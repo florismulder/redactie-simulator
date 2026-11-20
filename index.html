@@ -1,0 +1,973 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<title>Redactie Vechtwaard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Source+Serif+4:wght@600;700&display=swap">
+<style>
+/* Layout: een bureau in POV. Drie monitoren naast elkaar, klik vergroot het scherm tot volle breedte. */
+:root{
+  --room:#12161b; --room2:#1b2229; --desk:#3b2d24; --desk2:#2a1f19; --glow:#2fb7a3; --amber:#f2b046;
+  --ink:#1c2630; --mute:#6b7885; --line:#dde2e7; --paper:#f4f6f8; --brand:#0e6b5e; --brand2:#0a4c43; --alert:#c8382f;
+  --f-ui:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif; --f-head:'Space Grotesk','Inter',system-ui,sans-serif; --f-news:'Source Serif 4',Georgia,'Times New Roman',serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--room);color:#e8eef2;font-family:var(--f-ui);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+button{font-family:inherit}
+.room{height:100%;display:flex;flex-direction:column;background:radial-gradient(120% 70% at 50% 0%,var(--room2),var(--room) 70%)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 4px 6px}
+.brand{font-family:var(--f-head);font-weight:700;letter-spacing:.02em}
+.brand small{display:block;font:500 12px var(--f-ui);color:#8fa0ad;letter-spacing:0}
+.hint{font-size:13px;color:#8fa0ad}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.photo{position:relative;flex:none;border-radius:6px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pv{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;pointer-events:none;overflow:hidden;background:#fff;filter:brightness(.95) contrast(1.03);backface-visibility:hidden}
+.photo svg{position:absolute;inset:0;width:100%;height:100%}
+.hs{fill:rgba(47,183,163,0);stroke:rgba(47,183,163,0);stroke-width:5;cursor:pointer;transition:fill .2s,stroke .2s}
+.hs:hover{fill:rgba(47,183,163,.20);stroke:#2fb7a3}
+.lbl{position:absolute;transform:translate(-50%,-50%);background:rgba(10,13,16,.78);color:#fff;font-size:13px;font-weight:600;padding:5px 11px;border-radius:99px;pointer-events:none;white-space:nowrap;backdrop-filter:blur(4px)}
+.mon{position:fixed;left:0;top:0;width:100px;height:100px;opacity:0;visibility:hidden;background:#0a0d10;border-radius:10px;padding:10px;pointer-events:none;
+  transition:left .42s cubic-bezier(.2,.7,.2,1),top .42s cubic-bezier(.2,.7,.2,1),width .42s cubic-bezier(.2,.7,.2,1),height .42s cubic-bezier(.2,.7,.2,1),opacity .35s}
+.mon.zoomed{opacity:1;visibility:visible;z-index:60;pointer-events:auto;box-shadow:0 0 0 2px #232b33,0 30px 80px rgba(0,0,0,.7)}
+.screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px;background:#fff}
+.inner{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
+.bar{position:fixed;left:0;right:0;top:0;height:calc(48px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
+  display:none;align-items:center;gap:8px;background:rgba(10,13,16,.92);z-index:70;backdrop-filter:blur(6px)}
+.bar.on{display:flex}
+.bar button{background:#1d252c;color:#e8eef2;border:1px solid #2c3640;border-radius:8px;padding:8px 12px;font-size:14px;cursor:pointer}
+.bar button.cur{border-color:var(--glow);color:#fff}
+.bar .sp{flex:1}
+.dim{position:fixed;inset:0;background:rgba(5,7,9,.82);z-index:55;opacity:0;pointer-events:none;transition:opacity .3s}
+.dim.on{opacity:1;pointer-events:auto}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#0e6b5e;color:#fff;padding:12px 18px;border-radius:10px;font-size:15px;opacity:0;transition:.3s;z-index:90;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media (max-width:760px){
+  body{overflow:auto}
+  .room{height:auto;min-height:100%}
+}
+
+/* ---------- Scherm 1: redactiesysteem ---------- */
+.cms{width:1280px;height:800px;background:var(--paper);color:var(--ink);font-size:14px;display:flex;flex-direction:column}
+.cms .hd{height:48px;background:#1f2a33;color:#fff;display:flex;align-items:center;padding:0 20px;gap:14px;flex:none}
+.cms .hd b{font-family:var(--f-head);font-size:17px}
+.cms .hd span{color:#9fb0bc;font-size:13px}
+.cms .hd .r{margin-left:auto}
+.cms .body{flex:1;min-height:0;display:grid;grid-template-columns:400px 1fr}
+.cms .list{border-right:1px solid var(--line);background:#fff;overflow:auto}
+.cms .list h3{margin:0;padding:14px 18px;font:600 13px var(--f-ui);text-transform:uppercase;letter-spacing:.06em;color:var(--mute);border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff}
+.cms .it{padding:11px 18px;border-bottom:1px solid #eef1f4;cursor:pointer;display:grid;gap:4px}
+.cms .it:hover{background:#f6f9fb}
+.cms .it.sel{background:#e6f4f1;box-shadow:inset 3px 0 0 var(--brand)}
+.cms .it .t{font-weight:600;line-height:1.3}
+.cms .it .m{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mute)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;background:#e9edf1;color:#46535f;font-size:11px;font-weight:600}
+.pill.ok{background:#d9f0e6;color:#17613f}
+.cms .ed{padding:18px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.cms .orig{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+.cms .orig small{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.cms .orig p{margin:4px 0 0;color:#46535f;line-height:1.4}
+.cms label.l{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+.cms label.l span{font-weight:400;color:var(--mute)}
+.cms input.kop{width:100%;font:600 20px var(--f-news);padding:11px 14px;border:1px solid #c5cdd5;border-radius:8px;background:#fff;color:var(--ink)}
+.cms input.kop:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+.imgs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.img{border:2px solid var(--line);border-radius:8px;background:#fff;padding:6px;cursor:pointer;text-align:left;color:var(--ink);display:grid;gap:6px;font-size:12px}
+.img.sel{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,107,94,.18)}
+.ph{position:relative;height:70px;border-radius:5px;background:linear-gradient(135deg,#d3dae0,#bcc6ce);display:flex;align-items:center;justify-content:center;color:#6b7885;font-size:12px;overflow:hidden}
+.ph .play{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.img .d{line-height:1.25;min-height:30px}
+.img .k{color:var(--mute)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cms input[type=range]{width:100%;accent-color:var(--brand)}
+.time{font:700 26px var(--f-head);color:var(--brand)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.seg button{border:2px solid var(--line);background:#fff;border-radius:8px;padding:7px 6px;cursor:pointer;font-size:13px;font-weight:600;color:var(--ink);display:grid;gap:5px;justify-items:center}
+.seg button.sel{border-color:var(--brand);background:#e6f4f1}
+.mini{width:56px;height:34px;border:1px solid #c5cdd5;border-radius:3px;display:grid;grid-template-rows:1.4fr 1fr 1fr;gap:2px;padding:3px;background:#f3f5f7}
+.mini i{background:#d3dae0;border-radius:1px}
+.mini i.hot{background:var(--brand)}
+.cms .go{margin-top:auto;display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.cms .go p{margin:0;flex:1;color:#46535f}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:12px 24px;font-size:16px;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--brand2)}
+
+/* ---------- Scherm 2: website ---------- */
+.web{width:1280px;height:800px;background:#fff;color:#1a1f24;font-family:var(--f-ui);overflow:hidden}
+.web .mast{background:var(--brand);color:#fff;padding:14px 56px;display:flex;align-items:baseline;gap:18px}
+.web .mast b{font:700 36px var(--f-news);letter-spacing:-.01em}
+.web .mast span{opacity:.8;font-size:13px}
+.web .mast .r{margin-left:auto;opacity:.85}
+.web .nav{display:flex;gap:26px;padding:0 56px;border-bottom:1px solid #e1e5e9;font-weight:600;font-size:14px}
+.web .nav a{padding:11px 0;color:#37424c}
+.web .nav a.on{color:var(--brand);box-shadow:inset 0 -3px 0 var(--brand)}
+.web .main{padding:22px 56px;display:grid;gap:22px}
+.web .top2{display:grid;grid-template-columns:2fr 1fr;gap:28px}
+.web .hero .ph{height:300px;border-radius:4px;font-size:14px}
+.web .hero h1{font:700 32px/1.15 var(--f-news);margin:12px 0 6px}
+.web .hero p{margin:0;color:#56626d;font-size:15px}
+.web .side h4,.web h4.sec{margin:0 0 10px;font:700 12px var(--f-ui);text-transform:uppercase;letter-spacing:.08em;color:var(--brand)}
+.web .side li{list-style:none;padding:10px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
+.web .side ul{margin:0;padding:0}
+.web .mid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.web .card .ph{height:130px;border-radius:4px}
+.web .card h3{font:700 19px/1.2 var(--f-news);margin:8px 0 0}
+.web .low{display:grid;grid-template-columns:1fr 1fr;gap:6px 28px}
+.web .low div{padding:9px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
+.web .empty{background:repeating-linear-gradient(135deg,#f3f5f7 0 10px,#eef1f3 10px 20px);border-radius:4px;color:#8793a0;display:flex;align-items:center;justify-content:center;font-size:13px;min-height:44px}
+.cat{font:700 11px var(--f-ui);text-transform:uppercase;letter-spacing:.07em;color:var(--brand)}
+
+/* ---------- Scherm 3: resultaten ---------- */
+.res{width:1280px;height:800px;background:#0f1720;color:#e6edf3;padding:22px 28px;display:flex;flex-direction:column;gap:16px;font-size:14px}
+.res .head{display:flex;align-items:baseline;gap:14px}
+.res .head b{font:700 22px var(--f-head)}
+.res .head span{color:#8aa0b2}
+.res .head .ex{margin-left:auto;background:#3a2d12;color:var(--amber);padding:4px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi{background:#16212d;border-radius:10px;padding:14px 16px}
+.kpi small{color:#8aa0b2;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.kpi div{font:700 32px var(--f-head);font-variant-numeric:tabular-nums;margin-top:4px}
+.res .grid{flex:1;min-height:0;display:grid;grid-template-columns:1.55fr 1fr;gap:16px}
+.pan{background:#16212d;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;min-height:0}
+.pan h4{margin:0 0 10px;font:600 13px var(--f-ui);color:#8aa0b2;text-transform:uppercase;letter-spacing:.06em}
+table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.t th{text-align:right;font-weight:600;color:#8aa0b2;font-size:12px;padding:6px 8px;border-bottom:1px solid #263545}
+.t td{padding:9px 8px;border-bottom:1px solid #1f2d3b;text-align:right}
+.t th:first-child,.t td:first-child{text-align:left}
+.t tr.row{cursor:pointer}
+.t tr.row:hover td{background:#1b2938}
+.t tr.row.sel td{background:#1d3446}
+.t td.k{max-width:330px;display:flex;align-items:center;gap:6px;font-weight:600}.kt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.tagx{flex:none}
+.tagx{font-size:10px;background:#3a2d12;color:var(--amber);padding:1px 6px;border-radius:99px;margin-left:6px;font-weight:600}
+.chart{flex:1;min-height:0;display:flex;align-items:flex-end;gap:8px;padding-top:10px;border-bottom:1px solid #263545}
+.chart .b{flex:1;background:linear-gradient(var(--glow),#1f8576);border-radius:4px 4px 0 0;position:relative;min-height:2px}
+.chart .b em{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font:600 11px var(--f-ui);font-style:normal;color:#b9c8d4}
+.xl{display:flex;gap:8px;margin-top:6px;color:#8aa0b2;font-size:11px}
+.xl span{flex:1;text-align:center}
+.pan p.n{color:#8aa0b2;margin:10px 0 0;line-height:1.45}
+
+.cms .url{font:500 12px/1.3 ui-monospace,Menlo,Consolas,monospace;color:var(--mute);background:#eef1f4;border-radius:6px;padding:6px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cms .url b{color:var(--brand);font-weight:600}
+.cms .go .btns{display:flex;gap:10px}
+.btn.ghost{background:#fff;color:var(--alert);border:2px solid var(--alert);padding:10px 18px}
+.btn.ghost:hover{background:#fdecea}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.tagx.red{background:#3d1a18;color:#ff8c82}
+.chart .b.ev{background:linear-gradient(var(--amber),var(--amber) 5px,var(--glow) 5px,#1f8576)}
+.chart .b.off{background:#26333f}
+.evlist{display:grid;gap:3px;margin:8px 0 0;color:#cfdbe5;font-size:13px}
+.evlist b{color:var(--amber);font-weight:600}
+.why{margin-top:10px;display:grid;gap:6px;font-size:12px;color:#aebfcc;overflow:auto}
+.why div{display:grid;grid-template-columns:128px 1fr 46px;gap:8px;align-items:baseline;line-height:1.3}
+.why b{color:#e6edf3;font-weight:600}
+.why .f{text-align:right;font-weight:700;color:#e6edf3;font-variant-numeric:tabular-nums}
+.res .pan .chart{min-height:140px}
+.dbtn{background:#1d252c;color:#e8eef2;border:1px solid #2c3640;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;margin-left:12px}
+.dbtn:hover{border-color:var(--glow)}
+.top{align-items:center}
+.top .hint{margin-left:auto}
+.chart .b.fut{background:repeating-linear-gradient(135deg,#1c2a38 0 6px,#16212d 6px 12px);opacity:.55;min-height:0}
+#docent{position:fixed;inset:0;z-index:80;background:#f4f6f8;color:var(--ink);overflow:auto;font-size:14px}
+#docent[hidden]{display:none}
+.dc{min-height:100%;display:flex;flex-direction:column}
+.dch{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#1f2a33;color:#fff;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.dch b{font:700 18px var(--f-head)}
+.dch span{color:#9fb0bc;font-size:13px}
+.dch nav{display:flex;gap:6px;margin-left:12px;flex-wrap:wrap}
+.dch nav button,.x{background:transparent;color:#cfdbe5;border:1px solid #3a4854;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer}
+.dch nav button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.dch .x{margin-left:auto}
+.dcb{flex:1;padding:22px max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px));display:grid;gap:22px;grid-template-columns:1fr 1fr;align-content:start}
+.dcb.t-res{grid-template-columns:1fr}
+.dcol{min-width:0;display:flex;flex-direction:column;gap:12px}
+.dcol h3,.box2 h3{margin:0;font:700 16px var(--f-head)}
+.mks{display:grid;gap:10px}
+.mk{display:grid;gap:4px;text-align:left;background:#fff;border:2px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;color:var(--ink);font-size:14px}
+.mk b{font:700 16px var(--f-head)}
+.mk span{color:#56626d}
+.mk.sel{border-color:var(--brand);background:#e6f4f1}
+.frm{display:grid;gap:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+.frm label,.frm fieldset legend{font-weight:600;font-size:13px}
+.frm label{display:grid;gap:5px}
+.frm input[type=text],.frm input:not([type]),.frm select,.frm textarea,#dg-code{font:400 14px var(--f-ui);padding:9px 11px;border:1px solid #c5cdd5;border-radius:8px;background:#fff;color:var(--ink);width:100%}
+.frm textarea{resize:vertical}
+.frm fieldset{border:1px solid var(--line);border-radius:8px;margin:0;padding:10px 12px;display:grid;gap:8px;min-width:0}
+.ck{display:flex!important;align-items:flex-start;gap:8px;font-weight:400!important;line-height:1.35}
+.ck i{color:var(--mute);font-style:normal;font-size:12px}
+.scr{max-height:210px;overflow:auto;display:grid;gap:6px}
+.scr2{max-height:560px;overflow:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 16px}
+.sl{display:grid;gap:3px;font-weight:400!important;font-size:12.5px!important}
+.sl input{accent-color:var(--brand);width:100%}
+.br{display:grid;grid-template-columns:90px 1fr 110px;gap:8px}
+.note{margin:0;color:#56626d;line-height:1.45;font-size:13px}
+.note code,.dcol code,.gbox code{background:#e9edf1;padding:1px 6px;border-radius:5px;font-size:12.5px}
+.card2{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:5px}
+.card2 p{margin:0;color:#46535f}
+.card2 b{font:700 17px var(--f-head)}
+.op{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.op>div{flex:1;display:grid;gap:3px;min-width:0}
+.op span{color:#6b7885;font-size:12.5px}
+.op.act{border-color:var(--brand);background:#e6f4f1}
+.op button{background:var(--brand);color:#fff;border:0;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600}
+.op button:disabled{background:#c5d9d5;color:#17463f;cursor:default}
+.dkp{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:6px}
+.kp2{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:2px}
+.kp2 small{color:#6b7885;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.kp2 b{font:700 26px var(--f-head);font-variant-numeric:tabular-nums}
+.dgrid{display:grid;grid-template-columns:minmax(360px,.8fr) 1.4fr;gap:18px;align-items:start}
+.box2{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:10px;min-width:0;overflow:auto}
+.t2{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.t2 th{text-align:right;font-size:12px;color:#6b7885;font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+.t2 td{padding:8px;border-bottom:1px solid #eef1f4;text-align:right}
+.t2 th:first-child,.t2 td:first-child{text-align:left}
+.t2 td.k{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t2 tr.row{cursor:pointer}
+.t2 tr.row:hover td{background:#f6f9fb}
+.t2 tr.row.sel td{background:#e6f4f1}
+.darkp{background:#0f1720;color:#e6edf3;border-radius:10px;padding:14px 16px;min-height:380px}
+.gate{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px}
+.gbox{background:#fff;border:1px solid var(--line);border-radius:12px;padding:26px;display:grid;gap:12px;max-width:420px;width:100%}
+.gbox h2{margin:0;font:700 22px var(--f-head)}
+.gbox p{margin:0;color:#46535f}
+.gate .x{position:absolute;top:16px;right:16px;color:#46535f;border-color:#c5cdd5}
+@media (max-width:900px){.dcb{grid-template-columns:1fr}.dgrid{grid-template-columns:1fr}}
+
+.pv{filter:blur(.45px) brightness(.94) contrast(1.04) saturate(.95)}
+.pv::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,.10) 100%);pointer-events:none}
+
+
+[hidden]{display:none!important}
+body{margin:0}
+.who{color:#9fb0bc;font-size:13px;margin-left:auto;margin-right:4px}
+.who+.dbtn{margin-left:8px}
+.top .hint{margin-left:0}
+body.is-docent #room{display:none}
+#login{position:fixed;inset:0;z-index:100;background:radial-gradient(1100px 600px at 50% 0%,#233039 0%,#12161b 70%);display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.lbox{background:#fff;color:var(--ink);border-radius:14px;padding:28px 28px 24px;width:100%;max-width:420px;display:grid;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.lbrand{font:700 24px var(--f-head);color:var(--brand)}
+.lbrand small{display:block;font:400 14px var(--f-ui);color:var(--mute);margin-top:4px}
+.ltabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#eef1f4;padding:4px;border-radius:10px}
+.ltabs button{border:0;background:transparent;padding:10px;border-radius:8px;font:600 14px var(--f-ui);color:#46535f;cursor:pointer}
+.ltabs button.on{background:#fff;color:var(--brand);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+#login form{display:grid;gap:12px}
+#login label{display:grid;gap:5px;font-weight:600;font-size:13px}
+#login input{font:400 16px var(--f-ui);padding:11px 12px;border:1px solid #c5cdd5;border-radius:8px;width:100%;background:#fff;color:var(--ink)}
+#login input:focus{outline:2px solid var(--brand);border-color:var(--brand)}
+#login .btn:disabled{opacity:.6;cursor:default}
+.lerr{margin:0;color:var(--alert);font-size:14px;min-height:1.2em;line-height:1.4}
+.lnote{margin:0;color:var(--mute);font-size:13px;line-height:1.45}
+.toast{z-index:200}
+
+</style>
+
+<div class="room" id="room">
+  <div class="top">
+    <div class="brand">Redactie Vechtwaard<small>Jouw bureau · afdeling Nieuws</small></div>
+    <div class="hint">Klik op een scherm om het te vergroten</div><span class="who" id="who" hidden></span><button class="dbtn" id="outbtn" hidden>Uitloggen</button>
+  </div>
+  <div class="stage" id="stage"><div class="photo" id="photo">
+    <img src="bureau.jpg" alt="Redactiebureau met drie schermen">
+    <div class="pv" id="p0"></div><div class="pv" id="p1"></div><div class="pv" id="p2"></div>
+    <svg viewBox="0 0 2576 1438" preserveAspectRatio="none">
+      <polygon class="hs" data-i="0" points="102,580 926,517 943,898 172,1041"/>
+      <polygon class="hs" data-i="1" points="949,518 1658,517 1644,897 963,894"/>
+      <polygon class="hs" data-i="2" points="1679,539 2494,605 2431,1049 1664,899"/>
+    </svg>
+    <div class="lbl" style="left:19%;top:32%">Redactiesysteem</div>
+    <div class="lbl" style="left:50.5%;top:33%">Website</div>
+    <div class="lbl" style="left:80%;top:33%">Resultaten</div>
+  </div></div>
+</div>
+<div id="layer">
+  <div class="mon" data-i="0"><div class="screen"><div class="inner" id="s0"></div></div></div>
+  <div class="mon" data-i="1"><div class="screen"><div class="inner" id="s1"></div></div></div>
+  <div class="mon" data-i="2"><div class="screen"><div class="inner" id="s2"></div></div></div>
+</div>
+<div class="dim" id="dim"></div>
+<div class="bar" id="bar">
+  <button id="back">← Terug naar bureau</button>
+  <button data-go="0">Redactiesysteem</button><button data-go="1">Website</button><button data-go="2">Resultaten</button>
+  <span class="sp"></span><span class="hint">Esc sluit het scherm</span>
+</div>
+<div id="docent" hidden></div>
+<div id="login" hidden>
+  <div class="lbox">
+    <div class="lbrand">Redactie Vechtwaard<small>Oefenomgeving voor nieuwsredacteuren</small></div>
+    <div class="ltabs"><button data-lt="s" class="on" type="button">Student</button><button data-lt="d" type="button">Docent</button></div>
+    <form id="lf-s" autocomplete="off">
+      <label>Klascode<input name="code" required placeholder="Bijvoorbeeld VW-MR2A" autocapitalize="characters" autocomplete="off"></label>
+      <label>Voornaam<input name="naam" required maxlength="30" placeholder="Jouw voornaam" autocomplete="given-name"></label>
+      <button class="btn" type="submit">Naar mijn bureau</button>
+    </form>
+    <form id="lf-d" hidden autocomplete="off">
+      <label>Klascode<input name="code" required placeholder="Bijvoorbeeld VW-MR2A" autocapitalize="characters" autocomplete="off"></label>
+      <label>Docentcode<input name="dcode" type="password" required autocomplete="current-password"></label>
+      <button class="btn" type="submit">Open docentbesturing</button>
+    </form>
+    <p class="lerr" id="lerr" role="alert"></p>
+    <p class="lnote">Je logt in met de klascode van je docent en je voornaam. Een wachtwoord heb je niet nodig.</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* Rekenmotor redactiesimulator v1
+   Bepaalt bereik, kliks, klikpercentage, leestijd en verloop per uur voor één publicatie.
+   Zuivere functie: zelfde bericht + keuzes + seed + regels geeft altijd hetzelfde resultaat.
+   Alle getallen komen uit de regels (tabel rsim_settings, sleutel 'rekenregels'). */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.Engine = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+
+  const DEFAULTS = {
+    versie: 1,
+    eenvoud: { kort_duidelijk: 1.10, lang_vaag: 0.90, kort_max_woorden: 10, lang_min_woorden: 18 },
+    woorden: {
+      negatief_per_woord: 0.023, positief_per_woord: -0.010, max_woorden: 5,
+      negatief: ['dood', 'overleden', 'gewond', 'ramp', 'crisis', 'schandaal', 'brand', 'ongeluk', 'aanrijding', 'inbra', 'dreigt', 'bedreig', 'angst', 'paniek', 'woede', 'boos', 'verbod', 'sluit', 'dicht', 'tekort', 'vertraging', 'gevaar', 'storm', 'alg', 'explosie', 'faillissement', 'ontslag', 'zorgen', 'verdwenen', 'mislukt'],
+      positief: ['blij', 'feest', 'succes', 'geslaagd', 'winnaar', 'wint', 'gered', 'mooi', 'fantastisch', 'gelukkig', 'opening', 'groei', 'record', 'beste', 'liefde', 'terug', 'nieuw']
+    },
+    sensatie: {
+      kliks_max: 1.25, leestijd_min: 0.6,
+      clickbait: ['schokkend', 'je gelooft', 'niet te geloven', 'wat daarna', 'dit moet je', 'verbijsterend', 'ongelooflijk', 'drama', 'bizar', 'dít', 'alles over', 'onthuld']
+    },
+    beeld: { met_beeld: 1.19, per_categorie: { politiek: 1.75 }, video_boven_foto_website: 1.10, kwaliteit_effect: 0.05 },
+    plek: { boven: 1.0, midden: 0.2, onder: 0.1, zicht_basis: 0.35, halfwaarde_uur: { boven: 8, midden: 6, onder: 5 } },
+    ctr_basis: 0.03,
+    ruis: 0.30,
+    leestijd: { deel_onder_15_sec: 0.55, onder_15_gem_sec: 8, betrokken_basis_sec: 70 },
+    publiek: { dagbezoekers: 12000, aandeel: { jongeren: 0.20, volwassenen: 0.30, midden: 0.28, senioren: 0.22 } },
+    uurcurves: {
+      jongeren: [0.25, 0.1, 0.05, 0.03, 0.02, 0.03, 0.12, 0.3, 0.35, 0.3, 0.3, 0.4, 0.55, 0.55, 0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0, 0.8, 0.5],
+      volwassenen: [0.1, 0.04, 0.02, 0.02, 0.03, 0.12, 0.4, 0.85, 1.0, 0.8, 0.65, 0.7, 0.85, 0.8, 0.6, 0.6, 0.7, 0.8, 0.8, 0.75, 0.8, 0.7, 0.4, 0.2],
+      midden: [0.06, 0.03, 0.02, 0.02, 0.04, 0.2, 0.65, 1.0, 0.95, 0.7, 0.6, 0.65, 0.85, 0.8, 0.55, 0.5, 0.6, 0.7, 0.65, 0.6, 0.6, 0.5, 0.25, 0.1],
+      senioren: [0.04, 0.02, 0.02, 0.02, 0.05, 0.25, 0.7, 1.0, 0.95, 0.8, 0.7, 0.7, 0.85, 0.75, 0.55, 0.45, 0.45, 0.5, 0.45, 0.4, 0.35, 0.25, 0.12, 0.06]
+    },
+    horizon_uren: 24
+  };
+  const GROEPEN = ['jongeren', 'volwassenen', 'midden', 'senioren'];
+
+  function merge(a, b) {
+    if (b === undefined || b === null) return a;
+    if (Array.isArray(a) || typeof a !== 'object' || a === null) return b;
+    const o = Object.assign({}, a);
+    for (const k of Object.keys(b)) o[k] = k in a ? merge(a[k], b[k]) : b[k];
+    return o;
+  }
+
+  function mulberry32(seed) {
+    let a = (seed >>> 0) || 1;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function gauss(rnd) {
+    let u = 0, v = 0;
+    while (u === 0) u = rnd();
+    v = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+  const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+  const woordenVan = s => (String(s).toLowerCase().match(/[a-zà-ÿ0-9']+/g) || []);
+  const pct = f => (f >= 1 ? '+' : '−') + Math.abs(Math.round((f - 1) * 100)) + '%';
+
+  /* ---- analyse van de kop ---- */
+  function kopAnalyse(kop, R) {
+    const w = woordenVan(kop), n = w.length;
+    const E = R.eenvoud;
+    let eenvoud;
+    if (n <= E.kort_max_woorden) eenvoud = E.kort_duidelijk;
+    else if (n >= E.lang_min_woorden) eenvoud = E.lang_vaag;
+    else {
+      const t = (n - E.kort_max_woorden) / (E.lang_min_woorden - E.kort_max_woorden);
+      eenvoud = E.kort_duidelijk + t * (E.lang_vaag - E.kort_duidelijk);
+    }
+    const tel = lijst => w.filter(x => lijst.some(stam => x.startsWith(stam))).length;
+    const neg = Math.min(tel(R.woorden.negatief), R.woorden.max_woorden);
+    const pos = Math.min(tel(R.woorden.positief), R.woorden.max_woorden);
+    const woorden = 1 + neg * R.woorden.negatief_per_woord + pos * R.woorden.positief_per_woord;
+    const k = String(kop), kl = k.toLowerCase();
+    const uitroep = Math.min((k.match(/!/g) || []).length, 2) / 2;
+    const bait = Math.min(R.sensatie.clickbait.filter(c => kl.includes(c)).length, 2) / 2;
+    const letters = k.replace(/[^A-Za-zÀ-ÿ]/g, '');
+    const hoofd = letters.length > 4 ? (k.replace(/[^A-ZÀ-Ý]/g, '').length / letters.length) : 0;
+    const caps = clamp((hoofd - 0.25) / 0.5, 0, 1);
+    const sensatie = clamp(0.4 * uitroep + 0.45 * bait + 0.15 * caps, 0, 1);
+    return { aantalWoorden: n, eenvoud, negatief: neg, positief: pos, woorden, sensatie };
+  }
+
+  /* ---- beeldfactor ---- */
+  function beeldAnalyse(artikel, beeldIdx, R) {
+    const b = (beeldIdx !== undefined && beeldIdx !== null && beeldIdx >= 0) ? artikel.beelden[beeldIdx] : null;
+    if (!b) return { factor: 1, type: 'geen', kwaliteit: null };
+    const basis = (R.beeld.per_categorie && R.beeld.per_categorie[artikel.categorie]) || R.beeld.met_beeld;
+    const video = b.type === 'video' ? R.beeld.video_boven_foto_website : 1;
+    const kw = 1 + R.beeld.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3);
+    return { factor: basis * video * kw, type: b.type, kwaliteit: b.kwaliteit, basis, video, kw, categorieEffect: basis !== R.beeld.met_beeld };
+  }
+
+  /* ---- de toestand van een publicatie op één moment ---- */
+  function staatVan(artikel, st, R) {
+    const kop = kopAnalyse(st.kop, R);
+    const bld = beeldAnalyse(artikel, st.beeld, R);
+    const nw = artikel.nieuwswaarde;
+    const nwGem = (nw.impact + nw.nabijheid + nw.conflict + nw.human_interest + nw.actualiteit) / 5;
+    const potentieel = artikel.sensatie_potentieel / 5;
+    const L = R.leestijd;
+    const afhaak = clamp(L.deel_onder_15_sec + 0.3 * kop.sensatie * (1 - potentieel) + 0.1 * kop.sensatie, 0.3, 0.92);
+    const betrokken = L.betrokken_basis_sec * (0.85 + 0.06 * nw.human_interest) * (bld.type === 'video' ? 1.15 : 1);
+    const ref = L.deel_onder_15_sec * L.onder_15_gem_sec + (1 - L.deel_onder_15_sec) * betrokken;
+    const leestijd = Math.max(afhaak * L.onder_15_gem_sec + (1 - afhaak) * betrokken, ref * R.sensatie.leestijd_min);
+    return {
+      kop, bld, afhaak, leestijd, nwF: 0.7 + 0.15 * nwGem,
+      sensKliks: 1 + (R.sensatie.kliks_max - 1) * kop.sensatie * potentieel,
+      plekNaam: st.plek, plekF: R.plek[st.plek], halfPos: R.plek.halfwaarde_uur[st.plek]
+    };
+  }
+
+  /* wijzigingen: [{uurNa, kop?, beeld?, plek?, intrekken?}] met uurNa = uren sinds publicatie */
+  function beschrijfWijziging(w, artikel, vorig) {
+    const d = [];
+    if (w.intrekken) return 'Publicatie ingetrokken';
+    if (w.beeld !== undefined && w.beeld !== vorig.beeld) {
+      const b = w.beeld >= 0 ? artikel.beelden[w.beeld] : null;
+      d.push(!b ? 'Beeld verwijderd' : (vorig.beeld >= 0 ? 'Beeld gewisseld' : (b.type === 'video' ? 'Video toegevoegd' : 'Foto toegevoegd')));
+    }
+    if (w.kop !== undefined && w.kop !== vorig.kop) d.push('Kop aangepast');
+    if (w.plek !== undefined && w.plek !== vorig.plek) d.push('Verplaatst naar ' + ({ boven: 'bovenaan', midden: 'het midden', onder: 'onderaan' })[w.plek]);
+    return d.join(', ');
+  }
+
+  /* ---- de simulatie ---- */
+  function simuleer(artikel, keuze, regels, opts) {
+    const R = merge(DEFAULTS, regels || {});
+    const H = (opts && opts.uren !== undefined) ? opts.uren : R.horizon_uren;
+    const uur = keuze.uur;
+    const wijz = (keuze.wijzigingen || []).slice().sort((x, y) => x.uurNa - y.uurNa);
+    const halfNieuws = Math.max(artikel.tijdgevoeligheid_uren, 1);
+
+    const rnd = mulberry32(keuze.seed || 1);
+    const globaal = clamp(Math.exp(R.ruis * 0.5 * gauss(rnd)), 0.6, 1.6);
+
+    const somCurve = {};
+    GROEPEN.forEach(g => { somCurve[g] = R.uurcurves[g].reduce((x, y) => x + y, 0); });
+    const perGroep = {};
+    GROEPEN.forEach(g => { perGroep[g] = { bereik: 0, kliks: 0 }; });
+
+    let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld, plek: keuze.plek };
+    let S = staatVan(artikel, st, R), resetT = 0, ingetrokkenOp = null;
+    const gebeurtenissen = [], verloop = [];
+    let totBereik = 0, totKliks = 0, leesSom = 0, afhaakSom = 0;
+
+    for (let t = 0; t < H; t++) {
+      const klok = (uur + t) % 24;
+      let gebeurtenis = null;
+      while (wijz.length && wijz[0].uurNa <= t) {
+        const w = wijz.shift();
+        const tekst = beschrijfWijziging(w, artikel, st);
+        if (w.intrekken) { ingetrokkenOp = t; }
+        else {
+          const nieuw = { kop: w.kop !== undefined ? w.kop : st.kop, beeld: w.beeld !== undefined ? w.beeld : st.beeld, plek: w.plek !== undefined ? w.plek : st.plek };
+          if (nieuw.plek !== st.plek) resetT = t;
+          st = nieuw; S = staatVan(artikel, st, R);
+        }
+        if (tekst) { gebeurtenis = gebeurtenis ? gebeurtenis + ' en ' + tekst.toLowerCase() : tekst; gebeurtenissen.push({ uurNa: t, uur: klok, tekst }); }
+      }
+      const uurRuis = clamp(Math.exp(R.ruis * 0.3 * gauss(rnd)), 0.7, 1.4);   // altijd trekken, zodat eerdere uren niet veranderen
+      let b = 0, k = 0;
+      if (ingetrokkenOp === null) {
+        const dec = Math.pow(0.5, (t - resetT) / S.halfPos) * Math.pow(0.5, t / halfNieuws);
+        GROEPEN.forEach(g => {
+          const bezoekers = R.publiek.dagbezoekers * R.publiek.aandeel[g] * R.uurcurves[g][klok] / somCurve[g];
+          const gezien = bezoekers * R.plek.zicht_basis * S.plekF * dec;
+          const interesseF = artikel.interesse[g] / 3;
+          const ctr = R.ctr_basis * interesseF * S.nwF * S.bld.factor * S.kop.eenvoud * S.kop.woorden * S.sensKliks;
+          const bg = gezien * globaal * uurRuis;
+          perGroep[g].bereik += bg; perGroep[g].kliks += bg * ctr;
+          b += bg; k += bg * ctr;
+        });
+      }
+      const br = Math.round(b), kr = Math.min(Math.round(k), br);
+      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
+      totBereik += br; totKliks += kr; leesSom += kr * S.leestijd; afhaakSom += kr * S.afhaak;
+    }
+    GROEPEN.forEach(g => {
+      const p = perGroep[g];
+      p.bereik = Math.round(p.bereik); p.kliks = Math.round(p.kliks);
+      p.ctr = p.bereik ? p.kliks / p.bereik : 0;
+    });
+    const leestijd = Math.round(totKliks ? leesSom / totKliks : S.leestijd);
+    const afhaak = totKliks ? afhaakSom / totKliks : S.afhaak;
+
+    /* tijdstip: hoe actief is het publiek op het moment van plaatsen, gemiddeld over de dag = 1 */
+    let actief = 0, gemiddeld = 0;
+    GROEPEN.forEach(g => {
+      const a = R.publiek.aandeel[g] * artikel.interesse[g];
+      actief += a * (R.uurcurves[g][uur] / somCurve[g]) * 24;
+      gemiddeld += a;
+    });
+    const tijdIndex = actief / gemiddeld;
+
+    const uitleg = [], P = S.plekNaam, K = S.kop, B = S.bld;
+    uitleg.push({ sleutel: 'plek', label: 'Plek op de homepage', factor: S.plekF, tekst: ({ boven: 'Bovenaan', midden: 'Midden', onder: 'Onderaan' })[P] + ': ' + (S.plekF >= 1 ? 'iedereen ziet dit bericht het eerst' : 'veel bezoekers scrollen er niet naartoe (' + Math.round(S.plekF * 100) + '% van de zichtbaarheid bovenaan)') });
+    uitleg.push({ sleutel: 'tijd', label: 'Tijdstip van plaatsen', factor: tijdIndex, tekst: String(uur).padStart(2, '0') + ':00: jouw publiek is nu ' + (tijdIndex >= 1.3 ? 'zeer actief' : tijdIndex >= 0.8 ? 'redelijk actief' : 'weinig actief') + ' (index ' + tijdIndex.toFixed(2).replace('.', ',') + ')' });
+    uitleg.push({ sleutel: 'beeld', label: 'Beeld', factor: B.factor, tekst: B.type === 'geen' ? 'Geen beeld: de vergelijking is 1,0' : (B.type === 'video' ? 'Video' : 'Foto') + (B.categorieEffect ? ' (bij deze categorie telt beeld extra mee)' : '') + ': ' + pct(B.factor) + ' kliks' });
+    uitleg.push({ sleutel: 'eenvoud', label: 'Eenvoud van de kop', factor: K.eenvoud, tekst: K.aantalWoorden + ' woorden: ' + (K.eenvoud > 1.02 ? 'kort en duidelijk' : K.eenvoud < 0.98 ? 'lang en vaag' : 'gemiddeld') + ' (' + pct(K.eenvoud) + ')' });
+    uitleg.push({ sleutel: 'woorden', label: 'Woorden in de kop', factor: K.woorden, tekst: K.negatief + ' negatief, ' + K.positief + ' positief: ' + pct(K.woorden) + ' kliks' });
+    uitleg.push({ sleutel: 'sensatie', label: 'Sensatie in de kop', factor: S.sensKliks, tekst: K.sensatie < 0.05 ? 'Nuchtere kop' : 'Sensationele kop: kliks ' + pct(S.sensKliks) + ', maar meer lezers haken binnen 15 seconden af' });
+    uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: S.nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(S.nwF) + ')' });
+
+    return {
+      bereik: totBereik, kliks: totKliks, ctr: totBereik ? totKliks / totBereik : 0,
+      leestijd, afhaakdeel: afhaak, verloop, perGroep, uitleg, tijdIndex, gebeurtenissen,
+      ingetrokken: ingetrokkenOp !== null, ingetrokkenUurNa: ingetrokkenOp
+    };
+  }
+
+  return { simuleer, kopAnalyse, DEFAULTS, GROEPEN };
+});
+
+</script>
+<script>
+const Engine=window.Engine;
+const API_URL='https://fqdemhhcpetnrbtlgpxa.supabase.co',API_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZGVtaGhjcGV0bnJidGxncHhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExMzQ1NTYsImV4cCI6MjEwNjcxMDU1Nn0.Tji9meaHe0rS_Z18X-CUcwaybv48kSa77Dav3hEgP_I';
+let RULES={};
+const A=[],byId={};
+const mkA=x=>({id:x.id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving]),d:x,door:x.door||'startset'});
+function setA(list){A.length=0;Object.keys(byId).forEach(k=>delete byId[k]);list.forEach(x=>{const a=mkA(x);A.push(a);byId[a.id]=a})}
+const PLEK={boven:'Bovenaan',midden:'Midden',onder:'Onderaan'};
+const CATS=['verkeer','politiek','misdaad','human_interest','economie','zorg','onderwijs','cultuur','weer','milieu','veiligheid','sport','shownieuws','tech','mode'];
+const DOELEN={bereik:'Zoveel mogelijk bereik',lezers_houden:'Lezers vasthouden (hoge leestijd)',balans:'Balans tussen bereik en leestijd'};
+const METRICS=[['bereik','Bereik'],['kliks','Kliks en klikpercentage'],['leestijd','Leestijd'],['verloop','Verloop per uur']];
+const slug=t=>t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const hh=n=>String(n%24).padStart(2,'0')+':00';
+const fmt=n=>n.toLocaleString('nl-NL');
+const mmss=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+const dec=(n,d=2)=>n.toFixed(d).replace('.',',');
+let SKEW=0;const nowMs=()=>Date.now()+SKEW;
+
+/* ---- klas, opdrachten, studenten (uit de database) ---- */
+const klas={naam:'',code:'',modus:'versneld',vers:60};
+const st={sel:null,draft:null,res:0,docOk:false,dtab:'tijd',dsel:null,dpub:0,fv:{},actief:null,opdrachten:[],pubs:[],docStud:[],rol:null,busy:false,confirmReset:false,token:null,klascode:'',dcode:'',naam:'',sig:''};
+const studenten=()=>st.docStud;
+
+/* ---- tijd ---- */
+const actieveOpdracht=()=>st.opdrachten.find(o=>o.id===st.actief)||st.opdrachten[0];
+const tm=p=>{const o=(p&&st.opdrachten.find(x=>x.id===p.opdracht))||actieveOpdracht()||{};return {modus:o.modus||klas.modus,vers:klas.vers}};
+function tmLabel(){const t=tm();return t.modus==='direct'?'direct (24 uur meteen zichtbaar)':t.modus==='echt'?'echte tijd (1 uur is 1 uur)':'versneld ('+(t.vers>=60?'1 minuut = '+dec(t.vers/60,t.vers%60?1:0)+' uur':'1 minuut = '+t.vers+' minuten')+')'}
+function elapsed(p){const t=tm(p);if(t.modus==='direct')return 24;const min=(nowMs()-p.tPub)/60000;
+  return Math.max(0,Math.min(24,Math.floor(t.modus==='echt'?min/60:min*t.vers/60)))}
+
+/* ---- publicaties ---- */
+function nu(p){const s={kop:p.kop,beeld:p.beeld,plek:p.plek,ingetrokken:false,intrekUurNa:null};
+  [...p.wijzigingen].sort((x,y)=>x.uurNa-y.uurNa).forEach(w=>{if(w.intrekken){s.ingetrokken=true;s.intrekUurNa=w.uurNa}else{if(w.kop!==undefined)s.kop=w.kop;if(w.beeld!==undefined)s.beeld=w.beeld;if(w.plek!==undefined)s.plek=w.plek}});return s}
+const curPub=id=>st.pubs.find(p=>p.id===id);
+const laatsteUur=p=>p.wijzigingen.reduce((m,w)=>Math.max(m,w.uurNa),0);
+function editUur(p){const min=laatsteUur(p)+1;return tm(p).modus==='direct'?Math.min(Math.max(st.draft.uurNa||min,min),23):Math.min(23,Math.max(elapsed(p),min))}
+function newDraft(id){const a=byId[id],p=curPub(id);
+  if(p){const s=nu(p);const d={kop:s.kop,beeld:s.beeld,plek:s.plek,uur:12};if(!s.ingetrokken)d.uurNa=Math.min(23,laatsteUur(p)+1);return d}
+  return {kop:a.t,beeld:-1,uur:12,plek:'midden'}}
+const sim=p=>Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
+function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees});
+  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0}}
+function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
+
+/* ---- grafiek en uitleg (student en docent) ---- */
+function chartHTML(v){const c=v.c,V=c.verloop,mx=Math.max(1,...V.slice(0,v.e).map(x=>x.kliks));
+  const bars=V.map((x,i)=>{const fut=i>=v.e;return `<div class="b ${fut?'fut':''} ${!fut&&x.gebeurtenis?'ev':''} ${!fut&&!x.actief?'off':''}" style="height:${fut?100:(x.actief?Math.max(3,x.kliks/mx*88):3)}%" title="${hh(x.uur)}: ${fut?'nog niet verstreken':x.kliks+' kliks'}${!fut&&x.gebeurtenis?' ('+esc(x.gebeurtenis)+')':''}">${!fut&&x.actief&&(x.kliks===mx&&mx>1||x.gebeurtenis)?`<em>${x.kliks}</em>`:''}</div>`}).join('');
+  const labels=V.map((x,i)=>`<span>${i%3===0?String(x.uur).padStart(2,'0')+'u':''}</span>`).join('');
+  const ev=c.gebeurtenissen.filter(g=>g.uurNa<v.e).map(g=>`<span><b>${hh(g.uur)}</b> ${esc(g.tekst)} (${g.uurNa} uur na publicatie)</span>`).join('');
+  return `<div class="chart">${bars}</div><div class="xl">${labels}</div><div class="evlist"><span>${v.e} van 24 uur verstreken</span>${ev||(v.e?'<span>Geen wijzigingen sinds publicatie.</span>':'')}</div>`}
+const whyHTML=c=>`<div class="why">${c.uitleg.map(u=>`<div><b>${esc(u.label)}</b><span>${esc(u.tekst)}</span><span class="f">×${dec(u.factor)}</span></div>`).join('')}</div>`;
+
+/* ---- scherm 1: redactiesysteem ---- */
+function phBox(b){return `<div class="ph">${b?(b[0]==='video'?'<div class="play">▶</div>':'Foto'):'Geen beeld'}</div>`}
+function renderSys(){
+  sel0();
+  const op=actieveOpdracht(),a=byId[st.sel],d=st.draft,p=curPub(st.sel),s=p?nu(p):null;
+  const mode=!p?'nieuw':(s.ingetrokken?'ingetrokken':'edit');
+  const pog=st.pubs.filter(q=>q.id===st.sel).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
+  const list=op.artikelen.map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
+    const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd</span>');
+    return `<div class="it ${x.id===st.sel?'sel':''}" data-pick="${x.id}"><div class="t">${esc(x.t)}</div><div class="m"><span class="pill">${esc(x.c)}</span>${tag}</div></div>`}).join('');
+  const imgs=['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>']
+    .concat(a.b.map((b,i)=>`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+  const seg=['boven','midden','onder'].map(k=>`<button class="${d.plek===k?'sel':''}" data-plek="${k}"><span class="mini"><i class="${k==='boven'?'hot':''}"></i><i class="${k==='midden'?'hot':''}"></i><i class="${k==='onder'?'hot':''}"></i></span>${PLEK[k]}</button>`).join('');
+  const beeldTxt=d.beeld<0?'geen beeld':(a.b[d.beeld][0]==='video'?'video':'foto');
+  let tijd,go,url='';
+  if(mode==='edit'){
+    const min=laatsteUur(p)+1,uurNa=editUur(p),klok=p.uur+uurNa;
+    url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
+    if(min>23)tijd='<div><label class="l">Aanpassen om</label><p style="margin:0;color:#6b7885">Binnen de eerste 24 uur is geen aanpassing meer mogelijk.</p></div>';
+    else if(tm().modus==='direct')tijd=`<div><label class="l">Aanpassen om<span id="tm2sub">${uurNa} uur na publicatie</span></label><div class="time" id="tm2">${hh(klok)}</div><input type="range" id="uurna" min="${min}" max="23" value="${uurNa}"></div>`;
+    else tijd=`<div><label class="l">Aanpassen om<span>de klok loopt mee</span></label><div class="time">${hh(klok)}</div><p style="margin:4px 0 0;color:#6b7885">Een wijziging gaat nu in, ${uurNa} uur na publicatie.</p></div>`;
+    go=`<p>Gepubliceerd om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
+  }else{
+    tijd=`<div><label class="l">Tijdstip<span>Wanneer gaat het online</span></label><div class="time" id="tm">${hh(d.uur)}</div><input type="range" id="uur" min="0" max="23" value="${d.uur}"></div>`;
+    if(mode==='ingetrokken')url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
+    go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':esc(PLEK[d.plek])+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
+  }
+  $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>Vechtwaard CMS</b><span>Nieuws · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
+  <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${list}</div>
+  <div class="ed">${url}<div class="orig"><small>Bericht van de verslaggever</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
+  <div><label class="l">Kop op de site<span id="cnt">${d.kop.length} tekens</span></label><input class="kop" id="kop" maxlength="200" value="${esc(d.kop)}"></div>
+  <div><label class="l">Beeld<span>Kies wat bij de kop past</span></label><div class="imgs">${imgs}</div></div>
+  <div class="row2">${tijd}<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div></div>
+  <div class="go">${go}</div></div></div></div>`;
+}
+/* ---- scherm 2: website ---- */
+function webCard(p,big){
+  if(!p)return `<div class="empty" style="${big?'height:300px':'height:130px'}">Ruimte voor nieuws</div>`;
+  const a=byId[p.id],s=nu(p),b=s.beeld>=0?a.b[s.beeld]:null;
+  return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
+}
+function renderWeb(){
+  const live=st.pubs.filter(p=>!nu(p).ingetrokken);
+  const by=k=>live.filter(p=>nu(p).plek===k);
+  const bo=by('boven'),mi=by('midden'),on=by('onder');
+  const low=[0,1,2,3].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
+  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span><span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div>
+  <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
+  <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
+  <div><h4 class="sec">Meer uit de regio</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>
+  <div><h4 class="sec">Verder in het nieuws</h4><div class="low">${low}</div></div></div></div>`;
+}
+/* ---- scherm 3: resultaten ---- */
+function renderRes(){
+  const M=new Set(actieveOpdracht().metrics);
+  const rows=st.pubs.map(p=>({p,s:nu(p),v:viewOf(p)}));
+  const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,l:o.l+r.v.lees*r.v.k}),{b:0,k:0,l:0});
+  const sel=rows[Math.min(st.res,rows.length-1)];
+  const th=`<th>Kop</th><th>Plek</th><th>Tijd</th><th>Uur</th>${M.has('bereik')?'<th>Bereik</th>':''}${M.has('kliks')?'<th>Kliks</th><th>Klik%</th>':''}${M.has('leestijd')?'<th>Leestijd</th>':''}`;
+  const body=rows.map((r,i)=>`<tr class="row ${i===st.res?'sel':''}" data-res="${i}"><td class="k"><span class="kt">${esc(r.s.kop)}</span>${r.p.ex?'<span class="tagx">voorbeeld</span>':''}${r.s.ingetrokken?'<span class="tagx red">ingetrokken</span>':(r.p.wijzigingen.length?'<span class="tagx">aangepast</span>':'')}</td><td>${PLEK[r.s.plek]}</td><td>${hh(r.p.uur)}</td><td>${r.v.e}/24</td>${M.has('bereik')?`<td>${fmt(r.v.b)}</td>`:''}${M.has('kliks')?`<td>${fmt(r.v.k)}</td><td>${dec(r.v.ctr*100,1)}%</td>`:''}${M.has('leestijd')?`<td>${mmss(r.v.lees)}</td>`:''}</tr>`).join('');
+  let right='<p class="n">Publiceer een bericht om het verloop te zien.</p>';
+  if(sel){right=(M.has('verloop')?chartHTML(sel.v):`<p class="n">Het verloop per uur is voor deze opdracht verborgen.</p>`)+whyHTML(sel.v.c)}
+  const kp=[];
+  if(M.has('bereik'))kp.push(['Bereik',fmt(T.b)]);
+  if(M.has('kliks')){kp.push(['Kliks',fmt(T.k)]);kp.push(['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'])}
+  if(M.has('leestijd'))kp.push(['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']);
+  $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b><span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
+  <div class="kpis" style="grid-template-columns:repeat(${Math.max(kp.length,1)},1fr)">${kp.map(k=>`<div class="kpi"><small>${k[0]}</small><div>${k[1]}</div></div>`).join('')}</div>
+  <div class="grid"><div class="pan"><h4>Berichten</h4><table class="t"><tr>${th}</tr>${body}</table></div>
+  <div class="pan"><h4>${sel?esc(sel.s.kop.slice(0,40))+(sel.s.kop.length>40?'…':''):'Verloop'}</h4>${right}</div></div></div>`;
+}
+function syncPrev(){[0,1,2].forEach(i=>{$('#p'+i).innerHTML=$('#s'+i).innerHTML.replace(/ id="[^"]*"/g,'')})}
+function renderAll(){renderSys();renderWeb();renderRes();syncPrev()}
+
+/* ---- zoomen op het bureau ---- */
+const BZ=10, mons=[...document.querySelectorAll('.mon')], inners=[0,1,2].map(i=>$('#s'+i));
+const hs=[...document.querySelectorAll('.hs')];
+let zoomed=-1;
+const scaleFor=w=>(w-2*BZ)/1280;
+const ASP=2576/1438;
+const QUADS=[[[102,580],[926,517],[943,898],[172,1041]],[[949,518],[1658,517],[1644,897],[963,894]],[[1679,539],[2494,605],[2431,1049],[1664,899]]];
+function homog(src,dst){const A=[],b=[];for(let k=0;k<4;k++){const [x,y]=src[k],[u,v]=dst[k];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v)}
+  const n=8;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];
+    for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
+  const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let t=b[i];for(let c=i+1;c<n;c++)t-=A[i][c]*x[c];x[i]=t/A[i][i]}return x}
+function place(k){const src=[[0,0],[1280,0],[1280,800],[0,800]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
+  $('#p'+i).style.transform=`matrix3d(${h[0]},${h[3]},0,${h[6]},${h[1]},${h[4]},0,${h[7]},0,0,1,0,${h[2]},${h[5]},0,1)`})}
+function fit(){const sg=$('#stage'),p=$('#photo');const W=sg.clientWidth,H=sg.clientHeight;let w=Math.min(W,H*ASP),h=w/ASP;p.style.width=w+'px';p.style.height=h+'px';place(w/2576)}
+function target(){const W=innerWidth,H=innerHeight-48-16;let w=Math.min(W,H*1.6),h=w/1.6;return {w,h,l:(W-w)/2,t:48+(H-h)/2+8}}
+function setRect(m,r){m.style.left=r.left+'px';m.style.top=r.top+'px';m.style.width=r.width+'px';m.style.height=r.height+'px'}
+function open(i){
+  if(zoomed===i)return; if(zoomed>=0)closeNow();
+  const m=mons[i],r=hs[i].getBoundingClientRect(),T=target();
+  m.style.transition='none';setRect(m,r);inners[i].style.transition='none';inners[i].style.transform=`scale(${scaleFor(r.width)})`;
+  m.offsetWidth; m.style.transition='';inners[i].style.transition='';
+  m.classList.add('zoomed');zoomed=i;$('#dim').classList.add('on');$('#bar').classList.add('on');
+  setRect(m,{left:T.l,top:T.t,width:T.w,height:T.h});inners[i].style.transform=`scale(${scaleFor(T.w)})`;
+  document.querySelectorAll('#bar [data-go]').forEach(b=>b.classList.toggle('cur',+b.dataset.go===i));
+}
+function reset(m){m.classList.remove('zoomed');m.style.opacity=''}
+function closeNow(){const i=zoomed;if(i<0)return;reset(mons[i]);zoomed=-1;$('#dim').classList.remove('on');$('#bar').classList.remove('on')}
+function close(){
+  const i=zoomed;if(i<0)return;syncPrev();const m=mons[i],r=hs[i].getBoundingClientRect();
+  setRect(m,r);inners[i].style.transform=`scale(${scaleFor(r.width)})`;m.style.opacity='0';$('#dim').classList.remove('on');
+  zoomed=-1;setTimeout(()=>{if(zoomed!==i){reset(m);$('#bar').classList.remove('on')}},430);
+}
+hs.forEach(h=>h.addEventListener('click',()=>open(+h.dataset.i)));
+$('#back').onclick=close;$('#dim').onclick=close;
+document.querySelectorAll('#bar [data-go]').forEach(b=>b.onclick=()=>open(+b.dataset.go));
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(!$('#docent').hidden)return;close()}});
+addEventListener('resize',()=>{fit();if(zoomed>=0){const T=target(),m=mons[zoomed];m.style.transition='none';setRect(m,{left:T.l,top:T.t,width:T.w,height:T.h});inners[zoomed].style.transform=`scale(${scaleFor(T.w)})`;m.offsetWidth;m.style.transition=''}});
+
+/* ---- acties van de student ---- */
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2400)}
+function ververs(){if(st.rol!=='student')return;renderSys();renderWeb();renderRes();syncPrev()}
+const bId=(aid,idx)=>idx<0?'':byId[aid].d.beelden[idx].id;
+function zonderOverlap(fn){if(st.busy)return;st.busy=true;Promise.resolve().then(fn).catch(e=>toast(e.message)).finally(()=>{st.busy=false})}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
+  const p=curPub(st.sel);
+  if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
+  else if(t.dataset.beeld!==undefined){st.draft.beeld=+t.dataset.beeld;renderSys()}
+  else if(t.dataset.plek){st.draft.plek=t.dataset.plek;renderSys()}
+  else if(t.dataset.res!==undefined){st.res=+t.dataset.res;renderRes()}
+  else if(t.dataset.publish){
+    const d=st.draft;if(!d.kop.trim()){toast('Vul eerst een kop in');return}
+    const id=st.sel;
+    zonderOverlap(async()=>{const j=await api('rsim_publish',{p_token:st.token,p_article:id,p_kop:d.kop.trim(),p_beeld_id:bId(id,d.beeld),p_uur:d.uur,p_plek:d.plek});
+      st.pubs.unshift(toPub(j));st.res=0;st.draft=newDraft(st.sel);ververs();toast('Gepubliceerd. Kijk op de website en bij de resultaten.')});
+  }
+  else if(t.dataset.edit&&p){
+    const d=st.draft,s=nu(p),uurNa=editUur(p);let kop=null,beeld=null,plek=null,n=0;
+    if(d.kop.trim()&&d.kop.trim()!==s.kop){kop=d.kop.trim();n++}
+    if(d.beeld!==s.beeld){beeld=bId(p.id,d.beeld);n++}
+    if(d.plek!==s.plek){plek=d.plek;n++}
+    if(!n){toast('Je hebt nog niets veranderd');return}
+    zonderOverlap(async()=>{const j=await api('rsim_edit',{p_token:st.token,p_pub:p.pid,p_kop:kop,p_beeld_id:beeld,p_plek:plek,p_intrekken:false,p_uurna:uurNa});
+      const k=st.pubs.indexOf(p);st.pubs[k]=toPub(j);st.res=k;st.draft=newDraft(st.sel);ververs();toast('Doorgevoerd. Het adres is gelijk gebleven.')});
+  }
+  else if(t.dataset.intrek&&p){
+    if(laatsteUur(p)+1>23){toast('Intrekken kan alleen binnen de eerste 24 uur');return}
+    const uurNa=editUur(p);
+    zonderOverlap(async()=>{const j=await api('rsim_edit',{p_token:st.token,p_pub:p.pid,p_kop:null,p_beeld_id:null,p_plek:null,p_intrekken:true,p_uurna:uurNa});
+      const k=st.pubs.indexOf(p);st.pubs[k]=toPub(j);st.res=k;st.draft=newDraft(st.sel);ververs();toast('Ingetrokken. Vanaf nu verdwijnt het van de homepage.')});
+  }
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='kop'){st.draft.kop=e.target.value;$('#cnt').textContent=e.target.value.length+' tekens'}
+  if(e.target.id==='uur'){st.draft.uur=+e.target.value;$('#tm').textContent=hh(st.draft.uur)}
+  if(e.target.id==='uurna'){const p=curPub(st.sel);st.draft.uurNa=+e.target.value;$('#tm2').textContent=hh(p.uur+st.draft.uurNa);$('#tm2sub').textContent=st.draft.uurNa+' uur na publicatie'}
+});
+document.addEventListener('change',e=>{if(e.target.id==='uur')renderSys()});
+
+/* ================= Docentenmodus ================= */
+const dc=$('#docent');
+function openDocent(){dc.hidden=false;renderDocent()}
+function sluitDocent(){uitloggen()}
+function saveForm(){dc.querySelectorAll('[id^="f-"]').forEach(el=>{st.fv[el.id]=el.type==='checkbox'?el.checked:el.value})}
+function restoreForm(){dc.querySelectorAll('[id^="f-"]').forEach(el=>{if(el.id in st.fv){if(el.type==='checkbox')el.checked=st.fv[el.id];else el.value=st.fv[el.id]}})}
+const optS=(arr,sel)=>arr.map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(sel)?'selected':''}>${esc(l)}</option>`).join('');
+
+function dTijd(){
+  const kaart=(m,t,u)=>`<button class="mk ${klas.modus===m?'sel':''}" data-modus="${m}"><b>${t}</b><span>${u}</span></button>`;
+  const dur=klas.modus==='versneld'?`24 uur nieuws is klaar in ${dec(24*60/klas.vers,klas.vers>=60?0:1)} minuten.`:klas.modus==='echt'?'24 uur nieuws duurt een echte dag. Geschikt voor een opdracht over meerdere lessen.':'Alle uitkomsten van 24 uur zijn meteen zichtbaar. Geschikt voor een korte les of een toets.';
+  return `<div class="dcol"><h3>Tijdmodus voor klas ${klas.naam}</h3><div class="mks">
+    ${kaart('versneld','Versneld','De klok loopt sneller dan echt. Studenten zien de cijfers tijdens de les groeien.')}
+    ${kaart('echt','Echte tijd','Een uur is een uur. De cijfers groeien de hele dag door.')}
+    ${kaart('direct','Direct','Na publiceren staan alle 24 uur meteen op het scherm.')}</div>
+    <div class="frm" style="margin-top:14px;max-width:520px">${klas.modus==='versneld'?`<label>Snelheid van de klok<select id="dc-vers">${optS([[30,'1 minuut = 30 minuten'],[60,'1 minuut = 1 uur'],[120,'1 minuut = 2 uur'],[240,'1 minuut = 4 uur']],klas.vers)}</select></label>`:''}
+    <p class="note">${dur}</p><p class="note">Een opdracht kan een eigen tijdmodus kiezen. Die gaat dan voor op deze klasinstelling.</p></div></div>
+    <div class="dcol"><h3>Nu actief voor studenten</h3><div class="card2"><b>${esc(actieveOpdracht().naam)}</b><p>Doel: ${esc(DOELEN[actieveOpdracht().doel])}</p><p>Tijd: ${esc(tmLabel())}</p><p>${actieveOpdracht().artikelen.length} berichten${actieveOpdracht().max?', maximaal '+actieveOpdracht().max+' pogingen per bericht':', onbeperkt pogingen'}</p><p>Zichtbaar: ${actieveOpdracht().metrics.map(m=>METRICS.find(x=>x[0]===m)[1]).join(', ')}</p></div>
+    <p class="note" style="margin-top:12px">Klascode voor de studenten: <code>${klas.code}</code>. Studenten loggen in met deze code en hun voornaam.</p></div>
+    <div class="card2" style="margin-top:12px"><b>Publicaties wissen</b><p>Wist alle publicaties van alle studenten in klas ${esc(klas.naam)}. Studenten blijven ingelogd. Gebruik dit voor een nieuwe les.</p><button class="dbtn" data-dreset="1" style="margin-left:0;justify-self:start">${st.confirmReset?'Zeker weten? Klik nogmaals':'Alle publicaties wissen'}</button></div></div>`;
+}
+function aggStud(s){let b=0,k=0,l=0,n=0;s.pubs.forEach(p=>{const v=viewOf(p);b+=v.b;k+=v.k;l+=v.lees*v.k;n++});return {n,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0}}
+function dRes(){
+  if(!studenten().length)return `<div class="card2"><b>Nog geen studenten</b><p>Studenten loggen in met klascode <code>${esc(klas.code)}</code> en hun voornaam. Hun resultaten verschijnen hier.</p></div>`;
+  const lijst=studenten().map(s=>({s,a:aggStud(s)})).sort((x,y)=>y.a.b-x.a.b);
+  const T=lijst.reduce((o,r)=>({n:o.n+r.a.n,b:o.b+r.a.b,k:o.k+r.a.k,l:o.l+r.a.lees*r.a.k}),{n:0,b:0,k:0,l:0});
+  const rows=lijst.map(r=>`<tr class="row ${r.s.id===st.dsel?'sel':''}" data-dstud="${r.s.id}"><td><b>${esc(r.s.naam)}</b></td><td>${r.a.n}</td><td>${fmt(r.a.b)}</td><td>${fmt(r.a.k)}</td><td>${dec(r.a.ctr*100,1)}%</td><td>${mmss(r.a.lees)}</td></tr>`).join('');
+  const S=studenten().find(x=>x.id===st.dsel)||studenten()[0];
+  const pi=Math.min(st.dpub,S.pubs.length-1),P=S.pubs[pi],V=P&&viewOf(P),PS=P&&nu(P);
+  const prow=S.pubs.map((p,i)=>{const v=viewOf(p),s=nu(p),bt=s.beeld<0?'geen':byId[p.id].b[s.beeld][0];return `<tr class="row ${i===pi?'sel':''}" data-dpub="${i}"><td class="k">${esc(s.kop)}</td><td>${PLEK[s.plek]}</td><td>${hh(p.uur)}</td><td>${bt}</td><td>${v.e}/24</td><td>${fmt(v.b)}</td><td>${fmt(v.k)}</td><td>${dec(v.ctr*100,1)}%</td><td>${s.ingetrokken?'ingetrokken':(p.wijzigingen.length?'aangepast':'')}</td></tr>`}).join('');
+  return `<div class="dres"><div class="dkp">${[['Studenten',lijst.length],['Publicaties',T.n],['Bereik',fmt(T.b)],['Kliks',fmt(T.k)],['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'],['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']].map(k=>`<div class="kp2"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
+  <div class="dgrid"><div class="box2"><h3>Alle studenten</h3><table class="t2"><tr><th>Student</th><th>Pub.</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Leestijd</th></tr>${rows}</table></div>
+  <div class="box2"><h3>${esc(S.naam)}</h3><table class="t2"><tr><th>Kop</th><th>Plek</th><th>Tijd</th><th>Beeld</th><th>Uur</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Status</th></tr>${prow}</table>
+  ${P?`<div class="pan darkp"><h4>${esc(PS.kop.slice(0,60))}</h4>${chartHTML(V)}${whyHTML(V.c)}</div>`:''}</div></div></div>`;
+}
+function dOpd(){
+  const lijst=st.opdrachten.map(o=>`<div class="op ${o.id===st.actief?'act':''}"><div><b>${esc(o.naam)}</b><span>${esc(DOELEN[o.doel])} · ${o.artikelen.length} berichten · ${o.modus?o.modus:'tijd van de klas'} · ${o.max?o.max+' pogingen':'onbeperkt'}</span></div><button data-actief="${o.id}" ${o.id===st.actief?'disabled':''}>${o.id===st.actief?'Actief':'Activeer'}</button></div>`).join('');
+  const arts=A.map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
+  return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
+  <div class="dcol"><h3>Nieuwe opdracht klaarzetten</h3><div class="frm">
+   <label>Naam van de opdracht<input id="f-naam" placeholder="Bijvoorbeeld: Kop en beeld"></label>
+   <label>Doel<select id="f-doel">${optS(Object.entries(DOELEN),'balans')}</select></label>
+   <label>Tijdmodus<select id="f-modus">${optS([['','Zoals de klas ('+klas.modus+')'],['versneld','Versneld'],['echt','Echte tijd'],['direct','Direct']],'')}</select></label>
+   <label>Pogingen per bericht<select id="f-max">${optS([[0,'Onbeperkt'],[1,'1'],[2,'2'],[3,'3']],0)}</select></label>
+   <fieldset><legend>Wat zien studenten?</legend>${METRICS.map(m=>`<label class="ck"><input type="checkbox" id="f-m-${m[0]}" checked> ${m[1]}</label>`).join('')}</fieldset>
+   <fieldset><legend>Berichten in deze opdracht</legend><div class="scr">${arts}</div></fieldset>
+   <label class="ck"><input type="checkbox" id="f-direct" checked> Meteen actief maken</label>
+   <button class="btn" data-dsave-opd="1">Opdracht klaarzetten</button></div></div>`;
+}
+function dBer(){
+  const lijst=A.map(a=>`<tr><td class="k">${esc(a.t)}</td><td>${esc(a.c)}</td><td>${a.b.length}</td><td>${esc(a.door)}</td></tr>`).join('');
+  const sl=(id,l,v=3)=>`<label class="sl">${l}<input type="range" id="${id}" min="1" max="5" value="${v}"></label>`;
+  const rij=n=>`<div class="br"><select id="f-bt${n}">${optS([['foto','Foto'],['video','Video']],n===2?'video':'foto')}</select><input id="f-bd${n}" placeholder="Wat zie je op dit beeld?"><select id="f-bk${n}" title="Kwaliteit">${optS([[1,'Kwaliteit 1'],[2,'2'],[3,'3'],[4,'4'],[5,'5']],4)}</select></div>`;
+  return `<div class="dcol"><h3>Berichten in de database (${A.length})</h3><div class="scr2"><table class="t2"><tr><th>Titel</th><th>Categorie</th><th>Beelden</th><th>Door</th></tr>${lijst}</table></div></div>
+  <div class="dcol"><h3>Bericht toevoegen</h3><div class="frm">
+   <label>Titel van de verslaggever<input id="f-t" placeholder="Titel van het bericht"></label>
+   <label>Eerste alinea<textarea id="f-i" rows="3" placeholder="Intro van het bericht"></textarea></label>
+   <div class="two"><label>Categorie<select id="f-c">${optS(CATS.map(c=>[c,c.replace('_',' ')]),'economie')}</select></label>
+   <label>Hoe snel veroudert het?<select id="f-tg">${optS([[12,'Binnen een halve dag'],[24,'Binnen een dag'],[48,'Binnen twee dagen'],[96,'Binnen vier dagen'],[168,'Pas na een week']],48)}</select></label></div>
+   <fieldset><legend>Nieuwswaarde (1 laag, 5 hoog)</legend><div class="sls">${sl('f-nw-impact','Impact')}${sl('f-nw-nabijheid','Nabijheid')}${sl('f-nw-conflict','Conflict',2)}${sl('f-nw-human','Menselijk verhaal',2)}${sl('f-nw-actualiteit','Actualiteit')}</div></fieldset>
+   <fieldset><legend>Interesse per doelgroep</legend><div class="sls">${sl('f-ij-jongeren','Jongeren')}${sl('f-ij-volwassenen','Volwassenen')}${sl('f-ij-midden','Middengroep')}${sl('f-ij-senioren','Senioren')}${sl('f-sp','Sensatiepotentieel',2)}</div></fieldset>
+   <fieldset><legend>Beelden (grijs beeld met omschrijving)</legend>${rij(1)}${rij(2)}${rij(3)}</fieldset>
+   <button class="btn" data-dsave-art="1">Bericht toevoegen</button></div></div>`;
+}
+function renderDocent(){
+  if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
+  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['opd','Opdrachten'],['ber','Berichten']];
+  const body=({tijd:dTijd,res:dRes,opd:dOpd,ber:dBer})[st.dtab]();
+  dc.innerHTML=`<div class="dc"><div class="dch"><b>Docentenbesturing</b><span>Klas ${klas.naam} · ${esc(tmLabel())}</span><nav>${tabs.map(t=>`<button class="${st.dtab===t[0]?'on':''}" data-dtab="${t[0]}">${t[1]}</button>`).join('')}</nav><button class="x" data-dclose="1">Uitloggen</button></div><div class="dcb t-${st.dtab}">${body}</div></div>`;
+  restoreForm();
+}
+dc.addEventListener('click',e=>{
+  const t=e.target.closest('[data-dtab],[data-dclose],[data-modus],[data-dstud],[data-dpub],[data-actief],[data-dsave-opd],[data-dsave-art],[data-dreset]');if(!t)return;
+  const D=t.dataset;
+  if(D.dclose)uitloggen();
+  else if(D.dtab){saveForm();st.dtab=D.dtab;renderDocent()}
+  else if(D.modus)dAct('rsim_docent_set_time',{p_modus:D.modus,p_vers:klas.vers},'Tijdmodus aangepast voor de hele klas');
+  else if(D.dstud){st.dsel=D.dstud;st.dpub=0;renderDocent()}
+  else if(D.dpub!==undefined){st.dpub=+D.dpub;renderDocent()}
+  else if(D.actief)dAct('rsim_docent_activate',{p_assignment:D.actief},'Opdracht staat klaar op de bureaus van de studenten');
+  else if(D['dsaveOpd'])saveOpdracht();
+  else if(D['dsaveArt'])saveArtikel();
+  else if(D.dreset){
+    if(!st.confirmReset){st.confirmReset=true;renderDocent();setTimeout(()=>{st.confirmReset=false;if(!dc.hidden)renderDocent()},5000)}
+    else{st.confirmReset=false;dAct('rsim_docent_reset',{},'Alle publicaties zijn gewist')}
+  }
+});
+async function dAct(fn,extra,msg){
+  if(st.busy)return false;st.busy=true;
+  try{await api(fn,Object.assign({p_code:st.klascode,p_dcode:st.dcode},extra));await loadDocent();renderDocent();toast(msg);return true}
+  catch(e){toast(e.message);return false}
+  finally{st.busy=false}
+}
+dc.addEventListener('input',saveForm);
+dc.addEventListener('change',e=>{saveForm();if(e.target.id==='dc-vers')dAct('rsim_docent_set_time',{p_modus:klas.modus,p_vers:+e.target.value},'Snelheid aangepast')});
+const val=id=>{const el=dc.querySelector('#'+id);return el?(el.type==='checkbox'?el.checked:el.value):''};
+async function saveOpdracht(){
+  const naam=String(val('f-naam')).trim(),arts=A.filter(a=>val('f-a-'+a.id)).map(a=>a.id),metrics=METRICS.filter(m=>val('f-m-'+m[0])).map(m=>m[0]);
+  if(!naam){toast('Geef de opdracht een naam');return}
+  if(!arts.length){toast('Kies minstens één bericht');return}
+  if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
+  const act=!!val('f-direct');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  if(ok){delete st.fv['f-naam'];renderDocent()}
+}
+async function saveArtikel(){
+  const t=String(val('f-t')).trim(),i=String(val('f-i')).trim();
+  const beelden=[1,2,3].map(n=>({type:val('f-bt'+n),beschrijving:String(val('f-bd'+n)).trim(),kwaliteit:+val('f-bk'+n)})).filter(b=>b.beschrijving);
+  if(!t||!i){toast('Vul een titel en een eerste alinea in');return}
+  if(!beelden.length){toast('Voeg minstens één beeld toe met een omschrijving');return}
+  const g=x=>+val(x);
+  const p={titel:t,intro:i,categorie:val('f-c'),nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden};
+  const ok=await dAct('rsim_docent_add_article',{p},'Bericht toegevoegd aan de database en aan de actieve opdracht');
+  if(ok){['f-t','f-i','f-bd1','f-bd2','f-bd3'].forEach(k=>delete st.fv[k]);renderDocent()}
+}
+
+/* ================= Verbinding met de database ================= */
+const store={
+  get(k,s){try{return(s?sessionStorage:localStorage).getItem(k)}catch(e){return null}},
+  set(k,v,s){try{(s?sessionStorage:localStorage).setItem(k,v)}catch(e){}},
+  del(k){try{localStorage.removeItem(k);sessionStorage.removeItem(k)}catch(e){}}
+};
+async function api(fn,body){
+  let r;
+  try{r=await fetch(API_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{'Content-Type':'application/json',apikey:API_KEY,Authorization:'Bearer '+API_KEY},body:JSON.stringify(body)})}
+  catch(e){throw new Error('Geen verbinding. Controleer je internet en probeer opnieuw.')}
+  const j=await r.json().catch(()=>null);
+  if(!r.ok)throw new Error((j&&j.message)||('Er ging iets mis ('+r.status+')'));
+  return j;
+}
+const bIdx=(aid,bid)=>{const a=byId[aid];return bid&&a?a.d.beelden.findIndex(b=>b.id===bid):-1};
+const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld_id),uur:j.uur,plek:j.plek,seed:j.seed,tPub:j.tPub,opdracht:j.opdracht,
+  wijzigingen:(j.wijzigingen||[]).map(w=>{const o={uurNa:w.uurNa};if(w.kop!==undefined)o.kop=w.kop;if(w.beeld_id!==undefined)o.beeld=bIdx(j.id,w.beeld_id);if(w.plek!==undefined)o.plek=w.plek;if(w.intrekken)o.intrekken=true;return o})});
+const pubSig=()=>st.pubs.map(p=>p.pid+':'+p.wijzigingen.length).join(',');
+
+/* ---- student ---- */
+async function loadStudent(stil){
+  const s=await api('rsim_state',{p_token:st.token});
+  SKEW=s.now-Date.now();Object.assign(klas,s.klas);RULES=s.rules||{};
+  if(!s.opdracht||!s.opdracht.id){st.wacht=true;return false}
+  st.wacht=false;
+  setA(s.artikelen);
+  const nieuw=s.opdracht.id!==st.actief;
+  st.opdrachten=[s.opdracht];st.actief=s.opdracht.id;
+  st.pubs=s.pubs.map(toPub);
+  if(nieuw)st.sel=null;
+  sel0();
+  const sig=pubSig(),veranderd=nieuw||sig!==st.sig||!st.draft;st.sig=sig;
+  if(veranderd){st.res=0;st.draft=newDraft(st.sel)}
+  if(!stil||veranderd)renderAll();else{renderWeb();renderRes();syncPrev()}
+  return true;
+}
+/* ---- docent ---- */
+async function loadDocent(){
+  const d=await api('rsim_docent_state',{p_code:st.klascode,p_dcode:st.dcode});
+  SKEW=d.now-Date.now();Object.assign(klas,d.klas);RULES=d.rules||{};
+  setA(d.artikelen);
+  st.opdrachten=d.opdrachten;st.actief=(d.opdrachten.find(o=>o.actief)||d.opdrachten[0]||{}).id;
+  st.docStud=d.studenten.map(s=>({id:s.id,naam:s.naam,pubs:s.pubs.map(toPub)}));
+  if(!st.docStud.find(s=>s.id===st.dsel))st.dsel=st.docStud[0]?st.docStud[0].id:null;
+  if(!st.opdrachten.length)throw new Error('Deze klas heeft nog geen opdracht');
+}
+
+/* ---- inlog ---- */
+const lg=$('#login');
+function toonLogin(fout){lg.hidden=false;$('#lerr').textContent=fout||''}
+function toonApp(){lg.hidden=true}
+function uitloggen(){store.del('rsim_tok');store.del('rsim_naam');store.del('rsim_doc');location.reload()}
+async function startStudent(token,naam){
+  st.token=token;st.rol='student';st.naam=naam;
+  const ok=await loadStudent();
+  if(!ok){st.wacht=true;toonLogin('Er staat nog geen opdracht klaar. Je docent zet die zo klaar. Deze pagina probeert het zelf opnieuw.');return}
+  $('#who').textContent=naam+' · klas '+klas.naam;$('#outbtn').hidden=false;$('#who').hidden=false;
+  toonApp();fit();
+}
+async function startDocent(code,dcode){
+  st.klascode=code;st.dcode=dcode;st.rol='docent';st.docOk=true;
+  await loadDocent();
+  document.body.classList.add('is-docent');
+  toonApp();dc.hidden=false;renderDocent();
+}
+document.querySelectorAll('[data-lt]').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('[data-lt]').forEach(x=>x.classList.toggle('on',x===b));
+  $('#lf-s').hidden=b.dataset.lt!=='s';$('#lf-d').hidden=b.dataset.lt!=='d';$('#lerr').textContent='';
+});
+function bezig(f,aan){f.querySelector('button[type=submit]').disabled=aan}
+$('#lf-s').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target;bezig(f,true);$('#lerr').textContent='';
+  try{const j=await api('rsim_join',{p_code:f.code.value,p_voornaam:f.naam.value});
+    store.set('rsim_tok',j.token);store.set('rsim_naam',j.voornaam);await startStudent(j.token,j.voornaam)}
+  catch(x){$('#lerr').textContent=x.message}
+  bezig(f,false);
+});
+$('#lf-d').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.target;bezig(f,true);$('#lerr').textContent='';
+  try{await startDocent(f.code.value,f.dcode.value);store.set('rsim_doc',JSON.stringify({c:f.code.value,d:f.dcode.value}),true)}
+  catch(x){$('#lerr').textContent=x.message;st.rol=null}
+  bezig(f,false);
+});
+$('#outbtn').onclick=uitloggen;
+
+/* ---- klok en verversen ---- */
+setInterval(()=>{
+  if(st.rol==='student'&&!st.wacht){renderWeb();renderRes();syncPrev()}
+},5000);
+setInterval(async()=>{
+  try{
+    if(st.rol==='student')await loadStudent(true).then(ok=>{if(ok&&!lg.hidden)startStudent(st.token,st.naam)});
+    else if(st.rol==='docent'&&!dc.hidden&&st.dtab==='res'&&!st.busy){await loadDocent();renderDocent()}
+  }catch(e){if(/sessie/i.test(e.message))uitloggen()}
+},15000);
+['renderSys','renderWeb','renderRes'].forEach(n=>{const f=window[n];window[n]=function(){f();syncPrev()}});
+
+/* ---- opstart ---- */
+fit();
+(async function boot(){
+  const tok=store.get('rsim_tok'),naam=store.get('rsim_naam'),doc=store.get('rsim_doc',true);
+  try{
+    if(doc){const x=JSON.parse(doc);await startDocent(x.c,x.d);return}
+    if(tok){await startStudent(tok,naam||'');return}
+  }catch(e){store.del('rsim_tok');store.del('rsim_doc');st.rol=null;toonLogin(/sessie/i.test(e.message)?e.message:'');return}
+  toonLogin();
+})();
+
+</script>
+
+</html>
