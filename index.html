@@ -1,4 +1,4 @@
-<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%230e6b5e%27/%3E%3Cpath d=%27M16 18l16 30 16-30%27 fill=%27none%27 stroke=%27white%27 stroke-width=%278%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E"><meta name="robots" content="noindex">
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
 <title>Redactie Vechtwaard</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Source+Serif+4:wght@600;700&display=swap">
@@ -238,6 +238,56 @@ table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .pv{filter:blur(.45px) brightness(.94) contrast(1.04) saturate(.95)}
 .pv::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 38%,rgba(0,0,0,.10) 100%);pointer-events:none}
 
+/* rapport (monitor) */
+.rtabs{display:inline-flex;gap:4px;background:#0b121a;padding:3px;border-radius:8px}
+.res .head .rtabs button{border:0;background:transparent;color:#8aa0b2;font:600 13px var(--f-ui);padding:6px 14px;border-radius:6px;cursor:pointer}
+.res .head .rtabs button.on{background:#1f3347;color:#fff}
+.rgrid{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr;gap:16px}
+.rlijst{gap:6px;overflow:auto}
+.rs{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid #243445;background:#0f1a25;color:#d5e0ea;font:500 14px var(--f-ui);padding:10px 12px;border-radius:8px;cursor:pointer}
+.rs i{width:14px;height:14px;border-radius:50%;border:2px solid #4a6177;flex:none}
+.rs.ok i{background:#2fa66a;border-color:#2fa66a}
+.rs.sel{border-color:#5aa7e6;background:#16293b}
+.rlijst .n.small,.n.small{font-size:12.5px;margin-top:auto}
+.rmain{gap:10px;overflow:hidden}
+.rkop{display:flex;justify-content:space-between;align-items:center}
+.rkop b{font:700 15px var(--f-head)}.rkop span{background:#1f3347;color:#9fc4e6;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600}
+.rscroll{flex:1;min-height:0;overflow:auto;display:grid;gap:12px;align-content:start;padding-right:6px}
+.doelkop{font:700 20px var(--f-head);line-height:1.3}
+.rblok{background:#0f1a25;border-radius:8px;padding:12px 14px;display:grid;gap:8px}
+.rblok h5{margin:0;font:600 13px var(--f-ui);color:#8aa0b2;text-transform:uppercase;letter-spacing:.06em}
+.rblok label,.rscroll>label{display:grid;gap:5px;font-size:14px;color:#d5e0ea}
+.rblok label small,.rscroll label small{color:#8aa0b2;font-size:12.5px}
+.rin{font:400 15px var(--f-ui);background:#0b121a;color:#e6edf3;border:1px solid #2b3d50;border-radius:6px;padding:9px 10px;width:100%;box-sizing:border-box;resize:vertical}
+.rin:focus{outline:2px solid #5aa7e6}
+.rin.big{min-height:180px}
+.rrij{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:end}
+.ja{display:flex;gap:18px;padding-bottom:9px}.ja label{display:flex!important;align-items:center;gap:6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:#1f3347;color:#cfe5f8;padding:5px 12px;border-radius:99px;font-size:13px;font-weight:600}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.opt{display:flex!important;grid-template-columns:none;align-items:center;gap:10px;border:1px solid #243445;border-radius:8px;padding:8px 10px;cursor:pointer}
+.opt span{display:grid;gap:2px;flex:1}.opt b{font-weight:600}.opt em{font-style:normal;font-size:12px;font-weight:700;color:#9fc4e6}
+.opt.goed{border-color:#2fa66a;background:#12301f}.opt.goed em{color:#6fdca0}
+.opt.fout{border-color:#d9534f;background:#33171a}.opt.fout em{color:#ff8f8b}
+.opt.mis{border-color:#e0a030;background:#33270d}.opt.mis em{color:#ffc766}
+.rtab{overflow:auto;max-height:260px}
+.rtab table.t td,.rtab table.t th{white-space:nowrap}.rtab table.t td.k{white-space:normal;min-width:240px}
+.rtab tr.tot td{font-weight:700;border-top:2px solid #36506a}
+.rnav{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#8aa0b2;font-size:13px}
+.rbtn{border:0;background:#2a5d8f;color:#fff;font:600 14px var(--f-ui);padding:9px 18px;border-radius:8px;cursor:pointer;justify-self:start}
+.rbtn:disabled{opacity:.35;cursor:default}.rbtn.big{background:#2fa66a;padding:12px 22px;font-size:15px}
+.dl{margin:0;padding-left:22px;display:grid;gap:6px;font-size:16px}.dl.small{font-size:14px}
+.rbeo{background:#12301f;border:1px solid #2fa66a;border-radius:8px;padding:12px 14px}.rbeo p{margin:6px 0 0}
+/* rapport (docent) */
+.rdoel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px}
+.rcmp{display:grid;grid-template-columns:150px 1fr;gap:10px;font-size:14px}.rcmp span{color:var(--mute);font-size:13px}
+.rcmp em{font-style:normal;font-size:12px;font-weight:700;margin-left:6px;padding:2px 8px;border-radius:99px}
+.rcmp em.g{background:#dff3e8;color:#1b6b43}.rcmp em.x{background:#fbe3e1;color:#a3302b}
+.rstat{display:flex;align-items:center}
+.rcrs{display:grid;gap:8px}.rcr{display:grid!important;grid-template-columns:1fr 150px;gap:10px;align-items:center;font-size:13.5px}
+.rdoel label{display:grid;gap:5px;font-weight:600;font-size:13px}.rdoel textarea,.rdoel select{font:400 14px var(--f-ui);padding:8px;border:1px solid #c5cdd5;border-radius:6px;width:100%;box-sizing:border-box}
+.br2{display:grid;grid-template-columns:100px 1fr 90px;gap:8px;align-items:center}
+.br2 input[type=text],.br2 input:not([type]){font:400 14px var(--f-ui);padding:7px;border:1px solid #c5cdd5;border-radius:6px;width:100%;box-sizing:border-box}
 
 [hidden]{display:none!important}
 body{margin:0}
@@ -339,6 +389,8 @@ body.is-docent #room{display:none}
     beeld: { met_beeld: 1.19, per_categorie: { politiek: 1.75 }, video_boven_foto_website: 1.10, kwaliteit_effect: 0.05 },
     plek: { boven: 1.0, midden: 0.2, onder: 0.1, zicht_basis: 0.35, halfwaarde_uur: { boven: 8, midden: 6, onder: 5 } },
     ctr_basis: 0.03,
+    engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
+    conversie: { nieuwsbrief_basis: 0.03 },
     ruis: 0.30,
     leestijd: { deel_onder_15_sec: 0.55, onder_15_gem_sec: 8, betrokken_basis_sec: 70 },
     publiek: { dagbezoekers: 12000, aandeel: { jongeren: 0.20, volwassenen: 0.30, midden: 0.28, senioren: 0.22 } },
@@ -456,6 +508,9 @@ body.is-docent #room{display:none}
     const halfNieuws = Math.max(artikel.tijdgevoeligheid_uren, 1);
 
     const rnd = mulberry32(keuze.seed || 1);
+    const rnd2 = mulberry32(((keuze.seed || 1) ^ 0x5bd1e995) >>> 0);   // eigen reeks: bestaande cijfers blijven gelijk
+    const hi = artikel.nieuwswaarde.human_interest;
+    const intGem = GROEPEN.reduce((x, g) => x + R.publiek.aandeel[g] * artikel.interesse[g], 0) / 3;
     const globaal = clamp(Math.exp(R.ruis * 0.5 * gauss(rnd)), 0.6, 1.6);
 
     const somCurve = {};
@@ -466,7 +521,7 @@ body.is-docent #room{display:none}
     let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld, plek: keuze.plek };
     let S = staatVan(artikel, st, R), resetT = 0, ingetrokkenOp = null;
     const gebeurtenissen = [], verloop = [];
-    let totBereik = 0, totKliks = 0, leesSom = 0, afhaakSom = 0;
+    let totBereik = 0, totKliks = 0, leesSom = 0, afhaakSom = 0, totDoor = 0, totDeel = 0, totInschr = 0, cDoor = 0, cDeel = 0, cInschr = 0;   // c* = rest dat naar het volgende uur doorloopt
 
     for (let t = 0; t < H; t++) {
       const klok = (uur + t) % 24;
@@ -497,7 +552,15 @@ body.is-docent #room{display:none}
         });
       }
       const br = Math.round(b), kr = Math.min(Math.round(k), br);
-      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
+      const eRuis = clamp(Math.exp(R.engagement.ruis * 0.3 * gauss(rnd2)), 0.7, 1.4);
+      const bet = (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec);
+      cDoor += kr * clamp(R.engagement.doorklik_basis * bet, 0, 0.6) * eRuis;
+      cDeel += kr * R.engagement.delen_basis * bet * ((0.6 + 0.2 * hi) / 1.2) * eRuis;
+      cInschr += kr * R.conversie.nieuwsbrief_basis * bet * intGem * eRuis;
+      const door = Math.floor(cDoor), deel = Math.floor(cDeel), inschr = Math.floor(cInschr);
+      cDoor -= door; cDeel -= deel; cInschr -= inschr;
+      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door, deel, inschr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
+      totDoor += door; totDeel += deel; totInschr += inschr;
       totBereik += br; totKliks += kr; leesSom += kr * S.leestijd; afhaakSom += kr * S.afhaak;
     }
     GROEPEN.forEach(g => {
@@ -524,10 +587,13 @@ body.is-docent #room{display:none}
     uitleg.push({ sleutel: 'eenvoud', label: 'Eenvoud van de kop', factor: K.eenvoud, tekst: K.aantalWoorden + ' woorden: ' + (K.eenvoud > 1.02 ? 'kort en duidelijk' : K.eenvoud < 0.98 ? 'lang en vaag' : 'gemiddeld') + ' (' + pct(K.eenvoud) + ')' });
     uitleg.push({ sleutel: 'woorden', label: 'Woorden in de kop', factor: K.woorden, tekst: K.negatief + ' negatief, ' + K.positief + ' positief: ' + pct(K.woorden) + ' kliks' });
     uitleg.push({ sleutel: 'sensatie', label: 'Sensatie in de kop', factor: S.sensKliks, tekst: K.sensatie < 0.05 ? 'Nuchtere kop' : 'Sensationele kop: kliks ' + pct(S.sensKliks) + ', maar meer lezers haken binnen 15 seconden af' });
+    uitleg.push({ sleutel: 'betrokkenheid', label: 'Betrokkenheid van lezers', factor: (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec), tekst: Math.round((1 - S.afhaak) * 100) + '% van de lezers blijft langer dan 15 seconden. Dat bepaalt hoeveel lezers doorklikken, delen en zich inschrijven' });
     uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: S.nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(S.nwF) + ')' });
 
     return {
       bereik: totBereik, kliks: totKliks, ctr: totBereik ? totKliks / totBereik : 0,
+      doorkliks: totDoor, gedeeld: totDeel, inschrijvingen: totInschr,
+      engagementrate: totKliks ? (totDoor + totDeel) / totKliks : 0, conversie: totKliks ? totInschr / totKliks : 0,
       leestijd, afhaakdeel: afhaak, verloop, perGroep, uitleg, tijdIndex, gebeurtenissen,
       ingetrokken: ingetrokkenOp !== null, ingetrokkenUurNa: ingetrokkenOp
     };
@@ -579,8 +645,8 @@ function newDraft(id){const a=byId[id],p=curPub(id);
   if(p){const s=nu(p);const d={kop:s.kop,beeld:s.beeld,plek:s.plek,uur:12};if(!s.ingetrokken)d.uurNa=Math.min(23,laatsteUur(p)+1);return d}
   return {kop:a.t,beeld:-1,uur:12,plek:'midden'}}
 const sim=p=>Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
-function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees});
-  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0}}
+function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0});
+  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0,dk,dl,ins}}
 function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
 
 /* ---- grafiek en uitleg (student en docent) ---- */
@@ -645,6 +711,7 @@ function renderWeb(){
 }
 /* ---- scherm 3: resultaten ---- */
 function renderRes(){
+  if(st.rtab==='rap'&&heeftRapport())return renderRap();
   const M=new Set(actieveOpdracht().metrics);
   const rows=st.pubs.map(p=>({p,s:nu(p),v:viewOf(p)}));
   const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,l:o.l+r.v.lees*r.v.k}),{b:0,k:0,l:0});
@@ -657,7 +724,7 @@ function renderRes(){
   if(M.has('bereik'))kp.push(['Bereik',fmt(T.b)]);
   if(M.has('kliks')){kp.push(['Kliks',fmt(T.k)]);kp.push(['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'])}
   if(M.has('leestijd'))kp.push(['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']);
-  $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b><span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
+  $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b>${rtabsHTML()}<span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
   <div class="kpis" style="grid-template-columns:repeat(${Math.max(kp.length,1)},1fr)">${kp.map(k=>`<div class="kpi"><small>${k[0]}</small><div>${k[1]}</div></div>`).join('')}</div>
   <div class="grid"><div class="pan"><h4>Berichten</h4><table class="t"><tr>${th}</tr>${body}</table></div>
   <div class="pan"><h4>${sel?esc(sel.s.kop.slice(0,40))+(sel.s.kop.length>40?'…':''):'Verloop'}</h4>${right}</div></div></div>`;
@@ -782,12 +849,13 @@ function dRes(){
 function dOpd(){
   const lijst=st.opdrachten.map(o=>`<div class="op ${o.id===st.actief?'act':''}"><div><b>${esc(o.naam)}</b><span>${esc(DOELEN[o.doel])} · ${o.artikelen.length} berichten · ${o.modus?o.modus:'tijd van de klas'} · ${o.max?o.max+' pogingen':'onbeperkt'}</span></div><button data-actief="${o.id}" ${o.id===st.actief?'disabled':''}>${o.id===st.actief?'Actief':'Activeer'}</button></div>`).join('');
   const arts=A.map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
-  return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
+  return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}${rondesHTML()}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
   <div class="dcol"><h3>Nieuwe opdracht klaarzetten</h3><div class="frm">
    <label>Naam van de opdracht<input id="f-naam" placeholder="Bijvoorbeeld: Kop en beeld"></label>
    <label>Doel<select id="f-doel">${optS(Object.entries(DOELEN),'balans')}</select></label>
    <label>Tijdmodus<select id="f-modus">${optS([['','Zoals de klas ('+klas.modus+')'],['versneld','Versneld'],['echt','Echte tijd'],['direct','Direct']],'')}</select></label>
    <label>Pogingen per bericht<select id="f-max">${optS([[0,'Onbeperkt'],[1,'1'],[2,'2'],[3,'3']],0)}</select></label>
+   ${doelFormHTML()}
    <fieldset><legend>Wat zien studenten?</legend>${METRICS.map(m=>`<label class="ck"><input type="checkbox" id="f-m-${m[0]}" checked> ${m[1]}</label>`).join('')}</fieldset>
    <fieldset><legend>Berichten in deze opdracht</legend><div class="scr">${arts}</div></fieldset>
    <label class="ck"><input type="checkbox" id="f-direct" checked> Meteen actief maken</label>
@@ -810,8 +878,8 @@ function dBer(){
 }
 function renderDocent(){
   if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
-  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['opd','Opdrachten'],['ber','Berichten']];
-  const body=({tijd:dTijd,res:dRes,opd:dOpd,ber:dBer})[st.dtab]();
+  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten']];
+  const body=({tijd:dTijd,res:dRes,rap:dRap,opd:dOpd,ber:dBer})[st.dtab]();
   dc.innerHTML=`<div class="dc"><div class="dch"><b>Docentenbesturing</b><span>Klas ${klas.naam} · ${esc(tmLabel())}</span><nav>${tabs.map(t=>`<button class="${st.dtab===t[0]?'on':''}" data-dtab="${t[0]}">${t[1]}</button>`).join('')}</nav><button class="x" data-dclose="1">Uitloggen</button></div><div class="dcb t-${st.dtab}">${body}</div></div>`;
   restoreForm();
 }
@@ -846,7 +914,7 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){
@@ -859,6 +927,247 @@ async function saveArtikel(){
   const ok=await dAct('rsim_docent_add_article',{p},'Bericht toegevoegd aan de database en aan de actieve opdracht');
   if(ok){['f-t','f-i','f-bd1','f-bd2','f-bd3'].forEach(k=>delete st.fv[k]);renderDocent()}
 }
+
+/* ================= Rapportage: doelen, begeleiding en advies =================
+   Student: tabblad Rapport op de resultatenmonitor. Docent: tab Rapporten.
+   Stappen volgen je lessen: welke data nodig, berekenen, doel behaald en waarom, acties, advies. */
+const BEGELEIDING={veel:'Veel begeleiding',middel:'Middel',weinig:'Weinig',geen:'Geen (zoals de proeve)'};
+const BEG_UITLEG={veel:'Het systeem wijst de juiste data aan en toont de totalen.',middel:'De student kiest uit een korte lijst. Het systeem controleert de keuze.',weinig:'De student kiest uit alle data en telt zelf op.',geen:'Alleen de doelen en alle data. De student schrijft het hele advies.'};
+const DATAITEMS=[
+  {id:'bereik',naam:'Bereik',uitleg:'Hoeveel mensen het bericht zagen op de homepage.'},
+  {id:'kliks',naam:'Kliks',uitleg:'Hoeveel mensen het bericht openden.'},
+  {id:'klikpercentage',naam:'Klikpercentage',uitleg:'Kliks gedeeld door bereik.'},
+  {id:'leestijd',naam:'Gemiddelde leestijd',uitleg:'Hoe lang lezers gemiddeld bleven.'},
+  {id:'doorkliks',naam:'Doorkliks naar een ander bericht',uitleg:'Lezers die na het lezen verder klikten.'},
+  {id:'gedeeld',naam:'Keer gedeeld',uitleg:'Hoe vaak lezers het bericht deelden.'},
+  {id:'engagementrate',naam:'Betrokkenheid',uitleg:'Doorkliks en delen samen, per 100 lezers.'},
+  {id:'inschrijvingen',naam:'Nieuwsbriefinschrijvingen',uitleg:'Lezers die zich inschreven voor de nieuwsbrief.'},
+  {id:'plek',naam:'Plek op de homepage',uitleg:'Waar het bericht stond.',ruis:true},
+  {id:'tijdstip',naam:'Tijdstip van publicatie',uitleg:'Het uur waarop het online ging.',ruis:true},
+  {id:'koplengte',naam:'Aantal woorden in de kop',uitleg:'Hoe lang de kop is.',ruis:true},
+  {id:'verloop',naam:'Piekuur',uitleg:'Het uur met de meeste kliks.',ruis:true}];
+const DI=Object.fromEntries(DATAITEMS.map(d=>[d.id,d]));
+const DOELTYPES={
+  bereik:{naam:'Bereik',eenheid:'bezoekers',data:['bereik'],tekst:t=>`Minimaal ${fmt(t)} bezoekers bereikt`,w:T=>T.b},
+  kliks:{naam:'Kliks',eenheid:'kliks',data:['kliks'],tekst:t=>`Minimaal ${fmt(t)} kliks`,w:T=>T.k},
+  klikpercentage:{naam:'Klikpercentage',eenheid:'%',data:['klikpercentage'],tekst:t=>`Een klikpercentage van minimaal ${dec(t,1)}%`,w:T=>T.ctr*100},
+  leestijd:{naam:'Leestijd',eenheid:'seconden',data:['leestijd'],tekst:t=>`Een gemiddelde leestijd van minimaal ${t} seconden`,w:T=>T.lees},
+  doorkliks:{naam:'Doorkliks',eenheid:'doorkliks',data:['doorkliks'],tekst:t=>`Minimaal ${fmt(t)} doorkliks naar een ander bericht`,w:T=>T.dk},
+  gedeeld:{naam:'Gedeeld',eenheid:'keer',data:['gedeeld'],tekst:t=>`Minimaal ${fmt(t)} keer gedeeld`,w:T=>T.dl},
+  engagement:{naam:'Betrokkenheid',eenheid:'%',data:['engagementrate'],tekst:t=>`Een betrokkenheid van minimaal ${dec(t,1)}%`,w:T=>T.eng*100},
+  inschrijvingen:{naam:'Inschrijvingen',eenheid:'inschrijvingen',data:['inschrijvingen'],tekst:t=>`Minimaal ${fmt(t)} nieuwsbriefinschrijvingen`,w:T=>T.ins}};
+const CRITERIA=['Selecteert de relevante data met betrekking tot bereik en effect uit een bredere datacollectie','Analyseert het bereik en effect van de content op een juiste manier','Bepaalt of de vooraf gestelde doelen zijn behaald','Bedenkt acties die het effect en bereik kunnen vergroten of verbeteren','Deelt een duidelijk advies met de opdrachtgever'];
+/* de vier rondes: veel, middel, weinig, geen */
+const RONDES=[
+  {naam:'Ronde 1: veel begeleiding',begeleiding:'veel',artikelen:['n01','n03','n05','n08','n13'],doelen:[['bereik',2500],['klikpercentage',5],['inschrijvingen',10]]},
+  {naam:'Ronde 2: middel begeleiding',begeleiding:'middel',artikelen:['n02','n04','n06','n09','n11'],doelen:[['bereik',3500],['engagement',20],['kliks',200]]},
+  {naam:'Ronde 3: weinig begeleiding',begeleiding:'weinig',artikelen:['n07','n10','n12','n14','n15'],doelen:[['bereik',3000],['leestijd',35],['doorkliks',40],['inschrijvingen',6]]},
+  {naam:'Ronde 4: geen begeleiding (zoals de proeve)',begeleiding:'geen',artikelen:['n01','n02','n04','n08','n10','n12'],doelen:[['bereik',4000],['klikpercentage',5.5],['engagement',21],['inschrijvingen',8]]}];
+const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false});
+
+/* ---- cijfers uit de publicaties ---- */
+function totalen(pubs){const T={b:0,k:0,l:0,dk:0,dl:0,ins:0};
+  pubs.forEach(p=>{const v=viewOf(p);T.b+=v.b;T.k+=v.k;T.l+=v.lees*v.k;T.dk+=v.dk;T.dl+=v.dl;T.ins+=v.ins});
+  return {b:T.b,k:T.k,ctr:T.b?T.k/T.b:0,lees:T.k?Math.round(T.l/T.k):0,dk:T.dk,dl:T.dl,eng:T.k?(T.dk+T.dl)/T.k:0,ins:T.ins}}
+function celWaarde(id,p){const v=viewOf(p),s=nu(p),a=byId[p.id];
+  switch(id){case'bereik':return fmt(v.b);case'kliks':return fmt(v.k);case'klikpercentage':return dec(v.ctr*100,1)+'%';case'leestijd':return v.lees+' s';
+    case'doorkliks':return fmt(v.dk);case'gedeeld':return fmt(v.dl);case'engagementrate':return dec(v.k?(v.dk+v.dl)/v.k*100:0,1)+'%';case'inschrijvingen':return fmt(v.ins);
+    case'plek':return PLEK[s.plek];case'tijdstip':return hh(p.uur);case'koplengte':return String(s.kop.trim().split(/\s+/).length);
+    case'verloop':{const V=v.c.verloop.slice(0,v.e);let m=0,u=-1;V.forEach((x,i)=>{if(x.kliks>m){m=x.kliks;u=x.uur}});return u<0?'–':hh(u)}}return '–'}
+function totaalCel(id,T){switch(id){case'bereik':return fmt(T.b);case'kliks':return fmt(T.k);case'klikpercentage':return dec(T.ctr*100,1)+'%';case'leestijd':return T.lees+' s';
+  case'doorkliks':return fmt(T.dk);case'gedeeld':return fmt(T.dl);case'engagementrate':return dec(T.eng*100,1)+'%';case'inschrijvingen':return fmt(T.ins)}return '–'}
+const doelTekst=d=>DOELTYPES[d.type].tekst(d.drempel);
+const doelWaarde=(d,T)=>DOELTYPES[d.type].w(T);
+const doelGehaald=(d,T)=>doelWaarde(d,T)>=d.drempel-1e-9;
+const num=s=>{const x=parseFloat(String(s).replace(',','.'));return isFinite(x)?x:null};
+
+/* ---- toestand van het rapport van de student ---- */
+const heeftRapport=()=>{const o=actieveOpdracht();return !!(o&&o.doelen&&o.doelen.length)};
+function rapInh(){if(!st.rapport)st.rapport={inhoud:{},status:'concept',beoordeling:null};const r=st.rapport.inhoud;
+  if(!r.doelen)r.doelen={};if(!r.advies)r.advies={data:'',werkwijze:'',resultaten:'',acties:''};if(r.acties===undefined)r.acties='';return r}
+function rapDoel(id){const r=rapInh();if(!r.doelen[id])r.doelen[id]={gekozen:[],uitkomst:'',behaald:'',reden:'',gecontroleerd:false};return r.doelen[id]}
+const rapSlot=()=>st.rapport&&st.rapport.status==='ingeleverd';
+function rapKlaar(){if(!st.pubs.length)return {ok:false,tekst:'Publiceer eerst minstens één bericht. Daarna kun je je rapport maken.'};
+  const rest=st.pubs.reduce((m,p)=>Math.max(m,24-elapsed(p)),0);
+  if(rest>0)return {ok:false,tekst:`Je rapport gaat open als al je publicaties 24 uur hebben gelopen. Nog ${rest} uur in de simulatie.`};
+  return {ok:true}}
+function rapStappen(){const o=actieveOpdracht();
+  if(o.begeleiding==='geen')return [{id:'doelen',t:'De doelen'},{id:'data',t:'Alle data'},{id:'advies',t:'Advies aan de opdrachtgever'}];
+  return o.doelen.map((d,i)=>({id:'d:'+d.id,t:'Doel '+(i+1)+': '+DOELTYPES[d.type].naam})).concat([{id:'acties',t:'Acties'},{id:'advies',t:'Advies aan de opdrachtgever'}])}
+function stapKlaar(s){const r=rapInh();
+  if(s.id.startsWith('d:')){const d=rapDoel(s.id.slice(2));return d.gekozen.length>0&&d.uitkomst!==''&&d.behaald!==''&&d.reden.trim().length>2}
+  if(s.id==='acties')return r.acties.trim().length>5;
+  if(s.id==='advies')return Object.values(r.advies).every(x=>x.trim().length>5);
+  return false}
+function dataOpties(doel,beg){const nodig=DOELTYPES[doel.type].data;
+  if(beg==='weinig'||beg==='geen')return DATAITEMS.map(d=>d.id);
+  const rest=DATAITEMS.map(d=>d.id).filter(x=>!nodig.includes(x));let h=0;for(const c of doel.id+doel.type)h=(h*31+c.charCodeAt(0))>>>0;
+  const keuze=[];for(let i=0;keuze.length<3;i++){const x=rest[(h+i*5)%rest.length];if(!keuze.includes(x))keuze.push(x)}
+  return DATAITEMS.map(d=>d.id).filter(x=>nodig.includes(x)||keuze.includes(x))}
+
+/* ---- tabknoppen en tabel ---- */
+function rtabsHTML(){if(!heeftRapport())return '';
+  return `<span class="rtabs"><button data-rtab="res" class="${st.rtab==='rap'?'':'on'}">Cijfers</button><button data-rtab="rap" class="${st.rtab==='rap'?'on':''}">Rapport</button></span>`}
+function dataTabel(ids,pubs,metTotaal){
+  if(!ids.length)return '<p class="n">Kies eerst welke data je nodig hebt. Daarna zie je hier de cijfers.</p>';
+  const T=totalen(pubs);
+  const kop='<tr><th>Bericht</th>'+ids.map(i=>`<th>${esc(DI[i].naam)}</th>`).join('')+'</tr>';
+  const rijen=pubs.map(p=>`<tr><td class="k"><span class="kt">${esc(nu(p).kop)}</span>${nu(p).ingetrokken?'<span class="tagx red">ingetrokken</span>':''}</td>${ids.map(i=>`<td>${celWaarde(i,p)}</td>`).join('')}</tr>`).join('');
+  const tot=metTotaal?`<tr class="tot"><td>Totaal</td>${ids.map(i=>`<td>${totaalCel(i,T)}</td>`).join('')}</tr>`:'';
+  return `<div class="rtab"><table class="t">${kop}${rijen}${tot}</table></div>`}
+
+/* ---- het rapportscherm ---- */
+function renderRap(){
+  const o=actieveOpdracht(),beg=o.begeleiding||'veel',K=rapKlaar(),inh=rapInh(),slot=rapSlot();
+  const head=`<div class="head"><b>Resultatenmonitor</b>${rtabsHTML()}<span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(o.naam)}</span></div>`;
+  if(!K.ok){$('#s2').innerHTML=`<div class="res">${head}<div class="pan"><h4>Rapport</h4><p class="n" style="font-size:18px">${esc(K.tekst)}</p><p class="n">Bij de tab Cijfers volg je de publicaties.</p></div></div>`;return}
+  const stappen=rapStappen();if(!stappen.find(s=>s.id===st.rstep))st.rstep=stappen[0].id;
+  const idx=stappen.findIndex(s=>s.id===st.rstep),stap=stappen[idx],pubs=st.pubs;
+  const lijst=stappen.map(s=>`<button class="rs ${s.id===st.rstep?'sel':''} ${stapKlaar(s)?'ok':''}" data-rstap="${s.id}"><i></i>${esc(s.t)}</button>`).join('');
+  const kop=`<div class="rkop"><b>${esc(BEGELEIDING[beg])}</b><span>${slot?'Ingeleverd':'Concept'}</span></div>`;
+  let body='';
+  const dis=slot?'disabled':'';
+  if(stap.id.startsWith('d:')){
+    const doel=o.doelen.find(d=>d.id===stap.id.slice(2)),n=o.doelen.indexOf(doel)+1,dd=rapDoel(doel.id),dt=DOELTYPES[doel.type];
+    const opties=dataOpties(doel,beg),nodig=dt.data;
+    let keuzeHTML='';
+    if(beg==='veel'){dd.gekozen=nodig.slice();keuzeHTML=`<div class="chips">${nodig.map(i=>`<span class="chip">${esc(DI[i].naam)}</span>`).join('')}</div><p class="n">Deze data heb je nodig. ${esc(DI[nodig[0]].uitleg)}</p>`}
+    else keuzeHTML=`<div class="opts">${opties.map(i=>{const g=dd.gekozen.includes(i),c=dd.gecontroleerd&&beg==='middel';
+      return `<label class="opt ${c?(nodig.includes(i)?(g?'goed':'mis'):(g?'fout':'')):''}"><input type="checkbox" data-rap-data="${i}" ${g?'checked':''} ${dis}><span><b>${esc(DI[i].naam)}</b>${beg==='middel'?`<small>${esc(DI[i].uitleg)}</small>`:''}</span>${c&&nodig.includes(i)&&g?'<em>goed</em>':''}${c&&!nodig.includes(i)&&g?'<em>niet nodig</em>':''}${c&&nodig.includes(i)&&!g?'<em>deze mis je</em>':''}</label>`}).join('')}</div>
+      ${beg==='middel'?`<button class="rbtn" data-rcheck="1" ${dis}>Controleer mijn keuze</button>`:''}`;
+    const tabel=dataTabel(beg==='veel'?nodig:DATAITEMS.map(d=>d.id).filter(i=>dd.gekozen.includes(i)),pubs,beg!=='weinig');
+    body=`<div class="doelkop">Doel ${n}: ${esc(doelTekst(doel))}</div>
+      <div class="rblok"><h5>1. Welke data heb je nodig?</h5>${keuzeHTML}</div>
+      <div class="rblok"><h5>2. Dit zijn de cijfers</h5>${tabel}${beg==='weinig'?'<p class="n">Tel zelf op of bereken het gemiddelde.</p>':''}</div>
+      <div class="rblok"><h5>3. Is het doel behaald?</h5>
+        <div class="rrij"><label>Mijn uitkomst (${esc(dt.eenheid)})<input class="rin" type="text" inputmode="decimal" data-rap="d:${doel.id}:uitkomst" value="${esc(dd.uitkomst)}" ${dis}></label>
+        <div class="ja"><label><input type="radio" name="b${doel.id}" data-rap-behaald="ja" ${dd.behaald==='ja'?'checked':''} ${dis}> Ja, behaald</label><label><input type="radio" name="b${doel.id}" data-rap-behaald="nee" ${dd.behaald==='nee'?'checked':''} ${dis}> Nee, niet behaald</label></div></div>
+        <label>Waarom? Leg het uit met de cijfers.<textarea class="rin" rows="2" data-rap="d:${doel.id}:reden" ${dis}>${esc(dd.reden)}</textarea></label></div>`;
+  }else if(stap.id==='acties'){
+    const mis=o.doelen.filter(d=>{const T=totalen(pubs);return !doelGehaald(d,T)});
+    const hint=beg==='veel'?`<p class="n">Kijk naar de doelen die je niet haalde${mis.length?': '+mis.map(d=>esc(DOELTYPES[d.type].naam)).join(', '):''}. Bedenk bij elk doel één actie. Denk aan de kop, het beeld, de plek op de homepage en het tijdstip.</p>`
+      :beg==='middel'?'<p class="n">Welke acties verbeteren bereik en effect? Denk aan de kop, het beeld, de plek en het tijdstip.</p>':'';
+    body=`<div class="doelkop">Welke acties bedenk je?</div>${hint}<label>Mijn acties<textarea class="rin big" rows="8" data-rap="acties" ${dis}>${esc(inh.acties)}</textarea></label>`;
+  }else if(stap.id==='doelen'){
+    body=`<div class="doelkop">De doelen van de opdrachtgever</div><ol class="dl">${o.doelen.map(d=>`<li>${esc(doelTekst(d))}</li>`).join('')}</ol><p class="n">Bepaal zelf welke data je nodig hebt. Je vindt alle data bij de volgende stap.</p>`;
+  }else if(stap.id==='data'){
+    body=`<div class="doelkop">Alle data</div>${dataTabel(DATAITEMS.map(d=>d.id),pubs,false)}<p class="n">Kies zelf welke data je gebruikt. Niet alle data past bij elk doel.</p>`;
+  }else{
+    const a=inh.advies,veld=(k,t,h)=>`<label>${t}<small>${h}</small><textarea class="rin" rows="${beg==='geen'?4:3}" data-rap="advies:${k}" ${dis}>${esc(a[k])}</textarea></label>`;
+    body=`<div class="doelkop">Advies aan de opdrachtgever</div>${beg==='geen'?'<ol class="dl small">'+o.doelen.map(d=>`<li>${esc(doelTekst(d))}</li>`).join('')+'</ol>':''}
+      ${veld('data','De data die ik gebruikte','Welke cijfers pakte je en waarom?')}${veld('werkwijze','Mijn werkwijze','Hoe kwam je van de data tot je conclusie?')}
+      ${veld('resultaten','De resultaten van mijn analyse','Welke doelen zijn behaald en welke niet?')}${veld('acties','Mijn acties om bereik en effect te vergroten','Wat raad je de opdrachtgever aan?')}
+      ${slot?(st.rapport.beoordeling?`<div class="rbeo"><b>Beoordeling van je docent</b>${(st.rapport.beoordeling.opmerking||'')?'<p>'+esc(st.rapport.beoordeling.opmerking)+'</p>':''}</div>`:'<p class="n">Je rapport is ingeleverd. Je docent kijkt het na.</p>'):
+        `<div class="rnav"><button class="rbtn big" data-rindien="1">${st.rindien?'Zeker weten? Klik nogmaals om in te leveren':'Rapport inleveren'}</button></div>`}`;
+  }
+  const nav=`<div class="rnav"><button class="rbtn" data-rvolg="-1" ${idx===0?'disabled':''}>Vorige</button><span>${idx+1} van ${stappen.length}</span><button class="rbtn" data-rvolg="1" ${idx===stappen.length-1?'disabled':''}>Volgende</button></div>`;
+  $('#s2').innerHTML=`<div class="res">${head}<div class="rgrid"><div class="pan rlijst"><h4>Stappen</h4>${lijst}<p class="n small">${esc(BEG_UITLEG[beg])}</p></div><div class="pan rmain">${kop}<div class="rscroll">${body}</div>${nav}</div></div></div>`;
+}
+/* ---- opslaan ---- */
+let rapTimer=null;
+async function rapOpslaan(indienen){
+  if(rapSlot())return;
+  try{
+    if(typeof api==='function'&&st.token){const j=await api('rsim_report_save',{p_token:st.token,p_inhoud:rapInh(),p_indienen:!!indienen});st.rapport={inhoud:j.inhoud||{},status:j.status,beoordeling:j.beoordeling||null}}
+    else if(indienen){st.rapport.status='ingeleverd';if(!st.demoRap)st.demoRap=true}
+    if(indienen){st.rindien=false;toast('Rapport ingeleverd. Je docent kijkt het na.');renderRap()}
+  }catch(e){toast(e.message)}
+}
+const rapSoon=()=>{clearTimeout(rapTimer);rapTimer=setTimeout(()=>rapOpslaan(false),1500)};
+function resTick(){if(st.rtab==='rap'){const a=document.activeElement;if(a&&a.closest&&a.closest('#s2'))return}renderRes()}
+
+/* ---- klikken en typen op de monitor ---- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('#s2 [data-rtab],#s2 [data-rstap],#s2 [data-rvolg],#s2 [data-rcheck],#s2 [data-rindien]');if(!t||zoomed<0)return;
+  const D=t.dataset;
+  if(D.rtab){st.rtab=D.rtab;st.rindien=false;renderRes()}
+  else if(D.rstap){rapOpslaan(false);st.rstep=D.rstap;st.rindien=false;renderRap()}
+  else if(D.rvolg){const s=rapStappen(),i=s.findIndex(x=>x.id===st.rstep)+(+D.rvolg);if(s[i]){rapOpslaan(false);st.rstep=s[i].id;st.rindien=false;renderRap()}}
+  else if(D.rcheck){const o=actieveOpdracht(),doel=o.doelen.find(d=>'d:'+d.id===st.rstep);if(doel){rapDoel(doel.id).gecontroleerd=true;renderRap()}}
+  else if(D.rindien){if(!st.rindien){st.rindien=true;renderRap()}else{clearTimeout(rapTimer);rapOpslaan(true)}}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;if(!t.closest||!t.closest('#s2')||!t.dataset.rap||rapSlot())return;
+  const p=t.dataset.rap.split(':'),r=rapInh();
+  if(p[0]==='d')rapDoel(p[1])[p[2]]=t.value;else if(p[0]==='acties')r.acties=t.value;else if(p[0]==='advies')r.advies[p[1]]=t.value;
+  rapSoon();
+});
+document.addEventListener('change',e=>{
+  const t=e.target;if(!t.closest||!t.closest('#s2')||rapSlot())return;
+  if(t.dataset.rapData!==undefined){const o=actieveOpdracht(),doel=o.doelen.find(d=>'d:'+d.id===st.rstep);if(!doel)return;const dd=rapDoel(doel.id),i=t.dataset.rapData;
+    dd.gekozen=t.checked?dd.gekozen.concat(i):dd.gekozen.filter(x=>x!==i);dd.gecontroleerd=false;rapSoon();renderRap()}
+  else if(t.dataset.rapBehaald){const doel=actieveOpdracht().doelen.find(d=>'d:'+d.id===st.rstep);if(doel){rapDoel(doel.id).behaald=t.dataset.rapBehaald;rapSoon();renderRap()}}
+});
+
+/* ================= Docent: rapporten, doelen en de vier rondes ================= */
+const rapDocent=()=>st.docRap||(st.docRap=[]);
+function rapVan(studentId,opdrId){if(studentId==='jij')return st.rapport?{rid:'jij',student:'jij',status:st.rapport.status,inhoud:st.rapport.inhoud,beoordeling:st.rapport.beoordeling}:null;
+  return rapDocent().find(r=>r.student===studentId&&(!r.opdracht||r.opdracht===opdrId))||null}
+function dRap(){
+  const o=actieveOpdracht();
+  if(!o.doelen||!o.doelen.length)return `<div class="dcol"><h3>Rapporten</h3><div class="card2"><b>Deze opdracht heeft geen doelen</b><p>Activeer een opdracht met doelen, bijvoorbeeld een van de vier rondes. Maak de rondes bij het tabblad Opdrachten.</p></div></div>`;
+  const stud=studenten();
+  if(!stud.length)return `<div class="dcol"><h3>Rapporten</h3><div class="card2"><b>Nog geen studenten</b><p>Studenten loggen in met klascode <code>${esc(klas.code)}</code>.</p></div></div>`;
+  const status=s=>{const r=rapVan(s.id,o.id);return r?(r.status==='ingeleverd'?'ingeleverd':'concept'):'niet gestart'};
+  const rows=stud.map(s=>{const r=rapVan(s.id,o.id),b=r&&r.beoordeling&&r.beoordeling.criteria?r.beoordeling.criteria.filter(x=>x!==null&&x!==undefined).reduce((x,y)=>x+y,0)+' / 10':'';
+    return `<tr class="row ${s.id===st.dsel?'sel':''}" data-rsel="${s.id}"><td><b>${esc(s.naam)}</b></td><td>${status(s)}</td><td>${b}</td></tr>`}).join('');
+  const S=stud.find(x=>x.id===st.dsel)||stud[0],r=rapVan(S.id,o.id);
+  let detail='<p class="note">Deze student is nog niet begonnen met het rapport.</p>';
+  if(r){
+    const pubs=S.pubs.filter(p=>!p.opdracht||p.opdracht===o.id),T=totalen(pubs),inh=r.inhoud||{},dl=inh.doelen||{},bg=o.begeleiding||'veel';
+    const doelen=o.doelen.map((d,i)=>{const a=dl[d.id]||{gekozen:[],uitkomst:'',behaald:'',reden:''},w=doelWaarde(d,T),gh=doelGehaald(d,T),nodig=DOELTYPES[d.type].data,u=num(a.uitkomst);
+      const klopt=u!==null&&Math.abs(u-w)<=Math.max(1,Math.abs(w)*0.03);
+      const dataOk=nodig.every(x=>(a.gekozen||[]).includes(x));
+      return `<div class="rdoel"><b>Doel ${i+1}: ${esc(doelTekst(d))}</b>
+        <div class="rcmp"><span>Gekozen data</span><div>${(a.gekozen&&a.gekozen.length?a.gekozen.map(x=>esc(DI[x]?DI[x].naam:x)).join(', '):'–')} ${bg!=='veel'?`<em class="${dataOk?'g':'x'}">${dataOk?'bevat de juiste data':'mist: '+nodig.filter(x=>!(a.gekozen||[]).includes(x)).map(x=>esc(DI[x].naam)).join(', ')}</em>`:''}</div></div>
+        <div class="rcmp"><span>Uitkomst student</span><div>${a.uitkomst!==''?esc(a.uitkomst):'–'} <em class="${klopt?'g':'x'}">rekenmotor: ${dec(w,d.type==='bereik'||d.type==='kliks'||d.type==='doorkliks'||d.type==='gedeeld'||d.type==='inschrijvingen'?0:1)}</em></div></div>
+        <div class="rcmp"><span>Behaald volgens student</span><div>${a.behaald==='ja'?'Ja':a.behaald==='nee'?'Nee':'–'} <em class="${(a.behaald==='ja')===gh&&a.behaald!==''?'g':'x'}">rekenmotor: ${gh?'behaald':'niet behaald'}</em></div></div>
+        <div class="rcmp"><span>Reden</span><div>${esc(a.reden||'–')}</div></div></div>`}).join('');
+    const adv=inh.advies||{},B=(r.beoordeling&&r.beoordeling.criteria)||[];
+    const crit=CRITERIA.map((c,i)=>`<label class="rcr"><span>${i+1}. ${esc(c)}</span><select id="f-rv-${i}">${optS([['','–'],[0,'0 onvoldoende'],[1,'1 voldoende'],[2,'2 goed']],B[i]===null||B[i]===undefined?'':B[i])}</select></label>`).join('');
+    detail=`<div class="rstat"><b>${r.status==='ingeleverd'?'Ingeleverd':'Concept'}</b>${r.status==='ingeleverd'?`<button class="dbtn" data-reopen="${r.rid}" style="margin-left:auto">Heropenen voor de student</button>`:''}</div>
+      ${bg==='geen'?'':doelen}
+      ${inh.acties?`<div class="rdoel"><b>Acties</b><p>${esc(inh.acties)}</p></div>`:''}
+      <div class="rdoel"><b>Advies aan de opdrachtgever</b>${[['data','Data'],['werkwijze','Werkwijze'],['resultaten','Resultaten'],['acties','Acties']].map(k=>`<div class="rcmp"><span>${k[1]}</span><div>${esc(adv[k[0]]||'–')}</div></div>`).join('')}</div>
+      ${bg==='geen'?`<div class="rdoel"><b>Controle met de rekenmotor</b>${o.doelen.map(d=>`<div class="rcmp"><span>${esc(doelTekst(d))}</span><div>uitkomst ${dec(doelWaarde(d,T),1)}: ${doelGehaald(d,T)?'behaald':'niet behaald'}</div></div>`).join('')}</div>`:''}
+      <div class="rdoel"><b>Beoordeling (criteria van de proeve)</b><div class="rcrs">${crit}</div>
+        <label>Opmerking<textarea id="f-rv-op" rows="3">${esc(r.beoordeling&&r.beoordeling.opmerking||'')}</textarea></label>
+        <button class="btn" data-rev="${r.rid}">Beoordeling opslaan</button></div>`;
+  }
+  return `<div class="dcol"><h3>Rapporten bij: ${esc(o.naam)}</h3><div class="box2"><table class="t2"><tr><th>Student</th><th>Status</th><th>Punten</th></tr>${rows}</table></div>
+    <p class="note">De rekenmotor controleert alleen. Jij beoordeelt. De cijfers van de rekenmotor staan er als hulp bij.</p></div>
+    <div class="dcol"><h3>${esc(S.naam)}</h3>${detail}</div>`}
+/* formulier voor doelen en begeleiding bij een nieuwe opdracht */
+function doelFormHTML(){
+  const rij=i=>{const d=RONDES[3].doelen[i]||['bereik',3000];return `<div class="br2"><label class="ck"><input type="checkbox" id="f-dl-on${i}" ${i<3?'checked':''}> Doel ${i+1}</label><select id="f-dl-t${i}">${optS(Object.entries(DOELTYPES).map(([k,v])=>[k,v.naam]),d[0])}</select><input id="f-dl-v${i}" value="${d[1]}" inputmode="decimal"></div>`};
+  return `<label>Begeleiding<select id="f-bg">${optS(Object.entries(BEGELEIDING),'veel')}</select></label>
+    <fieldset><legend>Doelen van de opdrachtgever (leeg laten voor een gewone oefenopdracht)</legend><label class="ck"><input type="checkbox" id="f-dl-aan"> Deze opdracht heeft doelen en een rapport</label>${[0,1,2,3].map(rij).join('')}
+    <p class="note">Voor vijf berichten ligt een gewone dag rond 3.000 bereik, 5,5% klikpercentage, 22% betrokkenheid en 5 inschrijvingen.</p></fieldset>`}
+function formDoelen(){if(!val('f-dl-aan'))return [];
+  return [0,1,2,3].filter(i=>val('f-dl-on'+i)).map((i,k)=>({id:'d'+(k+1),type:val('f-dl-t'+i),drempel:num(val('f-dl-v'+i))||0}))}
+function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>`}
+async function maakRondes(){
+  if(st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){toast('De vier rondes bestaan al');return}
+  if(typeof dAct==='function'&&st.rol==='docent'){
+    if(st.busy)return;st.busy=true;
+    try{for(const r of RONDES.map(rondeObj))await api('rsim_docent_save_assignment',{p_code:st.klascode,p_dcode:st.dcode,p:r});await loadDocent();renderDocent();toast('De vier rondes staan klaar. Activeer er één bij Opdrachten.')}
+    catch(e){toast(e.message)}finally{st.busy=false}
+  }else{RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r)));renderDocent();toast('De vier rondes staan klaar. Activeer er één.')}
+}
+dc.addEventListener('click',e=>{
+  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes]');if(!t)return;const D=t.dataset;
+  if(D.rsel){st.dsel=D.rsel;renderDocent()}
+  else if(D.drondes)maakRondes();
+  else if(D.rev){
+    const crit=CRITERIA.map((c,i)=>{const v=val('f-rv-'+i);return v===''?null:+v}),b={criteria:crit,opmerking:String(val('f-rv-op')||'')};
+    if(typeof dAct==='function'&&st.rol==='docent')dAct('rsim_docent_review',{p_report:D.rev,p_beoordeling:b},'Beoordeling opgeslagen');
+    else{const r=rapVan(st.dsel,actieveOpdracht().id);if(r){r.beoordeling=b;if(r.rid==='jij')st.rapport.beoordeling=b}renderDocent();toast('Beoordeling opgeslagen')}
+  }
+  else if(D.reopen){
+    if(typeof dAct==='function'&&st.rol==='docent')dAct('rsim_docent_reopen',{p_report:D.reopen},'Rapport staat weer open voor de student');
+    else{const r=rapVan(st.dsel,actieveOpdracht().id);if(r){r.status='concept';if(r.rid==='jij')st.rapport.status='concept'}renderDocent();toast('Rapport staat weer open voor de student')}
+  }
+});
 
 /* ================= Verbinding met de database ================= */
 const store={
@@ -889,11 +1198,13 @@ async function loadStudent(stil){
   const nieuw=s.opdracht.id!==st.actief;
   st.opdrachten=[s.opdracht];st.actief=s.opdracht.id;
   st.pubs=s.pubs.map(toPub);
-  if(nieuw)st.sel=null;
+  if(nieuw){st.sel=null;st.rapport=null;st.rstep=null}
+  const focusIn=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#s2');
+  if(s.rapport&&!focusIn&&!rapTimer)st.rapport={inhoud:s.rapport.inhoud||{},status:s.rapport.status,beoordeling:s.rapport.beoordeling||null};
   sel0();
   const sig=pubSig(),veranderd=nieuw||sig!==st.sig||!st.draft;st.sig=sig;
   if(veranderd){st.res=0;st.draft=newDraft(st.sel)}
-  if(!stil||veranderd)renderAll();else{renderWeb();renderRes();syncPrev()}
+  if(!stil||veranderd)renderAll();else{renderWeb();resTick();syncPrev()}
   return true;
 }
 /* ---- docent ---- */
@@ -901,6 +1212,7 @@ async function loadDocent(){
   const d=await api('rsim_docent_state',{p_code:st.klascode,p_dcode:st.dcode});
   SKEW=d.now-Date.now();Object.assign(klas,d.klas);RULES=d.rules||{};
   setA(d.artikelen);
+  st.docRap=d.rapporten||[];
   st.opdrachten=d.opdrachten;st.actief=(d.opdrachten.find(o=>o.actief)||d.opdrachten[0]||{}).id;
   st.docStud=d.studenten.map(s=>({id:s.id,naam:s.naam,pubs:s.pubs.map(toPub)}));
   if(!st.docStud.find(s=>s.id===st.dsel))st.dsel=st.docStud[0]?st.docStud[0].id:null;
@@ -947,7 +1259,7 @@ $('#outbtn').onclick=uitloggen;
 
 /* ---- klok en verversen ---- */
 setInterval(()=>{
-  if(st.rol==='student'&&!st.wacht){renderWeb();renderRes();syncPrev()}
+  if(st.rol==='student'&&!st.wacht){renderWeb();resTick();syncPrev()}
 },5000);
 setInterval(async()=>{
   try{

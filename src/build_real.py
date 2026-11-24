@@ -1,5 +1,6 @@
 import os, shutil, subprocess, sys
-import os; base = os.path.dirname(os.path.abspath(__file__)) + '/'
+import os as _o
+base = _o.path.dirname(_o.path.abspath(__file__)) + '/'
 URL = 'https://fqdemhhcpetnrbtlgpxa.supabase.co'
 KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxZGVtaGhjcGV0bnJidGxncHhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExMzQ1NTYsImV4cCI6MjEwNjcxMDU1Nn0.Tji9meaHe0rS_Z18X-CUcwaybv48kSa77Dav3hEgP_I'
 
@@ -61,7 +62,6 @@ out = out.replace('<!--ENGINE-->', '<script>\n' + engine + '\n</script>')
 out = out.replace('<!--APP-->', '<script>\n' + app + '\n</script>')
 html = ('<!doctype html><html lang="nl"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-        '<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%230e6b5e%27/%3E%3Cpath d=%27M16 18l16 30 16-30%27 fill=%27none%27 stroke=%27white%27 stroke-width=%278%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">'
         '<meta name="robots" content="noindex">\n') + out + '\n</html>'
 d = base + 'deploy/'
 os.makedirs(d, exist_ok=True)

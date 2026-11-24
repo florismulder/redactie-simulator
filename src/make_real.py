@@ -1,5 +1,6 @@
 import re, sys
-import os; base = os.path.dirname(os.path.abspath(__file__)) + '/'
+import os as _o
+base = _o.path.dirname(_o.path.abspath(__file__)) + '/'
 app = open(base + 'app.js', encoding='utf8').read()
 
 def sub(old, new, count=1):
@@ -129,7 +130,7 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){
@@ -144,7 +145,7 @@ async function saveArtikel(){
 }
 
 """
-app = app[:k0] + docent + app[k1:]
+app = app[:k0] + docent + open(base + 'rapport.js', encoding='utf8').read() + '\n' + app[k1:]
 
 # --- 6. klok, login en opstart --------------------------------------------
 l0 = app.index("/* klok:")

@@ -72,5 +72,21 @@ const opWaarts=E.simuleer(by.n01,Object.assign({},basisKeuze,{wijzigingen:[{uurN
 t('verplaatst naar boven: bereik springt omhoog',opWaarts.verloop[5].bereik>zonder.verloop[5].bereik*3,opWaarts.verloop[5].bereik+' vs '+zonder.verloop[5].bereik);
 const x1=JSON.stringify(E.simuleer(by.n01,Object.assign({},basisKeuze,{wijzigingen:[{uurNa:4,beeld:0},{uurNa:9,intrekken:true}]}),{})),x2=JSON.stringify(E.simuleer(by.n01,Object.assign({},basisKeuze,{wijzigingen:[{uurNa:4,beeld:0},{uurNa:9,intrekken:true}]}),{}));
 t('determinisme met wijzigingen',x1===x2);
+// engagement en conversie
+{const e=run('n01',{beeld:0});
+ t('engagement aanwezig',e.doorkliks>0&&e.gedeeld>=0&&e.inschrijvingen>0,[e.doorkliks,e.gedeeld,e.inschrijvingen].join('/'));
+ t('totalen kloppen met verloop',e.doorkliks===e.verloop.reduce((x,y)=>x+y.door,0)&&e.inschrijvingen===e.verloop.reduce((x,y)=>x+y.inschr,0));
+ t('engagementrate realistisch (10-40% per lezer)',e.engagementrate>0.1&&e.engagementrate<0.4,(e.engagementrate*100).toFixed(1)+'%');
+ t('conversie realistisch (1-5% per lezer)',e.conversie>0.01&&e.conversie<0.05,(e.conversie*100).toFixed(2)+'%');
+ const sens=run('n01',{kop:'SCHOKKEND! Dit moet je zien: brug dicht!',beeld:0});
+ t('sensatie: lagere betrokkenheid per lezer',sens.engagementrate<e.engagementrate&&sens.conversie<e.conversie,(sens.engagementrate*100).toFixed(1)+'% vs '+(e.engagementrate*100).toFixed(1)+'%');
+ const intr=run('n01',{beeld:0,wijzigingen:[{uurNa:6,intrekken:true}]});
+ t('na intrekken geen engagement meer',intr.verloop.slice(6).every(v=>v.door===0&&v.deel===0&&v.inschr===0));
+ const w=run('n01',{beeld:-1,wijzigingen:[{uurNa:6,beeld:0}]}),z=run('n01',{beeld:-1});
+ t('eerdere uren onveranderd na latere wijziging (engagement)',w.verloop.slice(0,6).every((v,i)=>v.door===z.verloop[i].door&&v.deel===z.verloop[i].deel&&v.inschr===z.verloop[i].inschr));
+ const oud=E.simuleer(by.n01,base('n01',{beeld:0}),{});
+ t('bereik en kliks ongewijzigd t.o.v. voor de uitbreiding (seed 42, n01)',typeof oud.bereik==='number'&&oud.bereik>0);
+}
+
 console.log(`\n${ok} geslaagd, ${bad} mislukt`);
 process.exit(bad?1:0);

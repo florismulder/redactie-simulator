@@ -1,0 +1,12 @@
+import re
+src = open('/home/claude/redactie-sim/bureau.src.html', encoding='utf8').read()
+css = open('/home/claude/redactie-sim/docent.css', encoding='utf8').read()
+engine = open('/home/claude/redactie-sim/engine.js', encoding='utf8').read()
+app = open('/home/claude/redactie-sim/app.js', encoding='utf8').read()
+data = open('/home/claude/redactie-sim/data.json.txt', encoding='utf8').read().strip()
+app = app.replace('/*RAPPORT_HERE*/', open('/home/claude/redactie-sim/rapport.js', encoding='utf8').read()).replace('/*DATA*/', data)
+out = src.replace('/*CSS_EXTRA*/', css)
+out = out.replace('<!--ENGINE-->', '<script>\n' + engine + '\n</script>')
+out = out.replace('<!--APP-->', '<script>\n' + app + '\n</script>')
+open('/home/claude/redactie-sim/bureau.html', 'w', encoding='utf8').write(out)
+print(len(out))

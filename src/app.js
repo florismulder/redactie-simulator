@@ -55,8 +55,8 @@ function newDraft(id){const a=byId[id],p=curPub(id);
   if(p){const s=nu(p);const d={kop:s.kop,beeld:s.beeld,plek:s.plek,uur:12};if(!s.ingetrokken)d.uurNa=Math.min(23,laatsteUur(p)+1);return d}
   return {kop:a.t,beeld:-1,uur:12,plek:'midden'}}
 const sim=p=>Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
-function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees});
-  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0}}
+function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0});
+  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0,dk,dl,ins}}
 function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
 sel0();st.draft=newDraft(st.sel);
 
@@ -122,6 +122,7 @@ function renderWeb(){
 }
 /* ---- scherm 3: resultaten ---- */
 function renderRes(){
+  if(st.rtab==='rap'&&heeftRapport())return renderRap();
   const M=new Set(actieveOpdracht().metrics);
   const rows=st.pubs.map(p=>({p,s:nu(p),v:viewOf(p)}));
   const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,l:o.l+r.v.lees*r.v.k}),{b:0,k:0,l:0});
@@ -134,7 +135,7 @@ function renderRes(){
   if(M.has('bereik'))kp.push(['Bereik',fmt(T.b)]);
   if(M.has('kliks')){kp.push(['Kliks',fmt(T.k)]);kp.push(['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'])}
   if(M.has('leestijd'))kp.push(['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']);
-  $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b><span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
+  $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b>${rtabsHTML()}<span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
   <div class="kpis" style="grid-template-columns:repeat(${Math.max(kp.length,1)},1fr)">${kp.map(k=>`<div class="kpi"><small>${k[0]}</small><div>${k[1]}</div></div>`).join('')}</div>
   <div class="grid"><div class="pan"><h4>Berichten</h4><table class="t"><tr>${th}</tr>${body}</table></div>
   <div class="pan"><h4>${sel?esc(sel.s.kop.slice(0,40))+(sel.s.kop.length>40?'…':''):'Verloop'}</h4>${right}</div></div></div>`;
@@ -252,12 +253,13 @@ function dRes(){
 function dOpd(){
   const lijst=st.opdrachten.map(o=>`<div class="op ${o.id===st.actief?'act':''}"><div><b>${esc(o.naam)}</b><span>${esc(DOELEN[o.doel])} · ${o.artikelen.length} berichten · ${o.modus?o.modus:'tijd van de klas'} · ${o.max?o.max+' pogingen':'onbeperkt'}</span></div><button data-actief="${o.id}" ${o.id===st.actief?'disabled':''}>${o.id===st.actief?'Actief':'Activeer'}</button></div>`).join('');
   const arts=A.map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
-  return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
+  return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}${rondesHTML()}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
   <div class="dcol"><h3>Nieuwe opdracht klaarzetten</h3><div class="frm">
    <label>Naam van de opdracht<input id="f-naam" placeholder="Bijvoorbeeld: Kop en beeld"></label>
    <label>Doel<select id="f-doel">${optS(Object.entries(DOELEN),'balans')}</select></label>
    <label>Tijdmodus<select id="f-modus">${optS([['','Zoals de klas ('+klas.modus+')'],['versneld','Versneld'],['echt','Echte tijd'],['direct','Direct']],'')}</select></label>
    <label>Pogingen per bericht<select id="f-max">${optS([[0,'Onbeperkt'],[1,'1'],[2,'2'],[3,'3']],0)}</select></label>
+   ${doelFormHTML()}
    <fieldset><legend>Wat zien studenten?</legend>${METRICS.map(m=>`<label class="ck"><input type="checkbox" id="f-m-${m[0]}" checked> ${m[1]}</label>`).join('')}</fieldset>
    <fieldset><legend>Berichten in deze opdracht</legend><div class="scr">${arts}</div></fieldset>
    <label class="ck"><input type="checkbox" id="f-direct" checked> Meteen actief maken</label>
@@ -280,8 +282,8 @@ function dBer(){
 }
 function renderDocent(){
   if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
-  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['opd','Opdrachten'],['ber','Berichten']];
-  const body=({tijd:dTijd,res:dRes,opd:dOpd,ber:dBer})[st.dtab]();
+  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten']];
+  const body=({tijd:dTijd,res:dRes,rap:dRap,opd:dOpd,ber:dBer})[st.dtab]();
   dc.innerHTML=`<div class="dc"><div class="dch"><b>Docentenbesturing</b><span>Klas ${klas.naam} · ${esc(tmLabel())}</span><nav>${tabs.map(t=>`<button class="${st.dtab===t[0]?'on':''}" data-dtab="${t[0]}">${t[1]}</button>`).join('')}</nav><button class="x" data-dclose="1">Terug naar bureau</button></div><div class="dcb t-${st.dtab}">${body}</div></div>`;
   restoreForm();
 }
@@ -307,7 +309,7 @@ function saveOpdracht(){
   if(!naam){toast('Geef de opdracht een naam');return}
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
-  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics};
+  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',doelen:formDoelen()};
   st.opdrachten.push(o);if(val('f-direct')){st.actief=o.id;sel0();st.draft=newDraft(st.sel)}
   ['f-naam'].forEach(k=>delete st.fv[k]);renderDocent();ververs();toast(val('f-direct')?'Opdracht staat klaar en is actief':'Opdracht opgeslagen')
 }
@@ -326,7 +328,8 @@ function saveArtikel(){
   renderDocent();ververs();toast('Bericht toegevoegd aan de database en aan de vrije oefening')
 }
 
+/*RAPPORT_HERE*/
 /* klok: resultaten verversen terwijl de tijd loopt */
-setInterval(()=>{if(tm().modus==='direct'&&klas.modus==='direct')return;renderWeb();renderRes();syncPrev();if(!dc.hidden&&st.docOk&&st.dtab==='res')renderDocent()},5000);
+setInterval(()=>{if(tm().modus==='direct'&&klas.modus==='direct')return;renderWeb();resTick();syncPrev();if(!dc.hidden&&st.docOk&&st.dtab==='res')renderDocent()},5000);
 ['renderSys','renderWeb','renderRes'].forEach(n=>{const f=window[n];window[n]=function(){f();syncPrev()}});
 renderAll();fit();

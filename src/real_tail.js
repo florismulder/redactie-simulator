@@ -27,11 +27,13 @@ async function loadStudent(stil){
   const nieuw=s.opdracht.id!==st.actief;
   st.opdrachten=[s.opdracht];st.actief=s.opdracht.id;
   st.pubs=s.pubs.map(toPub);
-  if(nieuw)st.sel=null;
+  if(nieuw){st.sel=null;st.rapport=null;st.rstep=null}
+  const focusIn=document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#s2');
+  if(s.rapport&&!focusIn&&!rapTimer)st.rapport={inhoud:s.rapport.inhoud||{},status:s.rapport.status,beoordeling:s.rapport.beoordeling||null};
   sel0();
   const sig=pubSig(),veranderd=nieuw||sig!==st.sig||!st.draft;st.sig=sig;
   if(veranderd){st.res=0;st.draft=newDraft(st.sel)}
-  if(!stil||veranderd)renderAll();else{renderWeb();renderRes();syncPrev()}
+  if(!stil||veranderd)renderAll();else{renderWeb();resTick();syncPrev()}
   return true;
 }
 /* ---- docent ---- */
@@ -39,6 +41,7 @@ async function loadDocent(){
   const d=await api('rsim_docent_state',{p_code:st.klascode,p_dcode:st.dcode});
   SKEW=d.now-Date.now();Object.assign(klas,d.klas);RULES=d.rules||{};
   setA(d.artikelen);
+  st.docRap=d.rapporten||[];
   st.opdrachten=d.opdrachten;st.actief=(d.opdrachten.find(o=>o.actief)||d.opdrachten[0]||{}).id;
   st.docStud=d.studenten.map(s=>({id:s.id,naam:s.naam,pubs:s.pubs.map(toPub)}));
   if(!st.docStud.find(s=>s.id===st.dsel))st.dsel=st.docStud[0]?st.docStud[0].id:null;
@@ -85,7 +88,7 @@ $('#outbtn').onclick=uitloggen;
 
 /* ---- klok en verversen ---- */
 setInterval(()=>{
-  if(st.rol==='student'&&!st.wacht){renderWeb();renderRes();syncPrev()}
+  if(st.rol==='student'&&!st.wacht){renderWeb();resTick();syncPrev()}
 },5000);
 setInterval(async()=>{
   try{

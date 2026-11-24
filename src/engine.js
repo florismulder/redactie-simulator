@@ -22,6 +22,8 @@
     beeld: { met_beeld: 1.19, per_categorie: { politiek: 1.75 }, video_boven_foto_website: 1.10, kwaliteit_effect: 0.05 },
     plek: { boven: 1.0, midden: 0.2, onder: 0.1, zicht_basis: 0.35, halfwaarde_uur: { boven: 8, midden: 6, onder: 5 } },
     ctr_basis: 0.03,
+    engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
+    conversie: { nieuwsbrief_basis: 0.03 },
     ruis: 0.30,
     leestijd: { deel_onder_15_sec: 0.55, onder_15_gem_sec: 8, betrokken_basis_sec: 70 },
     publiek: { dagbezoekers: 12000, aandeel: { jongeren: 0.20, volwassenen: 0.30, midden: 0.28, senioren: 0.22 } },
@@ -139,6 +141,9 @@
     const halfNieuws = Math.max(artikel.tijdgevoeligheid_uren, 1);
 
     const rnd = mulberry32(keuze.seed || 1);
+    const rnd2 = mulberry32(((keuze.seed || 1) ^ 0x5bd1e995) >>> 0);   // eigen reeks: bestaande cijfers blijven gelijk
+    const hi = artikel.nieuwswaarde.human_interest;
+    const intGem = GROEPEN.reduce((x, g) => x + R.publiek.aandeel[g] * artikel.interesse[g], 0) / 3;
     const globaal = clamp(Math.exp(R.ruis * 0.5 * gauss(rnd)), 0.6, 1.6);
 
     const somCurve = {};
@@ -149,7 +154,7 @@
     let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld, plek: keuze.plek };
     let S = staatVan(artikel, st, R), resetT = 0, ingetrokkenOp = null;
     const gebeurtenissen = [], verloop = [];
-    let totBereik = 0, totKliks = 0, leesSom = 0, afhaakSom = 0;
+    let totBereik = 0, totKliks = 0, leesSom = 0, afhaakSom = 0, totDoor = 0, totDeel = 0, totInschr = 0, cDoor = 0, cDeel = 0, cInschr = 0;   // c* = rest dat naar het volgende uur doorloopt
 
     for (let t = 0; t < H; t++) {
       const klok = (uur + t) % 24;
@@ -180,7 +185,15 @@
         });
       }
       const br = Math.round(b), kr = Math.min(Math.round(k), br);
-      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
+      const eRuis = clamp(Math.exp(R.engagement.ruis * 0.3 * gauss(rnd2)), 0.7, 1.4);
+      const bet = (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec);
+      cDoor += kr * clamp(R.engagement.doorklik_basis * bet, 0, 0.6) * eRuis;
+      cDeel += kr * R.engagement.delen_basis * bet * ((0.6 + 0.2 * hi) / 1.2) * eRuis;
+      cInschr += kr * R.conversie.nieuwsbrief_basis * bet * intGem * eRuis;
+      const door = Math.floor(cDoor), deel = Math.floor(cDeel), inschr = Math.floor(cInschr);
+      cDoor -= door; cDeel -= deel; cInschr -= inschr;
+      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door, deel, inschr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
+      totDoor += door; totDeel += deel; totInschr += inschr;
       totBereik += br; totKliks += kr; leesSom += kr * S.leestijd; afhaakSom += kr * S.afhaak;
     }
     GROEPEN.forEach(g => {
@@ -207,10 +220,13 @@
     uitleg.push({ sleutel: 'eenvoud', label: 'Eenvoud van de kop', factor: K.eenvoud, tekst: K.aantalWoorden + ' woorden: ' + (K.eenvoud > 1.02 ? 'kort en duidelijk' : K.eenvoud < 0.98 ? 'lang en vaag' : 'gemiddeld') + ' (' + pct(K.eenvoud) + ')' });
     uitleg.push({ sleutel: 'woorden', label: 'Woorden in de kop', factor: K.woorden, tekst: K.negatief + ' negatief, ' + K.positief + ' positief: ' + pct(K.woorden) + ' kliks' });
     uitleg.push({ sleutel: 'sensatie', label: 'Sensatie in de kop', factor: S.sensKliks, tekst: K.sensatie < 0.05 ? 'Nuchtere kop' : 'Sensationele kop: kliks ' + pct(S.sensKliks) + ', maar meer lezers haken binnen 15 seconden af' });
+    uitleg.push({ sleutel: 'betrokkenheid', label: 'Betrokkenheid van lezers', factor: (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec), tekst: Math.round((1 - S.afhaak) * 100) + '% van de lezers blijft langer dan 15 seconden. Dat bepaalt hoeveel lezers doorklikken, delen en zich inschrijven' });
     uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: S.nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(S.nwF) + ')' });
 
     return {
       bereik: totBereik, kliks: totKliks, ctr: totBereik ? totKliks / totBereik : 0,
+      doorkliks: totDoor, gedeeld: totDeel, inschrijvingen: totInschr,
+      engagementrate: totKliks ? (totDoor + totDeel) / totKliks : 0, conversie: totKliks ? totInschr / totKliks : 0,
       leestijd, afhaakdeel: afhaak, verloop, perGroep, uitleg, tijdIndex, gebeurtenissen,
       ingetrokken: ingetrokkenOp !== null, ingetrokkenUurNa: ingetrokkenOp
     };
