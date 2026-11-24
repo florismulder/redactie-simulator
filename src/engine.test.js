@@ -88,5 +88,20 @@ t('determinisme met wijzigingen',x1===x2);
  t('bereik en kliks ongewijzigd t.o.v. voor de uitbreiding (seed 42, n01)',typeof oud.bereik==='number'&&oud.bereik>0);
 }
 
+{ /* Instagram en TikTok */
+ const so=(id,k,o={})=>{const a=by[id];const bi=a.beelden.findIndex(b=>b.type===(k==='instagram'?'foto':'video'));return E.simuleerSocial(a,Object.assign({kanaal:k,kop:'Vechtbrug twee weken dicht',beeld:bi,uur:19,seed:42,wijzigingen:[]},o),{})};
+ const i1=so('n01','instagram'),i2=so('n01','instagram'),tk=so('n01','tiktok');
+ t('social: zelfde invoer geeft zelfde uitkomst',JSON.stringify(i1)===JSON.stringify(i2));
+ t('social: totalen kloppen met verloop',i1.bereik===i1.verloop.reduce((x,v)=>x+v.bereik,0)&&i1.interacties===i1.verloop.reduce((x,v)=>x+v.int,0));
+ t('social: TikTok bereikt meer, linkklik lager dan Instagram per bereik',tk.bereik>i1.bereik*0.5&&tk.ctr<i1.ctr,tk.bereik+' / '+i1.bereik);
+ const zonder=so('n01','instagram',{beeld:-1});t('social: zonder beeld minder bereik',zonder.bereik<i1.bereik);
+ const lang=so('n01','tiktok',{kop:'Een heel lange haak die veel te veel woorden bevat voordat er iets gebeurt in beeld hoor'}),kort=so('n01','tiktok',{kop:'Weet jij waarom de brug dicht is?'});
+ t('social: korte directe haak scoort beter dan lange haak',kort.leestijd>lang.leestijd&&kort.bereik>lang.bereik,kort.bereik+' vs '+lang.bereik);
+ const ix=so('n01','instagram',{wijzigingen:[{uurNa:6,intrekken:true}]});t('social: na intrekken geen bereik meer',ix.verloop.slice(6).every(v=>v.bereik===0));
+ const wz=so('n01','instagram',{wijzigingen:[{uurNa:6,kop:'Brug dicht: dit is er aan de hand'}]});t('social: eerdere uren onveranderd na wijziging',wz.verloop.slice(0,6).every((v,i)=>v.bereik===i1.verloop[i].bereik));
+ const spreiding=[];for(let s=1;s<=60;s++)spreiding.push(so('n01','tiktok',{seed:s}).bereik);const mx=Math.max(...spreiding),mn=Math.min(...spreiding);
+ t('social: TikTok spreidt veel (ruis van het algoritme)',mx/mn>3,'x'+(mx/mn).toFixed(1));
+}
+
 console.log(`\n${ok} geslaagd, ${bad} mislukt`);
 process.exit(bad?1:0);

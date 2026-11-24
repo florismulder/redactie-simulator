@@ -288,6 +288,33 @@ table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .rdoel label{display:grid;gap:5px;font-weight:600;font-size:13px}.rdoel textarea,.rdoel select{font:400 14px var(--f-ui);padding:8px;border:1px solid #c5cdd5;border-radius:6px;width:100%;box-sizing:border-box}
 .br2{display:grid;grid-template-columns:100px 1fr 90px;gap:8px;align-items:center}
 .br2 input[type=text],.br2 input:not([type]){font:400 14px var(--f-ui);padding:7px;border:1px solid #c5cdd5;border-radius:6px;width:100%;box-sizing:border-box}
+/* kanalen */
+.ktabs{display:flex;align-items:center;gap:8px;padding:8px 20px;background:#e9edf1;border-bottom:1px solid var(--line);flex:none}
+.ktabs span{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#56626d;margin-right:4px}
+.ktabs button{border:1px solid #c5cdd5;background:#fff;color:#1f2a33;font:600 13px var(--f-ui);padding:6px 16px;border-radius:99px;cursor:pointer}
+.ktabs button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.web .mast .wbar{display:inline-flex;gap:4px;background:rgba(0,0,0,.22);padding:3px;border-radius:99px;margin-left:12px;opacity:1}
+.web .mast .wbar button{border:0;background:transparent;color:#fff;font:600 13px var(--f-ui);padding:5px 14px;border-radius:99px;cursor:pointer}
+.web .mast .wbar button.on{background:#fff;color:var(--brand)}
+.socmain{padding:28px 56px;display:flex;flex-direction:column;gap:22px;height:calc(800px - 68px);box-sizing:border-box;font-family:var(--f-ui)}
+.socmain .prof{display:flex;align-items:center;gap:16px}
+.socmain .av{width:64px;height:64px;border-radius:50%;background:var(--brand);color:#fff;font:700 28px var(--f-news);display:flex;align-items:center;justify-content:center}
+.socmain .prof b{display:block;font-size:20px}.socmain .prof span{color:#6b7885;font-size:14px}
+.socmain .sgrid{flex:1;min-height:0;display:grid;gap:18px}
+.socmain.instagram .sgrid{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr)}
+.socmain.tiktok{background:#101216;color:#fff}.socmain.tiktok .prof span{color:#9aa5af}
+.socmain.tiktok .sgrid{grid-template-columns:repeat(4,1fr)}
+.igt,.ttt{display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0}
+.igp{flex:1;min-height:0;background:#d9dfe5;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#6b7885;font-size:14px}
+.igt p{margin:0;font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ttp{flex:1;min-height:0;background:linear-gradient(180deg,#2a313a,#171b21);border-radius:10px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ttp .play{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px}
+.ttp .hk{position:absolute;left:12px;right:12px;bottom:14px;font:700 17px/1.25 var(--f-ui);text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.igt .st,.ttt .st{display:flex;justify-content:space-between;font-size:13px;color:#6b7885}.ttt .st{color:#9aa5af}
+.igt.empty .igp,.ttt.empty .ttp{background:#eef1f4;border:2px dashed #c5cdd5}.ttt.empty .ttp{background:#1a1e24;border-color:#3a424c}
+.igt.empty p,.ttt.empty p{color:#9aa5af;margin:0;font-size:13px}
+
+.cms .kop.s{font-family:var(--f-ui);font-weight:500;font-size:17px}
 
 [hidden]{display:none!important}
 body{margin:0}
@@ -391,6 +418,12 @@ body.is-docent #room{display:none}
     ctr_basis: 0.03,
     engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
     conversie: { nieuwsbrief_basis: 0.03 },
+    kanalen: {
+      instagram: { dagbereik: 6000, zicht_basis: 0.30, halfwaarde_uur: 7, aandeel: { jongeren: 0.35, volwassenen: 0.35, midden: 0.20, senioren: 0.10 },
+        kwaliteit_effect: 0.12, ctr_basis: 0.015, interactie_basis: 0.05, delen_basis: 0.006, max_tekens: 125, ideaal_min: 30, ideaal_max: 110, viraal_ruis: 0.25 },
+      tiktok: { dagbereik: 10000, zicht_basis: 0.35, halfwaarde_uur: 10, aandeel: { jongeren: 0.55, volwassenen: 0.25, midden: 0.15, senioren: 0.05 },
+        kwaliteit_effect: 0.10, ctr_basis: 0.004, interactie_basis: 0.07, delen_basis: 0.010, max_tekens: 90, korte_haak_woorden: 8, lange_haak_woorden: 14, viraal_ruis: 0.65, duur_sec: 30 }
+    },
     ruis: 0.30,
     leestijd: { deel_onder_15_sec: 0.55, onder_15_gem_sec: 8, betrokken_basis_sec: 70 },
     publiek: { dagbezoekers: 12000, aandeel: { jongeren: 0.20, volwassenen: 0.30, midden: 0.28, senioren: 0.22 } },
@@ -599,7 +632,107 @@ body.is-docent #room{display:none}
     };
   }
 
-  return { simuleer, kopAnalyse, DEFAULTS, GROEPEN };
+
+  /* ---- Instagram en TikTok ----
+     Zelfde vorm als simuleer(), zodat resultaten en rapport voor elk kanaal hetzelfde werken.
+     kliks = klikken naar het bericht op de website. leestijd = hoe lang mensen naar het bericht kijken.
+     interacties = likes, reacties en opgeslagen. */
+  function simuleerSocial(artikel, keuze, regels, opts) {
+    const R = merge(DEFAULTS, regels || {});
+    const kan = keuze.kanaal === 'tiktok' ? 'tiktok' : 'instagram', K = R.kanalen[kan];
+    const H = (opts && opts.uren !== undefined) ? opts.uren : R.horizon_uren;
+    const uur = keuze.uur;
+    const wijz = (keuze.wijzigingen || []).slice().sort((x, y) => x.uurNa - y.uurNa);
+    const halfNieuws = Math.max(artikel.tijdgevoeligheid_uren, 1);
+    const rnd = mulberry32(((keuze.seed || 1) ^ 0x9e3779b9) >>> 0);
+    const nw = artikel.nieuwswaarde;
+    const nwGem = (nw.impact + nw.nabijheid + nw.conflict + nw.human_interest + nw.actualiteit) / 5, nwF = 0.7 + 0.15 * nwGem;
+    const intGem = GROEPEN.reduce((x, g) => x + K.aandeel[g] * artikel.interesse[g], 0) / 3;
+    const viraal = clamp(Math.exp(K.viraal_ruis * gauss(rnd)), 0.4, 3.5);
+    const somCurve = {}; GROEPEN.forEach(g => { somCurve[g] = R.uurcurves[g].reduce((x, y) => x + y, 0); });
+
+    const wil = kan === 'instagram' ? 'foto' : 'video';
+    function staat(st) {
+      const tekst = String(st.kop || ''), ka = kopAnalyse(tekst, R), n = ka.aantalWoorden, tek = tekst.length;
+      const b = (st.beeld !== undefined && st.beeld !== null && st.beeld >= 0) ? artikel.beelden[st.beeld] : null;
+      const juist = b && b.type === wil;
+      const bf = !b ? 0.5 : (juist ? 1 : 0.7) * (1 + K.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3)) * 1.1;
+      let tf, tl;
+      if (kan === 'instagram') {
+        tf = tek === 0 ? 0.8 : (tek < K.ideaal_min ? 0.92 : (tek <= K.ideaal_max ? 1.1 : 0.97));
+        tl = tek === 0 ? 'Geen bijschrift' : tek + ' tekens: ' + (tek < K.ideaal_min ? 'erg kort' : tek <= K.ideaal_max ? 'kort en krachtig' : 'aan de lange kant');
+      } else {
+        const direct = /\?|\b(je|jij|jouw|u)\b/i.test(tekst) ? 0.08 : 0;
+        const lengte = n === 0 ? 0.8 : (n <= K.korte_haak_woorden ? 1.15 : (n <= K.lange_haak_woorden ? 1.0 : 0.85));
+        tf = lengte + direct;
+        tl = n + ' woorden: ' + (n <= K.korte_haak_woorden ? 'een korte haak' : n <= K.lange_haak_woorden ? 'gemiddeld' : 'te lang voor de eerste seconden') + (direct ? ', spreekt de kijker direct aan' : '');
+      }
+      const sens = 1 + 0.12 * ka.sensatie;
+      const kijk = kan === 'instagram' ? 2.5 + 2 * (juist && b ? (b.kwaliteit || 3) / 5 : 0.4) : K.duur_sec * clamp(0.25 + 0.3 * (tf - 0.8) + 0.08 * ((b && b.kwaliteit || 3) - 3) - 0.15 * ka.sensatie, 0.12, 0.8);
+      return { ka, b, juist, bf, tf, tl, kwal: Math.max(0.4, bf * tf * ka.woorden * sens * nwF), kijk, sens };
+    }
+    let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld };
+    let S = staat(st), ingetrokkenOp = null;
+    const gebeurtenissen = [], verloop = [];
+    let tB = 0, tK = 0, tD = 0, tI = 0, tA = 0, kijkSom = 0, cK = 0, cD = 0, cI = 0, cA = 0;
+    for (let t = 0; t < H; t++) {
+      const klok = (uur + t) % 24;
+      let gebeurtenis = null;
+      while (wijz.length && wijz[0].uurNa <= t) {
+        const w = wijz.shift();
+        let tekst = '';
+        if (w.intrekken) { ingetrokkenOp = t; tekst = 'Publicatie ingetrokken'; }
+        else {
+          const d = [];
+          if (w.beeld !== undefined && w.beeld !== st.beeld) d.push('Beeld gewisseld');
+          if (w.kop !== undefined && w.kop !== st.kop) d.push(kan === 'instagram' ? 'Bijschrift aangepast' : 'Haak aangepast');
+          tekst = d.join(', ');
+          st = { kop: w.kop !== undefined ? w.kop : st.kop, beeld: w.beeld !== undefined ? w.beeld : st.beeld }; S = staat(st);
+        }
+        if (tekst) { gebeurtenis = gebeurtenis ? gebeurtenis + ' en ' + tekst.toLowerCase() : tekst; gebeurtenissen.push({ uurNa: t, uur: klok, tekst }); }
+      }
+      const uurRuis = clamp(Math.exp(R.ruis * 0.3 * gauss(rnd)), 0.7, 1.4);
+      const eRuis = clamp(Math.exp(R.engagement.ruis * 0.3 * gauss(rnd)), 0.7, 1.4);
+      let b = 0;
+      if (ingetrokkenOp === null) {
+        const dec = Math.pow(0.5, t / K.halfwaarde_uur) * Math.pow(0.5, t / halfNieuws);
+        GROEPEN.forEach(g => {
+          const bez = K.dagbereik * K.aandeel[g] * R.uurcurves[g][klok] / somCurve[g];
+          b += bez * K.zicht_basis * dec * (artikel.interesse[g] / 3) * S.kwal * viraal * uurRuis;
+        });
+      }
+      const br = Math.round(b);
+      const kwE = clamp(S.kwal, 0.6, 1.6);
+      cK += br * K.ctr_basis * kwE * eRuis * intGem; cD += br * K.delen_basis * kwE * eRuis; cI += br * K.interactie_basis * kwE * eRuis; 
+      const kr = Math.min(Math.floor(cK), br), deel = Math.floor(cD), ia = Math.floor(cI);
+      cK -= kr; cD -= deel; cI -= ia;
+      cA += kr * R.conversie.nieuwsbrief_basis * 1.5 * intGem * eRuis;
+      const inschr = Math.floor(cA); cA -= inschr;
+      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door: 0, deel, inschr, int: ia, lees: Math.round(S.kijk), gebeurtenis, actief: ingetrokkenOp === null });
+      tB += br; tK += kr; tD += deel; tI += inschr; tA += ia; kijkSom += br * S.kijk;
+    }
+    const kijk = Math.round(tB ? kijkSom / tB : S.kijk);
+    let actief = 0, gemiddeld = 0;
+    GROEPEN.forEach(g => { const a = K.aandeel[g] * artikel.interesse[g]; actief += a * (R.uurcurves[g][uur] / somCurve[g]) * 24; gemiddeld += a; });
+    const tijdIndex = actief / gemiddeld;
+    const naam = kan === 'instagram' ? 'Instagram' : 'TikTok';
+    const uitleg = [];
+    uitleg.push({ sleutel: 'tijd', label: 'Tijdstip van plaatsen', factor: tijdIndex, tekst: String(uur).padStart(2, '0') + ':00: het publiek van ' + naam + ' is nu ' + (tijdIndex >= 1.3 ? 'zeer actief' : tijdIndex >= 0.8 ? 'redelijk actief' : 'weinig actief') + ' (index ' + tijdIndex.toFixed(2).replace('.', ',') + ')' });
+    uitleg.push({ sleutel: 'beeld', label: kan === 'instagram' ? 'Foto' : 'Video', factor: S.bf, tekst: !S.b ? 'Zonder beeld bereik je veel minder mensen' : (S.juist ? (kan === 'instagram' ? 'Foto' : 'Video') + ' past bij ' + naam + ', kwaliteit ' + (S.b.kwaliteit || 3) + ' van 5' : 'Dit beeldtype past minder bij ' + naam) });
+    uitleg.push({ sleutel: 'tekst', label: kan === 'instagram' ? 'Bijschrift' : 'Haak in de eerste seconden', factor: S.tf, tekst: S.tl });
+    uitleg.push({ sleutel: 'woorden', label: 'Woorden en sensatie', factor: S.ka.woorden * S.sens, tekst: S.ka.negatief + ' negatief, ' + S.ka.positief + ' positief' + (S.ka.sensatie > 0.05 ? ', sensationeel: meer bereik, minder kijktijd' : '') });
+    uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(nwF) + ')' });
+    if (kan === 'tiktok') uitleg.push({ sleutel: 'viraal', label: 'Het algoritme', factor: viraal, tekst: viraal > 1.4 ? 'Het algoritme duwde deze video veel verder dan gewoon. Dat is deels geluk' : viraal < 0.75 ? 'Het algoritme liet deze video snel los. Dat is deels pech' : 'Het algoritme behandelde deze video gewoon. Let op: bij TikTok verschilt hetzelfde idee soms enorm per keer' });
+    return {
+      kanaal: kan, bereik: tB, kliks: tK, ctr: tB ? tK / tB : 0,
+      doorkliks: 0, gedeeld: tD, inschrijvingen: tI, interacties: tA, interactiepercentage: tB ? tA / tB : 0,
+      engagementrate: 0, conversie: tK ? tI / tK : 0,
+      leestijd: kijk, afhaakdeel: 0, verloop, perGroep: {}, uitleg, tijdIndex, gebeurtenissen,
+      ingetrokken: ingetrokkenOp !== null, ingetrokkenUurNa: ingetrokkenOp
+    };
+  }
+
+  return { simuleer, simuleerSocial, kopAnalyse, DEFAULTS, GROEPEN };
 });
 
 </script>
@@ -638,15 +771,20 @@ function elapsed(p){const t=tm(p);if(t.modus==='direct')return 24;const min=(now
 /* ---- publicaties ---- */
 function nu(p){const s={kop:p.kop,beeld:p.beeld,plek:p.plek,ingetrokken:false,intrekUurNa:null};
   [...p.wijzigingen].sort((x,y)=>x.uurNa-y.uurNa).forEach(w=>{if(w.intrekken){s.ingetrokken=true;s.intrekUurNa=w.uurNa}else{if(w.kop!==undefined)s.kop=w.kop;if(w.beeld!==undefined)s.beeld=w.beeld;if(w.plek!==undefined)s.plek=w.plek}});return s}
-const curPub=id=>st.pubs.find(p=>p.id===id);
+const KANALEN={website:'Website',instagram:'Instagram',tiktok:'TikTok'};
+const kan=()=>st.kanaal||'website',kanaalVan=p=>p.kanaal||'website';
+const curPub=(id,k)=>st.pubs.find(p=>p.id===id&&kanaalVan(p)===(k||kan()));
+const opKanalen=()=>{const o=actieveOpdracht();return (o&&o.kanalen&&o.kanalen.length)?o.kanalen:['website']};
+const SOC={instagram:{wil:'foto',max:125,naam:'Bijschrift',ph:'Schrijf een kort bijschrift'},tiktok:{wil:'video',max:90,naam:'Haak',ph:'Eerste zin die kijkers vastpakt'}};
 const laatsteUur=p=>p.wijzigingen.reduce((m,w)=>Math.max(m,w.uurNa),0);
 function editUur(p){const min=laatsteUur(p)+1;return tm(p).modus==='direct'?Math.min(Math.max(st.draft.uurNa||min,min),23):Math.min(23,Math.max(elapsed(p),min))}
 function newDraft(id){const a=byId[id],p=curPub(id);
   if(p){const s=nu(p);const d={kop:s.kop,beeld:s.beeld,plek:s.plek,uur:12};if(!s.ingetrokken)d.uurNa=Math.min(23,laatsteUur(p)+1);return d}
+  if(kan()!=='website')return {kop:'',beeld:-1,uur:19,plek:'midden'};
   return {kop:a.t,beeld:-1,uur:12,plek:'midden'}}
-const sim=p=>Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
-function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0});
-  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0,dk,dl,ins}}
+const sim=p=>kanaalVan(p)==='website'?Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES):Engine.simuleerSocial(byId[p.id].d,{kanaal:kanaalVan(p),kop:p.kop,beeld:p.beeld,uur:p.uur,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
+function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0,ia=0;const soc=kanaalVan(p)!=='website';c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=soc?x.bereik*x.lees:x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0;ia+=x.int||0});
+  return {c,e,b,k,ctr:b?k/b:0,lees:soc?(b?Math.round(l/b):0):(k?Math.round(l/k):0),dk,dl,ins,ia,soc}}
 function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
 
 /* ---- grafiek en uitleg (student en docent) ---- */
@@ -661,35 +799,39 @@ const whyHTML=c=>`<div class="why">${c.uitleg.map(u=>`<div><b>${esc(u.label)}</b
 function phBox(b){return `<div class="ph">${b?(b[0]==='video'?'<div class="play">▶</div>':'Foto'):'Geen beeld'}</div>`}
 function renderSys(){
   sel0();
+  if(!opKanalen().includes(kan())){st.kanaal=opKanalen()[0];st.draft=newDraft(st.sel)}
+  const KN=kan(),soc=KN!=='website',SC=SOC[KN]||{};
   const op=actieveOpdracht(),a=byId[st.sel],d=st.draft,p=curPub(st.sel),s=p?nu(p):null;
   const mode=!p?'nieuw':(s.ingetrokken?'ingetrokken':'edit');
-  const pog=st.pubs.filter(q=>q.id===st.sel).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
+  const pog=st.pubs.filter(q=>q.id===st.sel&&kanaalVan(q)===kan()).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
   const list=op.artikelen.map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
     const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd</span>');
     return `<div class="it ${x.id===st.sel?'sel':''}" data-pick="${x.id}"><div class="t">${esc(x.t)}</div><div class="m"><span class="pill">${esc(x.c)}</span>${tag}</div></div>`}).join('');
-  const imgs=['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>']
-    .concat(a.b.map((b,i)=>`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+  const imgs=(soc?[]:['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>'])
+    .concat(a.b.map((b,i)=>soc&&b[0]!==SC.wil?'':`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+  const geenBeeld=soc&&!a.b.some(b=>b[0]===SC.wil);
   const seg=['boven','midden','onder'].map(k=>`<button class="${d.plek===k?'sel':''}" data-plek="${k}"><span class="mini"><i class="${k==='boven'?'hot':''}"></i><i class="${k==='midden'?'hot':''}"></i><i class="${k==='onder'?'hot':''}"></i></span>${PLEK[k]}</button>`).join('');
   const beeldTxt=d.beeld<0?'geen beeld':(a.b[d.beeld][0]==='video'?'video':'foto');
   let tijd,go,url='';
   if(mode==='edit'){
     const min=laatsteUur(p)+1,uurNa=editUur(p),klok=p.uur+uurNa;
-    url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
+    url=soc?'':`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
     if(min>23)tijd='<div><label class="l">Aanpassen om</label><p style="margin:0;color:#6b7885">Binnen de eerste 24 uur is geen aanpassing meer mogelijk.</p></div>';
     else if(tm().modus==='direct')tijd=`<div><label class="l">Aanpassen om<span id="tm2sub">${uurNa} uur na publicatie</span></label><div class="time" id="tm2">${hh(klok)}</div><input type="range" id="uurna" min="${min}" max="23" value="${uurNa}"></div>`;
     else tijd=`<div><label class="l">Aanpassen om<span>de klok loopt mee</span></label><div class="time">${hh(klok)}</div><p style="margin:4px 0 0;color:#6b7885">Een wijziging gaat nu in, ${uurNa} uur na publicatie.</p></div>`;
-    go=`<p>Gepubliceerd om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
+    go=`<p>${soc?KANALEN[KN]+', gepubliceerd':'Gepubliceerd'} om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
   }else{
     tijd=`<div><label class="l">Tijdstip<span>Wanneer gaat het online</span></label><div class="time" id="tm">${hh(d.uur)}</div><input type="range" id="uur" min="0" max="23" value="${d.uur}"></div>`;
-    if(mode==='ingetrokken')url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
-    go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':esc(PLEK[d.plek])+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
+    if(mode==='ingetrokken'&&!soc)url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
+    go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':geenBeeld?'Dit bericht heeft geen '+SC.wil+' voor '+KANALEN[KN]+'.':(soc?KANALEN[KN]:esc(PLEK[d.plek]))+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd||geenBeeld?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
   }
   $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>Vechtwaard CMS</b><span>Nieuws · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
+  ${opKanalen().length>1?`<div class="ktabs"><span>Kanaal</span>${opKanalen().map(k=>`<button data-kanaal="${k}" class="${k===KN?'on':''}">${KANALEN[k]}</button>`).join('')}</div>`:''}
   <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${list}</div>
   <div class="ed">${url}<div class="orig"><small>Bericht van de verslaggever</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
-  <div><label class="l">Kop op de site<span id="cnt">${d.kop.length} tekens</span></label><input class="kop" id="kop" maxlength="200" value="${esc(d.kop)}"></div>
-  <div><label class="l">Beeld<span>Kies wat bij de kop past</span></label><div class="imgs">${imgs}</div></div>
-  <div class="row2">${tijd}<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div></div>
+  <div><label class="l">${soc?SC.naam+(KN==='tiktok'?' in de eerste seconden':' bij de foto'):'Kop op de site'}<span id="cnt">${d.kop.length}${soc?' van '+SC.max:''} tekens</span></label><input class="kop ${soc?'s':''}" id="kop" maxlength="${soc?SC.max:200}" ${soc?`placeholder="${SC.ph}"`:''} value="${esc(d.kop)}"></div>
+  <div><label class="l">${soc?(KN==='instagram'?'Foto':'Video'):'Beeld'}<span>${soc?'Kies wat past bij '+KANALEN[KN]:'Kies wat bij de kop past'}</span></label><div class="imgs">${imgs}</div></div>
+  <div class="row2">${tijd}${soc?`<div><label class="l">Waar komt het te staan</label><p style="margin:4px 0 0;color:#6b7885">${KN==='instagram'?'In de tijdlijn van volgers. Kies een foto en schrijf een kort bijschrift.':'In de For You-feed. De haak bepaalt of mensen blijven kijken.'}</p></div>`:`<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div>`}</div>
   <div class="go">${go}</div></div></div></div>`;
 }
 /* ---- scherm 2: website ---- */
@@ -698,32 +840,43 @@ function webCard(p,big){
   const a=byId[p.id],s=nu(p),b=s.beeld>=0?a.b[s.beeld]:null;
   return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
 }
-function renderWeb(){
-  const live=st.pubs.filter(p=>!nu(p).ingetrokken);
+function renderSite(bar){
+  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
   const low=[0,1,2,3].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
-  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span><span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div>
+  return `<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span>${bar}<span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div>
   <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
   <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
   <div><h4 class="sec">Meer uit de regio</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>
   <div><h4 class="sec">Verder in het nieuws</h4><div class="low">${low}</div></div></div></div>`;
 }
+function socTile(p,k){const a=byId[p.id],s=nu(p),v=viewOf(p),b=s.beeld>=0?a.b[s.beeld]:null;
+  const stat=v.e?`<span>♥ ${fmt(v.ia)}</span><span>${k==='tiktok'?'▶ '+fmt(v.b):'bereik '+fmt(v.b)}</span>`:'<span>net geplaatst</span>';
+  return k==='instagram'?`<div class="igt"><div class="igp">${b?'Foto':''}</div><p>${esc(s.kop)}</p><div class="st">${stat}</div></div>`
+   :`<div class="ttt"><div class="ttp"><div class="play">▶</div><div class="hk">${esc(s.kop)}</div></div><div class="st">${stat}</div></div>`}
+function renderWeb(){
+  const ks=opKanalen();if(!ks.includes(st.wkan))st.wkan='website';
+  const bar=ks.length>1?`<span class="wbar">${ks.map(k=>`<button data-wkan="${k}" class="${k===st.wkan?'on':''}">${KANALEN[k]}</button>`).join('')}</span>`:'';
+  if(st.wkan==='website'){$('#s1').innerHTML=renderSite(bar);return}
+  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken),n=k==='instagram'?6:4;
+  const tiles=[...Array(n)].map((_,i)=>live[i]?socTile(live[i],k):`<div class="${k==='instagram'?'igt':'ttt'} empty"><div class="${k==='instagram'?'igp':'ttp'}"></div><p>Ruimte voor een post</p></div>`).join('');
+  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>${k==='instagram'?'@vechtwaard op Instagram':'@vechtwaard op TikTok'}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">V</div><div><b>vechtwaard</b><span>Nieuws uit de regio · ${live.length} ${k==='instagram'?'berichten':'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
 /* ---- scherm 3: resultaten ---- */
 function renderRes(){
   if(st.rtab==='rap'&&heeftRapport())return renderRap();
   const M=new Set(actieveOpdracht().metrics);
   const rows=st.pubs.map(p=>({p,s:nu(p),v:viewOf(p)}));
-  const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,l:o.l+r.v.lees*r.v.k}),{b:0,k:0,l:0});
+  const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,kw:o.kw+(r.v.soc?0:r.v.k),l:o.l+(r.v.soc?0:r.v.lees*r.v.k)}),{b:0,k:0,kw:0,l:0});
   const sel=rows[Math.min(st.res,rows.length-1)];
-  const th=`<th>Kop</th><th>Plek</th><th>Tijd</th><th>Uur</th>${M.has('bereik')?'<th>Bereik</th>':''}${M.has('kliks')?'<th>Kliks</th><th>Klik%</th>':''}${M.has('leestijd')?'<th>Leestijd</th>':''}`;
-  const body=rows.map((r,i)=>`<tr class="row ${i===st.res?'sel':''}" data-res="${i}"><td class="k"><span class="kt">${esc(r.s.kop)}</span>${r.p.ex?'<span class="tagx">voorbeeld</span>':''}${r.s.ingetrokken?'<span class="tagx red">ingetrokken</span>':(r.p.wijzigingen.length?'<span class="tagx">aangepast</span>':'')}</td><td>${PLEK[r.s.plek]}</td><td>${hh(r.p.uur)}</td><td>${r.v.e}/24</td>${M.has('bereik')?`<td>${fmt(r.v.b)}</td>`:''}${M.has('kliks')?`<td>${fmt(r.v.k)}</td><td>${dec(r.v.ctr*100,1)}%</td>`:''}${M.has('leestijd')?`<td>${mmss(r.v.lees)}</td>`:''}</tr>`).join('');
+  const th=`<th>Kop of tekst</th><th>Waar</th><th>Tijd</th><th>Uur</th>${M.has('bereik')?'<th>Bereik</th>':''}${M.has('kliks')?'<th>Kliks</th><th>Klik%</th>':''}${M.has('leestijd')?'<th>Leestijd</th>':''}`;
+  const body=rows.map((r,i)=>`<tr class="row ${i===st.res?'sel':''}" data-res="${i}"><td class="k"><span class="kt">${esc(r.s.kop)}</span>${r.p.ex?'<span class="tagx">voorbeeld</span>':''}${r.s.ingetrokken?'<span class="tagx red">ingetrokken</span>':(r.p.wijzigingen.length?'<span class="tagx">aangepast</span>':'')}</td><td>${kanaalVan(r.p)==='website'?'Web, '+PLEK[r.s.plek].toLowerCase():KANALEN[kanaalVan(r.p)]}</td><td>${hh(r.p.uur)}</td><td>${r.v.e}/24</td>${M.has('bereik')?`<td>${fmt(r.v.b)}</td>`:''}${M.has('kliks')?`<td>${fmt(r.v.k)}</td><td>${dec(r.v.ctr*100,1)}%</td>`:''}${M.has('leestijd')?`<td>${mmss(r.v.lees)}</td>`:''}</tr>`).join('');
   let right='<p class="n">Publiceer een bericht om het verloop te zien.</p>';
   if(sel){right=(M.has('verloop')?chartHTML(sel.v):`<p class="n">Het verloop per uur is voor deze opdracht verborgen.</p>`)+whyHTML(sel.v.c)}
   const kp=[];
   if(M.has('bereik'))kp.push(['Bereik',fmt(T.b)]);
   if(M.has('kliks')){kp.push(['Kliks',fmt(T.k)]);kp.push(['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'])}
-  if(M.has('leestijd'))kp.push(['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']);
+  if(M.has('leestijd'))kp.push(['Gem. leestijd website',T.kw?mmss(Math.round(T.l/T.kw)):'0:00']);
   $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b>${rtabsHTML()}<span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
   <div class="kpis" style="grid-template-columns:repeat(${Math.max(kp.length,1)},1fr)">${kp.map(k=>`<div class="kpi"><small>${k[0]}</small><div>${k[1]}</div></div>`).join('')}</div>
   <div class="grid"><div class="pan"><h4>Berichten</h4><table class="t"><tr>${th}</tr>${body}</table></div>
@@ -776,23 +929,26 @@ function ververs(){if(st.rol!=='student')return;renderSys();renderWeb();renderRe
 const bId=(aid,idx)=>idx<0?'':byId[aid].d.beelden[idx].id;
 function zonderOverlap(fn){if(st.busy)return;st.busy=true;Promise.resolve().then(fn).catch(e=>toast(e.message)).finally(()=>{st.busy=false})}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
+  const t=e.target.closest('#s1 [data-wkan],#s0 [data-kanaal],#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
   const p=curPub(st.sel);
-  if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
+  if(t.dataset.wkan){st.wkan=t.dataset.wkan;renderWeb()}
+  else if(t.dataset.kanaal){st.kanaal=t.dataset.kanaal;st.draft=newDraft(st.sel);renderSys()}
+  else if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
   else if(t.dataset.beeld!==undefined){st.draft.beeld=+t.dataset.beeld;renderSys()}
   else if(t.dataset.plek){st.draft.plek=t.dataset.plek;renderSys()}
   else if(t.dataset.res!==undefined){st.res=+t.dataset.res;renderRes()}
   else if(t.dataset.publish){
-    const d=st.draft;if(!d.kop.trim()){toast('Vul eerst een kop in');return}
+    const d=st.draft;if(!d.kop.trim()){toast(kan()==='website'?'Vul eerst een kop in':'Schrijf eerst een '+SOC[kan()].naam.toLowerCase());return}
+    if(kan()!=='website'&&d.beeld<0){toast('Kies eerst een '+SOC[kan()].wil);return}
     const id=st.sel;
-    zonderOverlap(async()=>{const j=await api('rsim_publish',{p_token:st.token,p_article:id,p_kop:d.kop.trim(),p_beeld_id:bId(id,d.beeld),p_uur:d.uur,p_plek:d.plek});
+    zonderOverlap(async()=>{const j=await api('rsim_publish_k',{p_token:st.token,p_article:id,p_kop:d.kop.trim(),p_beeld_id:bId(id,d.beeld),p_uur:d.uur,p_plek:d.plek,p_kanaal:kan()});
       st.pubs.unshift(toPub(j));st.res=0;st.draft=newDraft(st.sel);ververs();toast('Gepubliceerd. Kijk op de website en bij de resultaten.')});
   }
   else if(t.dataset.edit&&p){
     const d=st.draft,s=nu(p),uurNa=editUur(p);let kop=null,beeld=null,plek=null,n=0;
     if(d.kop.trim()&&d.kop.trim()!==s.kop){kop=d.kop.trim();n++}
     if(d.beeld!==s.beeld){beeld=bId(p.id,d.beeld);n++}
-    if(d.plek!==s.plek){plek=d.plek;n++}
+    if(d.plek!==s.plek&&kan()==='website'){plek=d.plek;n++}
     if(!n){toast('Je hebt nog niets veranderd');return}
     zonderOverlap(async()=>{const j=await api('rsim_edit',{p_token:st.token,p_pub:p.pid,p_kop:kop,p_beeld_id:beeld,p_plek:plek,p_intrekken:false,p_uurna:uurNa});
       const k=st.pubs.indexOf(p);st.pubs[k]=toPub(j);st.res=k;st.draft=newDraft(st.sel);ververs();toast('Doorgevoerd. Het adres is gelijk gebleven.')});
@@ -805,7 +961,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='kop'){st.draft.kop=e.target.value;$('#cnt').textContent=e.target.value.length+' tekens'}
+  if(e.target.id==='kop'){st.draft.kop=e.target.value;$('#cnt').textContent=e.target.value.length+(kan()!=='website'?' van '+SOC[kan()].max:'')+' tekens'}
   if(e.target.id==='uur'){st.draft.uur=+e.target.value;$('#tm').textContent=hh(st.draft.uur)}
   if(e.target.id==='uurna'){const p=curPub(st.sel);st.draft.uurNa=+e.target.value;$('#tm2').textContent=hh(p.uur+st.draft.uurNa);$('#tm2sub').textContent=st.draft.uurNa+' uur na publicatie'}
 });
@@ -840,10 +996,10 @@ function dRes(){
   const rows=lijst.map(r=>`<tr class="row ${r.s.id===st.dsel?'sel':''}" data-dstud="${r.s.id}"><td><b>${esc(r.s.naam)}</b></td><td>${r.a.n}</td><td>${fmt(r.a.b)}</td><td>${fmt(r.a.k)}</td><td>${dec(r.a.ctr*100,1)}%</td><td>${mmss(r.a.lees)}</td></tr>`).join('');
   const S=studenten().find(x=>x.id===st.dsel)||studenten()[0];
   const pi=Math.min(st.dpub,S.pubs.length-1),P=S.pubs[pi],V=P&&viewOf(P),PS=P&&nu(P);
-  const prow=S.pubs.map((p,i)=>{const v=viewOf(p),s=nu(p),bt=s.beeld<0?'geen':byId[p.id].b[s.beeld][0];return `<tr class="row ${i===pi?'sel':''}" data-dpub="${i}"><td class="k">${esc(s.kop)}</td><td>${PLEK[s.plek]}</td><td>${hh(p.uur)}</td><td>${bt}</td><td>${v.e}/24</td><td>${fmt(v.b)}</td><td>${fmt(v.k)}</td><td>${dec(v.ctr*100,1)}%</td><td>${s.ingetrokken?'ingetrokken':(p.wijzigingen.length?'aangepast':'')}</td></tr>`}).join('');
+  const prow=S.pubs.map((p,i)=>{const v=viewOf(p),s=nu(p),bt=s.beeld<0?'geen':byId[p.id].b[s.beeld][0];return `<tr class="row ${i===pi?'sel':''}" data-dpub="${i}"><td class="k">${esc(s.kop)}</td><td>${kanaalVan(p)==='website'?PLEK[s.plek]:KANALEN[kanaalVan(p)]}</td><td>${hh(p.uur)}</td><td>${bt}</td><td>${v.e}/24</td><td>${fmt(v.b)}</td><td>${fmt(v.k)}</td><td>${dec(v.ctr*100,1)}%</td><td>${s.ingetrokken?'ingetrokken':(p.wijzigingen.length?'aangepast':'')}</td></tr>`}).join('');
   return `<div class="dres"><div class="dkp">${[['Studenten',lijst.length],['Publicaties',T.n],['Bereik',fmt(T.b)],['Kliks',fmt(T.k)],['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'],['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']].map(k=>`<div class="kp2"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <div class="dgrid"><div class="box2"><h3>Alle studenten</h3><table class="t2"><tr><th>Student</th><th>Pub.</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Leestijd</th></tr>${rows}</table></div>
-  <div class="box2"><h3>${esc(S.naam)}</h3><table class="t2"><tr><th>Kop</th><th>Plek</th><th>Tijd</th><th>Beeld</th><th>Uur</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Status</th></tr>${prow}</table>
+  <div class="box2"><h3>${esc(S.naam)}</h3><table class="t2"><tr><th>Kop of tekst</th><th>Waar</th><th>Tijd</th><th>Beeld</th><th>Uur</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Status</th></tr>${prow}</table>
   ${P?`<div class="pan darkp"><h4>${esc(PS.kop.slice(0,60))}</h4>${chartHTML(V)}${whyHTML(V.c)}</div>`:''}</div></div></div>`;
 }
 function dOpd(){
@@ -914,7 +1070,7 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){
@@ -942,6 +1098,8 @@ const DATAITEMS=[
   {id:'gedeeld',naam:'Keer gedeeld',uitleg:'Hoe vaak lezers het bericht deelden.'},
   {id:'engagementrate',naam:'Betrokkenheid',uitleg:'Doorkliks en delen samen, per 100 lezers.'},
   {id:'inschrijvingen',naam:'Nieuwsbriefinschrijvingen',uitleg:'Lezers die zich inschreven voor de nieuwsbrief.'},
+  {id:'interacties',naam:'Interacties',uitleg:'Likes, reacties en opgeslagen op Instagram en TikTok.'},
+  {id:'kanaal',naam:'Kanaal',uitleg:'Waar het bericht stond: website, Instagram of TikTok.',ruis:true},
   {id:'plek',naam:'Plek op de homepage',uitleg:'Waar het bericht stond.',ruis:true},
   {id:'tijdstip',naam:'Tijdstip van publicatie',uitleg:'Het uur waarop het online ging.',ruis:true},
   {id:'koplengte',naam:'Aantal woorden in de kop',uitleg:'Hoe lang de kop is.',ruis:true},
@@ -953,6 +1111,7 @@ const DOELTYPES={
   klikpercentage:{naam:'Klikpercentage',eenheid:'%',data:['klikpercentage'],tekst:t=>`Een klikpercentage van minimaal ${dec(t,1)}%`,w:T=>T.ctr*100},
   leestijd:{naam:'Leestijd',eenheid:'seconden',data:['leestijd'],tekst:t=>`Een gemiddelde leestijd van minimaal ${t} seconden`,w:T=>T.lees},
   doorkliks:{naam:'Doorkliks',eenheid:'doorkliks',data:['doorkliks'],tekst:t=>`Minimaal ${fmt(t)} doorkliks naar een ander bericht`,w:T=>T.dk},
+  interacties:{naam:'Interacties',eenheid:'interacties',data:['interacties'],tekst:t=>`Minimaal ${fmt(t)} interacties (likes, reacties en opgeslagen)`,w:T=>T.ia},
   gedeeld:{naam:'Gedeeld',eenheid:'keer',data:['gedeeld'],tekst:t=>`Minimaal ${fmt(t)} keer gedeeld`,w:T=>T.dl},
   engagement:{naam:'Betrokkenheid',eenheid:'%',data:['engagementrate'],tekst:t=>`Een betrokkenheid van minimaal ${dec(t,1)}%`,w:T=>T.eng*100},
   inschrijvingen:{naam:'Inschrijvingen',eenheid:'inschrijvingen',data:['inschrijvingen'],tekst:t=>`Minimaal ${fmt(t)} nieuwsbriefinschrijvingen`,w:T=>T.ins}};
@@ -963,19 +1122,20 @@ const RONDES=[
   {naam:'Ronde 2: middel begeleiding',begeleiding:'middel',artikelen:['n02','n04','n06','n09','n11'],doelen:[['bereik',3500],['engagement',20],['kliks',200]]},
   {naam:'Ronde 3: weinig begeleiding',begeleiding:'weinig',artikelen:['n07','n10','n12','n14','n15'],doelen:[['bereik',3000],['leestijd',35],['doorkliks',40],['inschrijvingen',6]]},
   {naam:'Ronde 4: geen begeleiding (zoals de proeve)',begeleiding:'geen',artikelen:['n01','n02','n04','n08','n10','n12'],doelen:[['bereik',4000],['klikpercentage',5.5],['engagement',21],['inschrijvingen',8]]}];
-const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false});
+const RONDE_SOCIAL={naam:'Bonusronde: website, Instagram en TikTok',begeleiding:'weinig',artikelen:['n02','n05','n09','n12'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',18000],['kliks',350],['interacties',1500],['inschrijvingen',10]]};
+const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website']});
 
 /* ---- cijfers uit de publicaties ---- */
-function totalen(pubs){const T={b:0,k:0,l:0,dk:0,dl:0,ins:0};
-  pubs.forEach(p=>{const v=viewOf(p);T.b+=v.b;T.k+=v.k;T.l+=v.lees*v.k;T.dk+=v.dk;T.dl+=v.dl;T.ins+=v.ins});
-  return {b:T.b,k:T.k,ctr:T.b?T.k/T.b:0,lees:T.k?Math.round(T.l/T.k):0,dk:T.dk,dl:T.dl,eng:T.k?(T.dk+T.dl)/T.k:0,ins:T.ins}}
+function totalen(pubs){const T={b:0,k:0,l:0,kw:0,dk:0,dl:0,dlw:0,ins:0,ia:0};
+  pubs.forEach(p=>{const v=viewOf(p);T.b+=v.b;T.k+=v.k;T.dk+=v.dk;T.dl+=v.dl;T.ins+=v.ins;T.ia+=v.ia;if(!v.soc){T.l+=v.lees*v.k;T.kw+=v.k;T.dlw+=v.dl}});
+  return {b:T.b,k:T.k,ctr:T.b?T.k/T.b:0,lees:T.kw?Math.round(T.l/T.kw):0,dk:T.dk,dl:T.dl,eng:T.kw?(T.dk+T.dlw)/T.kw:0,ins:T.ins,ia:T.ia}}
 function celWaarde(id,p){const v=viewOf(p),s=nu(p),a=byId[p.id];
   switch(id){case'bereik':return fmt(v.b);case'kliks':return fmt(v.k);case'klikpercentage':return dec(v.ctr*100,1)+'%';case'leestijd':return v.lees+' s';
-    case'doorkliks':return fmt(v.dk);case'gedeeld':return fmt(v.dl);case'engagementrate':return dec(v.k?(v.dk+v.dl)/v.k*100:0,1)+'%';case'inschrijvingen':return fmt(v.ins);
-    case'plek':return PLEK[s.plek];case'tijdstip':return hh(p.uur);case'koplengte':return String(s.kop.trim().split(/\s+/).length);
+    case'doorkliks':return fmt(v.dk);case'gedeeld':return fmt(v.dl);case'engagementrate':return v.soc?'–':dec(v.k?(v.dk+v.dl)/v.k*100:0,1)+'%';case'interacties':return v.soc?fmt(v.ia):'–';case'kanaal':return KANALEN[p.kanaal||'website'];case'inschrijvingen':return fmt(v.ins);
+    case'plek':return (p.kanaal||'website')==='website'?PLEK[s.plek]:'–';case'tijdstip':return hh(p.uur);case'koplengte':return String(s.kop.trim().split(/\s+/).length);
     case'verloop':{const V=v.c.verloop.slice(0,v.e);let m=0,u=-1;V.forEach((x,i)=>{if(x.kliks>m){m=x.kliks;u=x.uur}});return u<0?'–':hh(u)}}return '–'}
 function totaalCel(id,T){switch(id){case'bereik':return fmt(T.b);case'kliks':return fmt(T.k);case'klikpercentage':return dec(T.ctr*100,1)+'%';case'leestijd':return T.lees+' s';
-  case'doorkliks':return fmt(T.dk);case'gedeeld':return fmt(T.dl);case'engagementrate':return dec(T.eng*100,1)+'%';case'inschrijvingen':return fmt(T.ins)}return '–'}
+  case'doorkliks':return fmt(T.dk);case'gedeeld':return fmt(T.dl);case'engagementrate':return dec(T.eng*100,1)+'%';case'inschrijvingen':return fmt(T.ins);case'interacties':return fmt(T.ia)}return '–'}
 const doelTekst=d=>DOELTYPES[d.type].tekst(d.drempel);
 const doelWaarde=(d,T)=>DOELTYPES[d.type].w(T);
 const doelGehaald=(d,T)=>doelWaarde(d,T)>=d.drempel-1e-9;
@@ -1012,7 +1172,7 @@ function dataTabel(ids,pubs,metTotaal){
   if(!ids.length)return '<p class="n">Kies eerst welke data je nodig hebt. Daarna zie je hier de cijfers.</p>';
   const T=totalen(pubs);
   const kop='<tr><th>Bericht</th>'+ids.map(i=>`<th>${esc(DI[i].naam)}</th>`).join('')+'</tr>';
-  const rijen=pubs.map(p=>`<tr><td class="k"><span class="kt">${esc(nu(p).kop)}</span>${nu(p).ingetrokken?'<span class="tagx red">ingetrokken</span>':''}</td>${ids.map(i=>`<td>${celWaarde(i,p)}</td>`).join('')}</tr>`).join('');
+  const rijen=pubs.map(p=>`<tr><td class="k"><span class="kt">${esc(nu(p).kop)}</span>${(p.kanaal||'website')!=='website'?'<span class="tagx">'+KANALEN[p.kanaal]+'</span>':''}${nu(p).ingetrokken?'<span class="tagx red">ingetrokken</span>':''}</td>${ids.map(i=>`<td>${celWaarde(i,p)}</td>`).join('')}</tr>`).join('');
   const tot=metTotaal?`<tr class="tot"><td>Totaal</td>${ids.map(i=>`<td>${totaalCel(i,T)}</td>`).join('')}</tr>`:'';
   return `<div class="rtab"><table class="t">${kop}${rijen}${tot}</table></div>`}
 
@@ -1140,24 +1300,29 @@ function dRap(){
 /* formulier voor doelen en begeleiding bij een nieuwe opdracht */
 function doelFormHTML(){
   const rij=i=>{const d=RONDES[3].doelen[i]||['bereik',3000];return `<div class="br2"><label class="ck"><input type="checkbox" id="f-dl-on${i}" ${i<3?'checked':''}> Doel ${i+1}</label><select id="f-dl-t${i}">${optS(Object.entries(DOELTYPES).map(([k,v])=>[k,v.naam]),d[0])}</select><input id="f-dl-v${i}" value="${d[1]}" inputmode="decimal"></div>`};
-  return `<label>Begeleiding<select id="f-bg">${optS(Object.entries(BEGELEIDING),'veel')}</select></label>
+  return `<fieldset><legend>Kanalen waarop studenten publiceren</legend>${Object.entries(KANALEN).map(([k,n])=>`<label class="ck"><input type="checkbox" id="f-kn-${k}" ${k==='website'?'checked':''}> ${n}</label>`).join('')}</fieldset>
+  <label>Begeleiding<select id="f-bg">${optS(Object.entries(BEGELEIDING),'veel')}</select></label>
     <fieldset><legend>Doelen van de opdrachtgever (leeg laten voor een gewone oefenopdracht)</legend><label class="ck"><input type="checkbox" id="f-dl-aan"> Deze opdracht heeft doelen en een rapport</label>${[0,1,2,3].map(rij).join('')}
     <p class="note">Voor vijf berichten ligt een gewone dag rond 3.000 bereik, 5,5% klikpercentage, 22% betrokkenheid en 5 inschrijvingen.</p></fieldset>`}
+function formKanalen(){const k=Object.keys(KANALEN).filter(x=>val('f-kn-'+x));return k.length?k:['website']}
 function formDoelen(){if(!val('f-dl-aan'))return [];
   return [0,1,2,3].filter(i=>val('f-dl-on'+i)).map((i,k)=>({id:'d'+(k+1),type:val('f-dl-t'+i),drempel:num(val('f-dl-v'+i))||0}))}
-function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>`}
-async function maakRondes(){
-  if(st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){toast('De vier rondes bestaan al');return}
+function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>
+  <div class="card2" style="margin-top:6px"><b>Bonusronde met alle kanalen</b><p>Vier berichten op de website, Instagram en TikTok. Weinig begeleiding. Studenten leren dat elk kanaal anders werkt.</p><button class="dbtn" data-dbonus="1" style="margin-left:0;justify-self:start">Maak de bonusronde</button></div>`}
+async function maakRondes(lijst,eerste){
+  lijst=lijst||RONDES;eerste=eerste||'Ronde 1:';
+  if(st.opdrachten.some(o=>o.naam.startsWith(eerste))){toast('Deze ronde bestaat al');return}
   if(typeof dAct==='function'&&st.rol==='docent'){
     if(st.busy)return;st.busy=true;
-    try{for(const r of RONDES.map(rondeObj))await api('rsim_docent_save_assignment',{p_code:st.klascode,p_dcode:st.dcode,p:r});await loadDocent();renderDocent();toast('De vier rondes staan klaar. Activeer er één bij Opdrachten.')}
+    try{for(const r of lijst.map(rondeObj))await api('rsim_docent_save_assignment',{p_code:st.klascode,p_dcode:st.dcode,p:r});await loadDocent();renderDocent();toast('Klaar. Activeer er één bij Opdrachten.')}
     catch(e){toast(e.message)}finally{st.busy=false}
-  }else{RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r)));renderDocent();toast('De vier rondes staan klaar. Activeer er één.')}
+  }else{lijst.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+Math.floor(Math.random()*1e6)},r)));renderDocent();toast('Klaar. Activeer er één.')}
 }
 dc.addEventListener('click',e=>{
-  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes]');if(!t)return;const D=t.dataset;
+  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes],[data-dbonus]');if(!t)return;const D=t.dataset;
   if(D.rsel){st.dsel=D.rsel;renderDocent()}
   else if(D.drondes)maakRondes();
+  else if(D.dbonus)maakRondes([RONDE_SOCIAL],'Bonusronde:');
   else if(D.rev){
     const crit=CRITERIA.map((c,i)=>{const v=val('f-rv-'+i);return v===''?null:+v}),b={criteria:crit,opmerking:String(val('f-rv-op')||'')};
     if(typeof dAct==='function'&&st.rol==='docent')dAct('rsim_docent_review',{p_report:D.rev,p_beoordeling:b},'Beoordeling opgeslagen');
@@ -1169,7 +1334,7 @@ dc.addEventListener('click',e=>{
   }
 });
 /* demo: de vier rondes staan meteen klaar, met directe tijd zodat het rapport meteen opengaat */
-if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}
+if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}
 
 /* ================= Verbinding met de database ================= */
 const store={
@@ -1186,7 +1351,7 @@ async function api(fn,body){
   return j;
 }
 const bIdx=(aid,bid)=>{const a=byId[aid];return bid&&a?a.d.beelden.findIndex(b=>b.id===bid):-1};
-const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld_id),uur:j.uur,plek:j.plek,seed:j.seed,tPub:j.tPub,opdracht:j.opdracht,
+const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld_id),uur:j.uur,plek:j.plek,seed:j.seed,tPub:j.tPub,opdracht:j.opdracht,kanaal:j.kanaal||'website',
   wijzigingen:(j.wijzigingen||[]).map(w=>{const o={uurNa:w.uurNa};if(w.kop!==undefined)o.kop=w.kop;if(w.beeld_id!==undefined)o.beeld=bIdx(j.id,w.beeld_id);if(w.plek!==undefined)o.plek=w.plek;if(w.intrekken)o.intrekken=true;return o})});
 const pubSig=()=>st.pubs.map(p=>p.pid+':'+p.wijzigingen.length).join(',');
 

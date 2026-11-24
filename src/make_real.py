@@ -42,7 +42,6 @@ sub("return tm().modus==='direct'?Math.min(Math.max(st.draft.uurNa||min,min),23)
 
 # verwijder de oude startregels (sel0 en newDraft zonder data)
 sub("sel0();st.draft=newDraft(st.sel);\n", "")
-sub("const curPub=id=>st.pubs.find(p=>p.id===id);", "const curPub=id=>st.pubs.find(p=>p.id===id);")
 
 # datum op de website
 sub('<span class="r">vr 20 november</span>', "<span class=\"r\">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span>")
@@ -57,23 +56,26 @@ a1 = app.index("document.addEventListener('input',e=>{")
 acties = r"""const bId=(aid,idx)=>idx<0?'':byId[aid].d.beelden[idx].id;
 function zonderOverlap(fn){if(st.busy)return;st.busy=true;Promise.resolve().then(fn).catch(e=>toast(e.message)).finally(()=>{st.busy=false})}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
+  const t=e.target.closest('#s1 [data-wkan],#s0 [data-kanaal],#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
   const p=curPub(st.sel);
-  if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
+  if(t.dataset.wkan){st.wkan=t.dataset.wkan;renderWeb()}
+  else if(t.dataset.kanaal){st.kanaal=t.dataset.kanaal;st.draft=newDraft(st.sel);renderSys()}
+  else if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
   else if(t.dataset.beeld!==undefined){st.draft.beeld=+t.dataset.beeld;renderSys()}
   else if(t.dataset.plek){st.draft.plek=t.dataset.plek;renderSys()}
   else if(t.dataset.res!==undefined){st.res=+t.dataset.res;renderRes()}
   else if(t.dataset.publish){
-    const d=st.draft;if(!d.kop.trim()){toast('Vul eerst een kop in');return}
+    const d=st.draft;if(!d.kop.trim()){toast(kan()==='website'?'Vul eerst een kop in':'Schrijf eerst een '+SOC[kan()].naam.toLowerCase());return}
+    if(kan()!=='website'&&d.beeld<0){toast('Kies eerst een '+SOC[kan()].wil);return}
     const id=st.sel;
-    zonderOverlap(async()=>{const j=await api('rsim_publish',{p_token:st.token,p_article:id,p_kop:d.kop.trim(),p_beeld_id:bId(id,d.beeld),p_uur:d.uur,p_plek:d.plek});
+    zonderOverlap(async()=>{const j=await api('rsim_publish_k',{p_token:st.token,p_article:id,p_kop:d.kop.trim(),p_beeld_id:bId(id,d.beeld),p_uur:d.uur,p_plek:d.plek,p_kanaal:kan()});
       st.pubs.unshift(toPub(j));st.res=0;st.draft=newDraft(st.sel);ververs();toast('Gepubliceerd. Kijk op de website en bij de resultaten.')});
   }
   else if(t.dataset.edit&&p){
     const d=st.draft,s=nu(p),uurNa=editUur(p);let kop=null,beeld=null,plek=null,n=0;
     if(d.kop.trim()&&d.kop.trim()!==s.kop){kop=d.kop.trim();n++}
     if(d.beeld!==s.beeld){beeld=bId(p.id,d.beeld);n++}
-    if(d.plek!==s.plek){plek=d.plek;n++}
+    if(d.plek!==s.plek&&kan()==='website'){plek=d.plek;n++}
     if(!n){toast('Je hebt nog niets veranderd');return}
     zonderOverlap(async()=>{const j=await api('rsim_edit',{p_token:st.token,p_pub:p.pid,p_kop:kop,p_beeld_id:beeld,p_plek:plek,p_intrekken:false,p_uurna:uurNa});
       const k=st.pubs.indexOf(p);st.pubs[k]=toPub(j);st.res=k;st.draft=newDraft(st.sel);ververs();toast('Doorgevoerd. Het adres is gelijk gebleven.')});
@@ -130,7 +132,7 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){

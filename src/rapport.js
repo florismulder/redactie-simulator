@@ -12,6 +12,8 @@ const DATAITEMS=[
   {id:'gedeeld',naam:'Keer gedeeld',uitleg:'Hoe vaak lezers het bericht deelden.'},
   {id:'engagementrate',naam:'Betrokkenheid',uitleg:'Doorkliks en delen samen, per 100 lezers.'},
   {id:'inschrijvingen',naam:'Nieuwsbriefinschrijvingen',uitleg:'Lezers die zich inschreven voor de nieuwsbrief.'},
+  {id:'interacties',naam:'Interacties',uitleg:'Likes, reacties en opgeslagen op Instagram en TikTok.'},
+  {id:'kanaal',naam:'Kanaal',uitleg:'Waar het bericht stond: website, Instagram of TikTok.',ruis:true},
   {id:'plek',naam:'Plek op de homepage',uitleg:'Waar het bericht stond.',ruis:true},
   {id:'tijdstip',naam:'Tijdstip van publicatie',uitleg:'Het uur waarop het online ging.',ruis:true},
   {id:'koplengte',naam:'Aantal woorden in de kop',uitleg:'Hoe lang de kop is.',ruis:true},
@@ -23,6 +25,7 @@ const DOELTYPES={
   klikpercentage:{naam:'Klikpercentage',eenheid:'%',data:['klikpercentage'],tekst:t=>`Een klikpercentage van minimaal ${dec(t,1)}%`,w:T=>T.ctr*100},
   leestijd:{naam:'Leestijd',eenheid:'seconden',data:['leestijd'],tekst:t=>`Een gemiddelde leestijd van minimaal ${t} seconden`,w:T=>T.lees},
   doorkliks:{naam:'Doorkliks',eenheid:'doorkliks',data:['doorkliks'],tekst:t=>`Minimaal ${fmt(t)} doorkliks naar een ander bericht`,w:T=>T.dk},
+  interacties:{naam:'Interacties',eenheid:'interacties',data:['interacties'],tekst:t=>`Minimaal ${fmt(t)} interacties (likes, reacties en opgeslagen)`,w:T=>T.ia},
   gedeeld:{naam:'Gedeeld',eenheid:'keer',data:['gedeeld'],tekst:t=>`Minimaal ${fmt(t)} keer gedeeld`,w:T=>T.dl},
   engagement:{naam:'Betrokkenheid',eenheid:'%',data:['engagementrate'],tekst:t=>`Een betrokkenheid van minimaal ${dec(t,1)}%`,w:T=>T.eng*100},
   inschrijvingen:{naam:'Inschrijvingen',eenheid:'inschrijvingen',data:['inschrijvingen'],tekst:t=>`Minimaal ${fmt(t)} nieuwsbriefinschrijvingen`,w:T=>T.ins}};
@@ -33,19 +36,20 @@ const RONDES=[
   {naam:'Ronde 2: middel begeleiding',begeleiding:'middel',artikelen:['n02','n04','n06','n09','n11'],doelen:[['bereik',3500],['engagement',20],['kliks',200]]},
   {naam:'Ronde 3: weinig begeleiding',begeleiding:'weinig',artikelen:['n07','n10','n12','n14','n15'],doelen:[['bereik',3000],['leestijd',35],['doorkliks',40],['inschrijvingen',6]]},
   {naam:'Ronde 4: geen begeleiding (zoals de proeve)',begeleiding:'geen',artikelen:['n01','n02','n04','n08','n10','n12'],doelen:[['bereik',4000],['klikpercentage',5.5],['engagement',21],['inschrijvingen',8]]}];
-const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false});
+const RONDE_SOCIAL={naam:'Bonusronde: website, Instagram en TikTok',begeleiding:'weinig',artikelen:['n02','n05','n09','n12'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',18000],['kliks',350],['interacties',1500],['inschrijvingen',10]]};
+const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website']});
 
 /* ---- cijfers uit de publicaties ---- */
-function totalen(pubs){const T={b:0,k:0,l:0,dk:0,dl:0,ins:0};
-  pubs.forEach(p=>{const v=viewOf(p);T.b+=v.b;T.k+=v.k;T.l+=v.lees*v.k;T.dk+=v.dk;T.dl+=v.dl;T.ins+=v.ins});
-  return {b:T.b,k:T.k,ctr:T.b?T.k/T.b:0,lees:T.k?Math.round(T.l/T.k):0,dk:T.dk,dl:T.dl,eng:T.k?(T.dk+T.dl)/T.k:0,ins:T.ins}}
+function totalen(pubs){const T={b:0,k:0,l:0,kw:0,dk:0,dl:0,dlw:0,ins:0,ia:0};
+  pubs.forEach(p=>{const v=viewOf(p);T.b+=v.b;T.k+=v.k;T.dk+=v.dk;T.dl+=v.dl;T.ins+=v.ins;T.ia+=v.ia;if(!v.soc){T.l+=v.lees*v.k;T.kw+=v.k;T.dlw+=v.dl}});
+  return {b:T.b,k:T.k,ctr:T.b?T.k/T.b:0,lees:T.kw?Math.round(T.l/T.kw):0,dk:T.dk,dl:T.dl,eng:T.kw?(T.dk+T.dlw)/T.kw:0,ins:T.ins,ia:T.ia}}
 function celWaarde(id,p){const v=viewOf(p),s=nu(p),a=byId[p.id];
   switch(id){case'bereik':return fmt(v.b);case'kliks':return fmt(v.k);case'klikpercentage':return dec(v.ctr*100,1)+'%';case'leestijd':return v.lees+' s';
-    case'doorkliks':return fmt(v.dk);case'gedeeld':return fmt(v.dl);case'engagementrate':return dec(v.k?(v.dk+v.dl)/v.k*100:0,1)+'%';case'inschrijvingen':return fmt(v.ins);
-    case'plek':return PLEK[s.plek];case'tijdstip':return hh(p.uur);case'koplengte':return String(s.kop.trim().split(/\s+/).length);
+    case'doorkliks':return fmt(v.dk);case'gedeeld':return fmt(v.dl);case'engagementrate':return v.soc?'–':dec(v.k?(v.dk+v.dl)/v.k*100:0,1)+'%';case'interacties':return v.soc?fmt(v.ia):'–';case'kanaal':return KANALEN[p.kanaal||'website'];case'inschrijvingen':return fmt(v.ins);
+    case'plek':return (p.kanaal||'website')==='website'?PLEK[s.plek]:'–';case'tijdstip':return hh(p.uur);case'koplengte':return String(s.kop.trim().split(/\s+/).length);
     case'verloop':{const V=v.c.verloop.slice(0,v.e);let m=0,u=-1;V.forEach((x,i)=>{if(x.kliks>m){m=x.kliks;u=x.uur}});return u<0?'–':hh(u)}}return '–'}
 function totaalCel(id,T){switch(id){case'bereik':return fmt(T.b);case'kliks':return fmt(T.k);case'klikpercentage':return dec(T.ctr*100,1)+'%';case'leestijd':return T.lees+' s';
-  case'doorkliks':return fmt(T.dk);case'gedeeld':return fmt(T.dl);case'engagementrate':return dec(T.eng*100,1)+'%';case'inschrijvingen':return fmt(T.ins)}return '–'}
+  case'doorkliks':return fmt(T.dk);case'gedeeld':return fmt(T.dl);case'engagementrate':return dec(T.eng*100,1)+'%';case'inschrijvingen':return fmt(T.ins);case'interacties':return fmt(T.ia)}return '–'}
 const doelTekst=d=>DOELTYPES[d.type].tekst(d.drempel);
 const doelWaarde=(d,T)=>DOELTYPES[d.type].w(T);
 const doelGehaald=(d,T)=>doelWaarde(d,T)>=d.drempel-1e-9;
@@ -82,7 +86,7 @@ function dataTabel(ids,pubs,metTotaal){
   if(!ids.length)return '<p class="n">Kies eerst welke data je nodig hebt. Daarna zie je hier de cijfers.</p>';
   const T=totalen(pubs);
   const kop='<tr><th>Bericht</th>'+ids.map(i=>`<th>${esc(DI[i].naam)}</th>`).join('')+'</tr>';
-  const rijen=pubs.map(p=>`<tr><td class="k"><span class="kt">${esc(nu(p).kop)}</span>${nu(p).ingetrokken?'<span class="tagx red">ingetrokken</span>':''}</td>${ids.map(i=>`<td>${celWaarde(i,p)}</td>`).join('')}</tr>`).join('');
+  const rijen=pubs.map(p=>`<tr><td class="k"><span class="kt">${esc(nu(p).kop)}</span>${(p.kanaal||'website')!=='website'?'<span class="tagx">'+KANALEN[p.kanaal]+'</span>':''}${nu(p).ingetrokken?'<span class="tagx red">ingetrokken</span>':''}</td>${ids.map(i=>`<td>${celWaarde(i,p)}</td>`).join('')}</tr>`).join('');
   const tot=metTotaal?`<tr class="tot"><td>Totaal</td>${ids.map(i=>`<td>${totaalCel(i,T)}</td>`).join('')}</tr>`:'';
   return `<div class="rtab"><table class="t">${kop}${rijen}${tot}</table></div>`}
 
@@ -210,24 +214,29 @@ function dRap(){
 /* formulier voor doelen en begeleiding bij een nieuwe opdracht */
 function doelFormHTML(){
   const rij=i=>{const d=RONDES[3].doelen[i]||['bereik',3000];return `<div class="br2"><label class="ck"><input type="checkbox" id="f-dl-on${i}" ${i<3?'checked':''}> Doel ${i+1}</label><select id="f-dl-t${i}">${optS(Object.entries(DOELTYPES).map(([k,v])=>[k,v.naam]),d[0])}</select><input id="f-dl-v${i}" value="${d[1]}" inputmode="decimal"></div>`};
-  return `<label>Begeleiding<select id="f-bg">${optS(Object.entries(BEGELEIDING),'veel')}</select></label>
+  return `<fieldset><legend>Kanalen waarop studenten publiceren</legend>${Object.entries(KANALEN).map(([k,n])=>`<label class="ck"><input type="checkbox" id="f-kn-${k}" ${k==='website'?'checked':''}> ${n}</label>`).join('')}</fieldset>
+  <label>Begeleiding<select id="f-bg">${optS(Object.entries(BEGELEIDING),'veel')}</select></label>
     <fieldset><legend>Doelen van de opdrachtgever (leeg laten voor een gewone oefenopdracht)</legend><label class="ck"><input type="checkbox" id="f-dl-aan"> Deze opdracht heeft doelen en een rapport</label>${[0,1,2,3].map(rij).join('')}
     <p class="note">Voor vijf berichten ligt een gewone dag rond 3.000 bereik, 5,5% klikpercentage, 22% betrokkenheid en 5 inschrijvingen.</p></fieldset>`}
+function formKanalen(){const k=Object.keys(KANALEN).filter(x=>val('f-kn-'+x));return k.length?k:['website']}
 function formDoelen(){if(!val('f-dl-aan'))return [];
   return [0,1,2,3].filter(i=>val('f-dl-on'+i)).map((i,k)=>({id:'d'+(k+1),type:val('f-dl-t'+i),drempel:num(val('f-dl-v'+i))||0}))}
-function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>`}
-async function maakRondes(){
-  if(st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){toast('De vier rondes bestaan al');return}
+function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>
+  <div class="card2" style="margin-top:6px"><b>Bonusronde met alle kanalen</b><p>Vier berichten op de website, Instagram en TikTok. Weinig begeleiding. Studenten leren dat elk kanaal anders werkt.</p><button class="dbtn" data-dbonus="1" style="margin-left:0;justify-self:start">Maak de bonusronde</button></div>`}
+async function maakRondes(lijst,eerste){
+  lijst=lijst||RONDES;eerste=eerste||'Ronde 1:';
+  if(st.opdrachten.some(o=>o.naam.startsWith(eerste))){toast('Deze ronde bestaat al');return}
   if(typeof dAct==='function'&&st.rol==='docent'){
     if(st.busy)return;st.busy=true;
-    try{for(const r of RONDES.map(rondeObj))await api('rsim_docent_save_assignment',{p_code:st.klascode,p_dcode:st.dcode,p:r});await loadDocent();renderDocent();toast('De vier rondes staan klaar. Activeer er één bij Opdrachten.')}
+    try{for(const r of lijst.map(rondeObj))await api('rsim_docent_save_assignment',{p_code:st.klascode,p_dcode:st.dcode,p:r});await loadDocent();renderDocent();toast('Klaar. Activeer er één bij Opdrachten.')}
     catch(e){toast(e.message)}finally{st.busy=false}
-  }else{RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r)));renderDocent();toast('De vier rondes staan klaar. Activeer er één.')}
+  }else{lijst.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+Math.floor(Math.random()*1e6)},r)));renderDocent();toast('Klaar. Activeer er één.')}
 }
 dc.addEventListener('click',e=>{
-  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes]');if(!t)return;const D=t.dataset;
+  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes],[data-dbonus]');if(!t)return;const D=t.dataset;
   if(D.rsel){st.dsel=D.rsel;renderDocent()}
   else if(D.drondes)maakRondes();
+  else if(D.dbonus)maakRondes([RONDE_SOCIAL],'Bonusronde:');
   else if(D.rev){
     const crit=CRITERIA.map((c,i)=>{const v=val('f-rv-'+i);return v===''?null:+v}),b={criteria:crit,opmerking:String(val('f-rv-op')||'')};
     if(typeof dAct==='function'&&st.rol==='docent')dAct('rsim_docent_review',{p_report:D.rev,p_beoordeling:b},'Beoordeling opgeslagen');
@@ -239,4 +248,4 @@ dc.addEventListener('click',e=>{
   }
 });
 /* demo: de vier rondes staan meteen klaar, met directe tijd zodat het rapport meteen opengaat */
-if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}
+if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}

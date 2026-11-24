@@ -24,6 +24,12 @@
     ctr_basis: 0.03,
     engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
     conversie: { nieuwsbrief_basis: 0.03 },
+    kanalen: {
+      instagram: { dagbereik: 6000, zicht_basis: 0.30, halfwaarde_uur: 7, aandeel: { jongeren: 0.35, volwassenen: 0.35, midden: 0.20, senioren: 0.10 },
+        kwaliteit_effect: 0.12, ctr_basis: 0.015, interactie_basis: 0.05, delen_basis: 0.006, max_tekens: 125, ideaal_min: 30, ideaal_max: 110, viraal_ruis: 0.25 },
+      tiktok: { dagbereik: 10000, zicht_basis: 0.35, halfwaarde_uur: 10, aandeel: { jongeren: 0.55, volwassenen: 0.25, midden: 0.15, senioren: 0.05 },
+        kwaliteit_effect: 0.10, ctr_basis: 0.004, interactie_basis: 0.07, delen_basis: 0.010, max_tekens: 90, korte_haak_woorden: 8, lange_haak_woorden: 14, viraal_ruis: 0.65, duur_sec: 30 }
+    },
     ruis: 0.30,
     leestijd: { deel_onder_15_sec: 0.55, onder_15_gem_sec: 8, betrokken_basis_sec: 70 },
     publiek: { dagbezoekers: 12000, aandeel: { jongeren: 0.20, volwassenen: 0.30, midden: 0.28, senioren: 0.22 } },
@@ -232,5 +238,105 @@
     };
   }
 
-  return { simuleer, kopAnalyse, DEFAULTS, GROEPEN };
+
+  /* ---- Instagram en TikTok ----
+     Zelfde vorm als simuleer(), zodat resultaten en rapport voor elk kanaal hetzelfde werken.
+     kliks = klikken naar het bericht op de website. leestijd = hoe lang mensen naar het bericht kijken.
+     interacties = likes, reacties en opgeslagen. */
+  function simuleerSocial(artikel, keuze, regels, opts) {
+    const R = merge(DEFAULTS, regels || {});
+    const kan = keuze.kanaal === 'tiktok' ? 'tiktok' : 'instagram', K = R.kanalen[kan];
+    const H = (opts && opts.uren !== undefined) ? opts.uren : R.horizon_uren;
+    const uur = keuze.uur;
+    const wijz = (keuze.wijzigingen || []).slice().sort((x, y) => x.uurNa - y.uurNa);
+    const halfNieuws = Math.max(artikel.tijdgevoeligheid_uren, 1);
+    const rnd = mulberry32(((keuze.seed || 1) ^ 0x9e3779b9) >>> 0);
+    const nw = artikel.nieuwswaarde;
+    const nwGem = (nw.impact + nw.nabijheid + nw.conflict + nw.human_interest + nw.actualiteit) / 5, nwF = 0.7 + 0.15 * nwGem;
+    const intGem = GROEPEN.reduce((x, g) => x + K.aandeel[g] * artikel.interesse[g], 0) / 3;
+    const viraal = clamp(Math.exp(K.viraal_ruis * gauss(rnd)), 0.4, 3.5);
+    const somCurve = {}; GROEPEN.forEach(g => { somCurve[g] = R.uurcurves[g].reduce((x, y) => x + y, 0); });
+
+    const wil = kan === 'instagram' ? 'foto' : 'video';
+    function staat(st) {
+      const tekst = String(st.kop || ''), ka = kopAnalyse(tekst, R), n = ka.aantalWoorden, tek = tekst.length;
+      const b = (st.beeld !== undefined && st.beeld !== null && st.beeld >= 0) ? artikel.beelden[st.beeld] : null;
+      const juist = b && b.type === wil;
+      const bf = !b ? 0.5 : (juist ? 1 : 0.7) * (1 + K.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3)) * 1.1;
+      let tf, tl;
+      if (kan === 'instagram') {
+        tf = tek === 0 ? 0.8 : (tek < K.ideaal_min ? 0.92 : (tek <= K.ideaal_max ? 1.1 : 0.97));
+        tl = tek === 0 ? 'Geen bijschrift' : tek + ' tekens: ' + (tek < K.ideaal_min ? 'erg kort' : tek <= K.ideaal_max ? 'kort en krachtig' : 'aan de lange kant');
+      } else {
+        const direct = /\?|\b(je|jij|jouw|u)\b/i.test(tekst) ? 0.08 : 0;
+        const lengte = n === 0 ? 0.8 : (n <= K.korte_haak_woorden ? 1.15 : (n <= K.lange_haak_woorden ? 1.0 : 0.85));
+        tf = lengte + direct;
+        tl = n + ' woorden: ' + (n <= K.korte_haak_woorden ? 'een korte haak' : n <= K.lange_haak_woorden ? 'gemiddeld' : 'te lang voor de eerste seconden') + (direct ? ', spreekt de kijker direct aan' : '');
+      }
+      const sens = 1 + 0.12 * ka.sensatie;
+      const kijk = kan === 'instagram' ? 2.5 + 2 * (juist && b ? (b.kwaliteit || 3) / 5 : 0.4) : K.duur_sec * clamp(0.25 + 0.3 * (tf - 0.8) + 0.08 * ((b && b.kwaliteit || 3) - 3) - 0.15 * ka.sensatie, 0.12, 0.8);
+      return { ka, b, juist, bf, tf, tl, kwal: Math.max(0.4, bf * tf * ka.woorden * sens * nwF), kijk, sens };
+    }
+    let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld };
+    let S = staat(st), ingetrokkenOp = null;
+    const gebeurtenissen = [], verloop = [];
+    let tB = 0, tK = 0, tD = 0, tI = 0, tA = 0, kijkSom = 0, cK = 0, cD = 0, cI = 0, cA = 0;
+    for (let t = 0; t < H; t++) {
+      const klok = (uur + t) % 24;
+      let gebeurtenis = null;
+      while (wijz.length && wijz[0].uurNa <= t) {
+        const w = wijz.shift();
+        let tekst = '';
+        if (w.intrekken) { ingetrokkenOp = t; tekst = 'Publicatie ingetrokken'; }
+        else {
+          const d = [];
+          if (w.beeld !== undefined && w.beeld !== st.beeld) d.push('Beeld gewisseld');
+          if (w.kop !== undefined && w.kop !== st.kop) d.push(kan === 'instagram' ? 'Bijschrift aangepast' : 'Haak aangepast');
+          tekst = d.join(', ');
+          st = { kop: w.kop !== undefined ? w.kop : st.kop, beeld: w.beeld !== undefined ? w.beeld : st.beeld }; S = staat(st);
+        }
+        if (tekst) { gebeurtenis = gebeurtenis ? gebeurtenis + ' en ' + tekst.toLowerCase() : tekst; gebeurtenissen.push({ uurNa: t, uur: klok, tekst }); }
+      }
+      const uurRuis = clamp(Math.exp(R.ruis * 0.3 * gauss(rnd)), 0.7, 1.4);
+      const eRuis = clamp(Math.exp(R.engagement.ruis * 0.3 * gauss(rnd)), 0.7, 1.4);
+      let b = 0;
+      if (ingetrokkenOp === null) {
+        const dec = Math.pow(0.5, t / K.halfwaarde_uur) * Math.pow(0.5, t / halfNieuws);
+        GROEPEN.forEach(g => {
+          const bez = K.dagbereik * K.aandeel[g] * R.uurcurves[g][klok] / somCurve[g];
+          b += bez * K.zicht_basis * dec * (artikel.interesse[g] / 3) * S.kwal * viraal * uurRuis;
+        });
+      }
+      const br = Math.round(b);
+      const kwE = clamp(S.kwal, 0.6, 1.6);
+      cK += br * K.ctr_basis * kwE * eRuis * intGem; cD += br * K.delen_basis * kwE * eRuis; cI += br * K.interactie_basis * kwE * eRuis; 
+      const kr = Math.min(Math.floor(cK), br), deel = Math.floor(cD), ia = Math.floor(cI);
+      cK -= kr; cD -= deel; cI -= ia;
+      cA += kr * R.conversie.nieuwsbrief_basis * 1.5 * intGem * eRuis;
+      const inschr = Math.floor(cA); cA -= inschr;
+      verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door: 0, deel, inschr, int: ia, lees: Math.round(S.kijk), gebeurtenis, actief: ingetrokkenOp === null });
+      tB += br; tK += kr; tD += deel; tI += inschr; tA += ia; kijkSom += br * S.kijk;
+    }
+    const kijk = Math.round(tB ? kijkSom / tB : S.kijk);
+    let actief = 0, gemiddeld = 0;
+    GROEPEN.forEach(g => { const a = K.aandeel[g] * artikel.interesse[g]; actief += a * (R.uurcurves[g][uur] / somCurve[g]) * 24; gemiddeld += a; });
+    const tijdIndex = actief / gemiddeld;
+    const naam = kan === 'instagram' ? 'Instagram' : 'TikTok';
+    const uitleg = [];
+    uitleg.push({ sleutel: 'tijd', label: 'Tijdstip van plaatsen', factor: tijdIndex, tekst: String(uur).padStart(2, '0') + ':00: het publiek van ' + naam + ' is nu ' + (tijdIndex >= 1.3 ? 'zeer actief' : tijdIndex >= 0.8 ? 'redelijk actief' : 'weinig actief') + ' (index ' + tijdIndex.toFixed(2).replace('.', ',') + ')' });
+    uitleg.push({ sleutel: 'beeld', label: kan === 'instagram' ? 'Foto' : 'Video', factor: S.bf, tekst: !S.b ? 'Zonder beeld bereik je veel minder mensen' : (S.juist ? (kan === 'instagram' ? 'Foto' : 'Video') + ' past bij ' + naam + ', kwaliteit ' + (S.b.kwaliteit || 3) + ' van 5' : 'Dit beeldtype past minder bij ' + naam) });
+    uitleg.push({ sleutel: 'tekst', label: kan === 'instagram' ? 'Bijschrift' : 'Haak in de eerste seconden', factor: S.tf, tekst: S.tl });
+    uitleg.push({ sleutel: 'woorden', label: 'Woorden en sensatie', factor: S.ka.woorden * S.sens, tekst: S.ka.negatief + ' negatief, ' + S.ka.positief + ' positief' + (S.ka.sensatie > 0.05 ? ', sensationeel: meer bereik, minder kijktijd' : '') });
+    uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(nwF) + ')' });
+    if (kan === 'tiktok') uitleg.push({ sleutel: 'viraal', label: 'Het algoritme', factor: viraal, tekst: viraal > 1.4 ? 'Het algoritme duwde deze video veel verder dan gewoon. Dat is deels geluk' : viraal < 0.75 ? 'Het algoritme liet deze video snel los. Dat is deels pech' : 'Het algoritme behandelde deze video gewoon. Let op: bij TikTok verschilt hetzelfde idee soms enorm per keer' });
+    return {
+      kanaal: kan, bereik: tB, kliks: tK, ctr: tB ? tK / tB : 0,
+      doorkliks: 0, gedeeld: tD, inschrijvingen: tI, interacties: tA, interactiepercentage: tB ? tA / tB : 0,
+      engagementrate: 0, conversie: tK ? tI / tK : 0,
+      leestijd: kijk, afhaakdeel: 0, verloop, perGroep: {}, uitleg, tijdIndex, gebeurtenissen,
+      ingetrokken: ingetrokkenOp !== null, ingetrokkenUurNa: ingetrokkenOp
+    };
+  }
+
+  return { simuleer, simuleerSocial, kopAnalyse, DEFAULTS, GROEPEN };
 });

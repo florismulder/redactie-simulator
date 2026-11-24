@@ -48,15 +48,20 @@ function elapsed(p){const t=tm();if(t.modus==='direct')return 24;const min=(Date
 /* ---- publicaties ---- */
 function nu(p){const s={kop:p.kop,beeld:p.beeld,plek:p.plek,ingetrokken:false,intrekUurNa:null};
   [...p.wijzigingen].sort((x,y)=>x.uurNa-y.uurNa).forEach(w=>{if(w.intrekken){s.ingetrokken=true;s.intrekUurNa=w.uurNa}else{if(w.kop!==undefined)s.kop=w.kop;if(w.beeld!==undefined)s.beeld=w.beeld;if(w.plek!==undefined)s.plek=w.plek}});return s}
-const curPub=id=>st.pubs.find(p=>p.id===id);
+const KANALEN={website:'Website',instagram:'Instagram',tiktok:'TikTok'};
+const kan=()=>st.kanaal||'website',kanaalVan=p=>p.kanaal||'website';
+const curPub=(id,k)=>st.pubs.find(p=>p.id===id&&kanaalVan(p)===(k||kan()));
+const opKanalen=()=>{const o=actieveOpdracht();return (o&&o.kanalen&&o.kanalen.length)?o.kanalen:['website']};
+const SOC={instagram:{wil:'foto',max:125,naam:'Bijschrift',ph:'Schrijf een kort bijschrift'},tiktok:{wil:'video',max:90,naam:'Haak',ph:'Eerste zin die kijkers vastpakt'}};
 const laatsteUur=p=>p.wijzigingen.reduce((m,w)=>Math.max(m,w.uurNa),0);
 function editUur(p){const min=laatsteUur(p)+1;return tm().modus==='direct'?Math.min(Math.max(st.draft.uurNa||min,min),23):Math.min(23,Math.max(elapsed(p),min))}
 function newDraft(id){const a=byId[id],p=curPub(id);
   if(p){const s=nu(p);const d={kop:s.kop,beeld:s.beeld,plek:s.plek,uur:12};if(!s.ingetrokken)d.uurNa=Math.min(23,laatsteUur(p)+1);return d}
+  if(kan()!=='website')return {kop:'',beeld:-1,uur:19,plek:'midden'};
   return {kop:a.t,beeld:-1,uur:12,plek:'midden'}}
-const sim=p=>Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
-function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0;c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0});
-  return {c,e,b,k,ctr:b?k/b:0,lees:k?Math.round(l/k):0,dk,dl,ins}}
+const sim=p=>kanaalVan(p)==='website'?Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES):Engine.simuleerSocial(byId[p.id].d,{kanaal:kanaalVan(p),kop:p.kop,beeld:p.beeld,uur:p.uur,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
+function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0,ia=0;const soc=kanaalVan(p)!=='website';c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=soc?x.bereik*x.lees:x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0;ia+=x.int||0});
+  return {c,e,b,k,ctr:b?k/b:0,lees:soc?(b?Math.round(l/b):0):(k?Math.round(l/k):0),dk,dl,ins,ia,soc}}
 function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
 sel0();st.draft=newDraft(st.sel);
 
@@ -72,35 +77,39 @@ const whyHTML=c=>`<div class="why">${c.uitleg.map(u=>`<div><b>${esc(u.label)}</b
 function phBox(b){return `<div class="ph">${b?(b[0]==='video'?'<div class="play">▶</div>':'Foto'):'Geen beeld'}</div>`}
 function renderSys(){
   sel0();
+  if(!opKanalen().includes(kan())){st.kanaal=opKanalen()[0];st.draft=newDraft(st.sel)}
+  const KN=kan(),soc=KN!=='website',SC=SOC[KN]||{};
   const op=actieveOpdracht(),a=byId[st.sel],d=st.draft,p=curPub(st.sel),s=p?nu(p):null;
   const mode=!p?'nieuw':(s.ingetrokken?'ingetrokken':'edit');
-  const pog=st.pubs.filter(q=>q.id===st.sel).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
+  const pog=st.pubs.filter(q=>q.id===st.sel&&kanaalVan(q)===kan()).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
   const list=op.artikelen.map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
     const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd</span>');
     return `<div class="it ${x.id===st.sel?'sel':''}" data-pick="${x.id}"><div class="t">${esc(x.t)}</div><div class="m"><span class="pill">${esc(x.c)}</span>${tag}</div></div>`}).join('');
-  const imgs=['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>']
-    .concat(a.b.map((b,i)=>`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+  const imgs=(soc?[]:['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>'])
+    .concat(a.b.map((b,i)=>soc&&b[0]!==SC.wil?'':`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+  const geenBeeld=soc&&!a.b.some(b=>b[0]===SC.wil);
   const seg=['boven','midden','onder'].map(k=>`<button class="${d.plek===k?'sel':''}" data-plek="${k}"><span class="mini"><i class="${k==='boven'?'hot':''}"></i><i class="${k==='midden'?'hot':''}"></i><i class="${k==='onder'?'hot':''}"></i></span>${PLEK[k]}</button>`).join('');
   const beeldTxt=d.beeld<0?'geen beeld':(a.b[d.beeld][0]==='video'?'video':'foto');
   let tijd,go,url='';
   if(mode==='edit'){
     const min=laatsteUur(p)+1,uurNa=editUur(p),klok=p.uur+uurNa;
-    url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
+    url=soc?'':`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
     if(min>23)tijd='<div><label class="l">Aanpassen om</label><p style="margin:0;color:#6b7885">Binnen de eerste 24 uur is geen aanpassing meer mogelijk.</p></div>';
     else if(tm().modus==='direct')tijd=`<div><label class="l">Aanpassen om<span id="tm2sub">${uurNa} uur na publicatie</span></label><div class="time" id="tm2">${hh(klok)}</div><input type="range" id="uurna" min="${min}" max="23" value="${uurNa}"></div>`;
     else tijd=`<div><label class="l">Aanpassen om<span>de klok loopt mee</span></label><div class="time">${hh(klok)}</div><p style="margin:4px 0 0;color:#6b7885">Een wijziging gaat nu in, ${uurNa} uur na publicatie.</p></div>`;
-    go=`<p>Gepubliceerd om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
+    go=`<p>${soc?KANALEN[KN]+', gepubliceerd':'Gepubliceerd'} om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
   }else{
     tijd=`<div><label class="l">Tijdstip<span>Wanneer gaat het online</span></label><div class="time" id="tm">${hh(d.uur)}</div><input type="range" id="uur" min="0" max="23" value="${d.uur}"></div>`;
-    if(mode==='ingetrokken')url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
-    go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':esc(PLEK[d.plek])+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
+    if(mode==='ingetrokken'&&!soc)url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
+    go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':geenBeeld?'Dit bericht heeft geen '+SC.wil+' voor '+KANALEN[KN]+'.':(soc?KANALEN[KN]:esc(PLEK[d.plek]))+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd||geenBeeld?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
   }
   $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>Vechtwaard CMS</b><span>Nieuws · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
+  ${opKanalen().length>1?`<div class="ktabs"><span>Kanaal</span>${opKanalen().map(k=>`<button data-kanaal="${k}" class="${k===KN?'on':''}">${KANALEN[k]}</button>`).join('')}</div>`:''}
   <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${list}</div>
   <div class="ed">${url}<div class="orig"><small>Bericht van de verslaggever</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
-  <div><label class="l">Kop op de site<span id="cnt">${d.kop.length} tekens</span></label><input class="kop" id="kop" maxlength="200" value="${esc(d.kop)}"></div>
-  <div><label class="l">Beeld<span>Kies wat bij de kop past</span></label><div class="imgs">${imgs}</div></div>
-  <div class="row2">${tijd}<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div></div>
+  <div><label class="l">${soc?SC.naam+(KN==='tiktok'?' in de eerste seconden':' bij de foto'):'Kop op de site'}<span id="cnt">${d.kop.length}${soc?' van '+SC.max:''} tekens</span></label><input class="kop ${soc?'s':''}" id="kop" maxlength="${soc?SC.max:200}" ${soc?`placeholder="${SC.ph}"`:''} value="${esc(d.kop)}"></div>
+  <div><label class="l">${soc?(KN==='instagram'?'Foto':'Video'):'Beeld'}<span>${soc?'Kies wat past bij '+KANALEN[KN]:'Kies wat bij de kop past'}</span></label><div class="imgs">${imgs}</div></div>
+  <div class="row2">${tijd}${soc?`<div><label class="l">Waar komt het te staan</label><p style="margin:4px 0 0;color:#6b7885">${KN==='instagram'?'In de tijdlijn van volgers. Kies een foto en schrijf een kort bijschrift.':'In de For You-feed. De haak bepaalt of mensen blijven kijken.'}</p></div>`:`<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div>`}</div>
   <div class="go">${go}</div></div></div></div>`;
 }
 /* ---- scherm 2: website ---- */
@@ -109,32 +118,43 @@ function webCard(p,big){
   const a=byId[p.id],s=nu(p),b=s.beeld>=0?a.b[s.beeld]:null;
   return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
 }
-function renderWeb(){
-  const live=st.pubs.filter(p=>!nu(p).ingetrokken);
+function renderSite(bar){
+  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
   const low=[0,1,2,3].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
-  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span><span class="r">vr 20 november</span></div>
+  return `<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span>${bar}<span class="r">vr 20 november</span></div>
   <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
   <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
   <div><h4 class="sec">Meer uit de regio</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>
   <div><h4 class="sec">Verder in het nieuws</h4><div class="low">${low}</div></div></div></div>`;
 }
+function socTile(p,k){const a=byId[p.id],s=nu(p),v=viewOf(p),b=s.beeld>=0?a.b[s.beeld]:null;
+  const stat=v.e?`<span>♥ ${fmt(v.ia)}</span><span>${k==='tiktok'?'▶ '+fmt(v.b):'bereik '+fmt(v.b)}</span>`:'<span>net geplaatst</span>';
+  return k==='instagram'?`<div class="igt"><div class="igp">${b?'Foto':''}</div><p>${esc(s.kop)}</p><div class="st">${stat}</div></div>`
+   :`<div class="ttt"><div class="ttp"><div class="play">▶</div><div class="hk">${esc(s.kop)}</div></div><div class="st">${stat}</div></div>`}
+function renderWeb(){
+  const ks=opKanalen();if(!ks.includes(st.wkan))st.wkan='website';
+  const bar=ks.length>1?`<span class="wbar">${ks.map(k=>`<button data-wkan="${k}" class="${k===st.wkan?'on':''}">${KANALEN[k]}</button>`).join('')}</span>`:'';
+  if(st.wkan==='website'){$('#s1').innerHTML=renderSite(bar);return}
+  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken),n=k==='instagram'?6:4;
+  const tiles=[...Array(n)].map((_,i)=>live[i]?socTile(live[i],k):`<div class="${k==='instagram'?'igt':'ttt'} empty"><div class="${k==='instagram'?'igp':'ttp'}"></div><p>Ruimte voor een post</p></div>`).join('');
+  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>${k==='instagram'?'@vechtwaard op Instagram':'@vechtwaard op TikTok'}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">V</div><div><b>vechtwaard</b><span>Nieuws uit de regio · ${live.length} ${k==='instagram'?'berichten':'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
 /* ---- scherm 3: resultaten ---- */
 function renderRes(){
   if(st.rtab==='rap'&&heeftRapport())return renderRap();
   const M=new Set(actieveOpdracht().metrics);
   const rows=st.pubs.map(p=>({p,s:nu(p),v:viewOf(p)}));
-  const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,l:o.l+r.v.lees*r.v.k}),{b:0,k:0,l:0});
+  const T=rows.reduce((o,r)=>({b:o.b+r.v.b,k:o.k+r.v.k,kw:o.kw+(r.v.soc?0:r.v.k),l:o.l+(r.v.soc?0:r.v.lees*r.v.k)}),{b:0,k:0,kw:0,l:0});
   const sel=rows[Math.min(st.res,rows.length-1)];
-  const th=`<th>Kop</th><th>Plek</th><th>Tijd</th><th>Uur</th>${M.has('bereik')?'<th>Bereik</th>':''}${M.has('kliks')?'<th>Kliks</th><th>Klik%</th>':''}${M.has('leestijd')?'<th>Leestijd</th>':''}`;
-  const body=rows.map((r,i)=>`<tr class="row ${i===st.res?'sel':''}" data-res="${i}"><td class="k"><span class="kt">${esc(r.s.kop)}</span>${r.p.ex?'<span class="tagx">voorbeeld</span>':''}${r.s.ingetrokken?'<span class="tagx red">ingetrokken</span>':(r.p.wijzigingen.length?'<span class="tagx">aangepast</span>':'')}</td><td>${PLEK[r.s.plek]}</td><td>${hh(r.p.uur)}</td><td>${r.v.e}/24</td>${M.has('bereik')?`<td>${fmt(r.v.b)}</td>`:''}${M.has('kliks')?`<td>${fmt(r.v.k)}</td><td>${dec(r.v.ctr*100,1)}%</td>`:''}${M.has('leestijd')?`<td>${mmss(r.v.lees)}</td>`:''}</tr>`).join('');
+  const th=`<th>Kop of tekst</th><th>Waar</th><th>Tijd</th><th>Uur</th>${M.has('bereik')?'<th>Bereik</th>':''}${M.has('kliks')?'<th>Kliks</th><th>Klik%</th>':''}${M.has('leestijd')?'<th>Leestijd</th>':''}`;
+  const body=rows.map((r,i)=>`<tr class="row ${i===st.res?'sel':''}" data-res="${i}"><td class="k"><span class="kt">${esc(r.s.kop)}</span>${r.p.ex?'<span class="tagx">voorbeeld</span>':''}${r.s.ingetrokken?'<span class="tagx red">ingetrokken</span>':(r.p.wijzigingen.length?'<span class="tagx">aangepast</span>':'')}</td><td>${kanaalVan(r.p)==='website'?'Web, '+PLEK[r.s.plek].toLowerCase():KANALEN[kanaalVan(r.p)]}</td><td>${hh(r.p.uur)}</td><td>${r.v.e}/24</td>${M.has('bereik')?`<td>${fmt(r.v.b)}</td>`:''}${M.has('kliks')?`<td>${fmt(r.v.k)}</td><td>${dec(r.v.ctr*100,1)}%</td>`:''}${M.has('leestijd')?`<td>${mmss(r.v.lees)}</td>`:''}</tr>`).join('');
   let right='<p class="n">Publiceer een bericht om het verloop te zien.</p>';
   if(sel){right=(M.has('verloop')?chartHTML(sel.v):`<p class="n">Het verloop per uur is voor deze opdracht verborgen.</p>`)+whyHTML(sel.v.c)}
   const kp=[];
   if(M.has('bereik'))kp.push(['Bereik',fmt(T.b)]);
   if(M.has('kliks')){kp.push(['Kliks',fmt(T.k)]);kp.push(['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'])}
-  if(M.has('leestijd'))kp.push(['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']);
+  if(M.has('leestijd'))kp.push(['Gem. leestijd website',T.kw?mmss(Math.round(T.l/T.kw)):'0:00']);
   $('#s2').innerHTML=`<div class="res"><div class="head"><b>Resultatenmonitor</b>${rtabsHTML()}<span>Tijd: ${esc(tmLabel())}</span><span class="ex">${esc(actieveOpdracht().naam)}</span></div>
   <div class="kpis" style="grid-template-columns:repeat(${Math.max(kp.length,1)},1fr)">${kp.map(k=>`<div class="kpi"><small>${k[0]}</small><div>${k[1]}</div></div>`).join('')}</div>
   <div class="grid"><div class="pan"><h4>Berichten</h4><table class="t"><tr>${th}</tr>${body}</table></div>
@@ -185,24 +205,27 @@ addEventListener('resize',()=>{fit();if(zoomed>=0){const T=target(),m=mons[zoome
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),2400)}
 function ververs(){renderSys();renderWeb();renderRes();syncPrev()}
 document.addEventListener('click',e=>{
-  const t=e.target.closest('#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
+  const t=e.target.closest('#s1 [data-wkan],#s0 [data-kanaal],#s0 [data-pick],#s0 [data-beeld],#s0 [data-plek],#s0 [data-publish],#s2 [data-res],#s0 [data-edit],#s0 [data-intrek]');if(!t||zoomed<0)return;
   const p=curPub(st.sel);
-  if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
+  if(t.dataset.wkan){st.wkan=t.dataset.wkan;renderWeb()}
+  else if(t.dataset.kanaal){st.kanaal=t.dataset.kanaal;st.draft=newDraft(st.sel);renderSys()}
+  else if(t.dataset.pick){st.sel=t.dataset.pick;st.draft=newDraft(st.sel);renderSys()}
   else if(t.dataset.beeld!==undefined){st.draft.beeld=+t.dataset.beeld;renderSys()}
   else if(t.dataset.plek){st.draft.plek=t.dataset.plek;renderSys()}
   else if(t.dataset.res!==undefined){st.res=+t.dataset.res;renderRes()}
   else if(t.dataset.publish){
-    const d=st.draft;if(!d.kop.trim()){toast('Vul eerst een kop in');return}
-    st.pubs.unshift({id:st.sel,slug:p?p.slug:slug(d.kop),kop:d.kop.trim(),beeld:d.beeld,uur:d.uur,plek:d.plek,seed:Math.floor(Math.random()*1e9),tPub:Date.now(),wijzigingen:[]});st.res=0;
+    const d=st.draft;if(!d.kop.trim()){toast(kan()==='website'?'Vul eerst een kop in':'Schrijf eerst een '+SOC[kan()].naam.toLowerCase());return}
+    if(kan()!=='website'&&d.beeld<0){toast('Kies eerst een '+SOC[kan()].wil);return}
+    st.pubs.unshift({kanaal:kan(),id:st.sel,slug:kan()==='website'?(p?p.slug:slug(d.kop)):null,kop:d.kop.trim(),beeld:d.beeld,uur:d.uur,plek:d.plek,seed:Math.floor(Math.random()*1e9),tPub:Date.now(),wijzigingen:[]});st.res=0;
     st.draft=newDraft(st.sel);ververs();toast('Gepubliceerd. Kijk op de website en bij de resultaten.');
   }
   else if(t.dataset.edit&&p){
     const d=st.draft,s=nu(p),uurNa=editUur(p),w={uurNa};
     if(d.kop.trim()&&d.kop.trim()!==s.kop)w.kop=d.kop.trim();
     if(d.beeld!==s.beeld)w.beeld=d.beeld;
-    if(d.plek!==s.plek)w.plek=d.plek;
+    if(d.plek!==s.plek&&kan()==='website')w.plek=d.plek;
     if(Object.keys(w).length===1){toast('Je hebt nog niets veranderd');return}
-    p.wijzigingen.push(w);st.res=st.pubs.indexOf(p);st.draft=newDraft(st.sel);ververs();toast('Doorgevoerd. Het adres is gelijk gebleven.');
+    p.wijzigingen.push(w);st.res=st.pubs.indexOf(p);st.draft=newDraft(st.sel);ververs();toast('Doorgevoerd.'+(kan()==='website'?' Het adres is gelijk gebleven.':''));
   }
   else if(t.dataset.intrek&&p){
     if(laatsteUur(p)+1>23){toast('Intrekken kan alleen binnen de eerste 24 uur');return}
@@ -210,7 +233,7 @@ document.addEventListener('click',e=>{
   }
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='kop'){st.draft.kop=e.target.value;$('#cnt').textContent=e.target.value.length+' tekens'}
+  if(e.target.id==='kop'){st.draft.kop=e.target.value;$('#cnt').textContent=e.target.value.length+(kan()!=='website'?' van '+SOC[kan()].max:'')+' tekens'}
   if(e.target.id==='uur'){st.draft.uur=+e.target.value;$('#tm').textContent=hh(st.draft.uur)}
   if(e.target.id==='uurna'){const p=curPub(st.sel);st.draft.uurNa=+e.target.value;$('#tm2').textContent=hh(p.uur+st.draft.uurNa);$('#tm2sub').textContent=st.draft.uurNa+' uur na publicatie'}
 });
@@ -244,10 +267,10 @@ function dRes(){
   const rows=lijst.map(r=>`<tr class="row ${r.s.id===st.dsel?'sel':''}" data-dstud="${r.s.id}"><td><b>${esc(r.s.naam)}</b></td><td>${r.a.n}</td><td>${fmt(r.a.b)}</td><td>${fmt(r.a.k)}</td><td>${dec(r.a.ctr*100,1)}%</td><td>${mmss(r.a.lees)}</td></tr>`).join('');
   const S=studenten().find(x=>x.id===st.dsel)||studenten()[0];
   const pi=Math.min(st.dpub,S.pubs.length-1),P=S.pubs[pi],V=P&&viewOf(P),PS=P&&nu(P);
-  const prow=S.pubs.map((p,i)=>{const v=viewOf(p),s=nu(p),bt=s.beeld<0?'geen':byId[p.id].b[s.beeld][0];return `<tr class="row ${i===pi?'sel':''}" data-dpub="${i}"><td class="k">${esc(s.kop)}</td><td>${PLEK[s.plek]}</td><td>${hh(p.uur)}</td><td>${bt}</td><td>${v.e}/24</td><td>${fmt(v.b)}</td><td>${fmt(v.k)}</td><td>${dec(v.ctr*100,1)}%</td><td>${s.ingetrokken?'ingetrokken':(p.wijzigingen.length?'aangepast':'')}</td></tr>`}).join('');
+  const prow=S.pubs.map((p,i)=>{const v=viewOf(p),s=nu(p),bt=s.beeld<0?'geen':byId[p.id].b[s.beeld][0];return `<tr class="row ${i===pi?'sel':''}" data-dpub="${i}"><td class="k">${esc(s.kop)}</td><td>${kanaalVan(p)==='website'?PLEK[s.plek]:KANALEN[kanaalVan(p)]}</td><td>${hh(p.uur)}</td><td>${bt}</td><td>${v.e}/24</td><td>${fmt(v.b)}</td><td>${fmt(v.k)}</td><td>${dec(v.ctr*100,1)}%</td><td>${s.ingetrokken?'ingetrokken':(p.wijzigingen.length?'aangepast':'')}</td></tr>`}).join('');
   return `<div class="dres"><div class="dkp">${[['Studenten',lijst.length],['Publicaties',T.n],['Bereik',fmt(T.b)],['Kliks',fmt(T.k)],['Klikpercentage',T.b?dec(T.k/T.b*100,1)+'%':'0%'],['Gem. leestijd',T.k?mmss(Math.round(T.l/T.k)):'0:00']].map(k=>`<div class="kp2"><small>${k[0]}</small><b>${k[1]}</b></div>`).join('')}</div>
   <div class="dgrid"><div class="box2"><h3>Alle studenten</h3><table class="t2"><tr><th>Student</th><th>Pub.</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Leestijd</th></tr>${rows}</table></div>
-  <div class="box2"><h3>${esc(S.naam)}</h3><table class="t2"><tr><th>Kop</th><th>Plek</th><th>Tijd</th><th>Beeld</th><th>Uur</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Status</th></tr>${prow}</table>
+  <div class="box2"><h3>${esc(S.naam)}</h3><table class="t2"><tr><th>Kop of tekst</th><th>Waar</th><th>Tijd</th><th>Beeld</th><th>Uur</th><th>Bereik</th><th>Kliks</th><th>Klik%</th><th>Status</th></tr>${prow}</table>
   ${P?`<div class="pan darkp"><h4>${esc(PS.kop.slice(0,60))}</h4>${chartHTML(V)}${whyHTML(V.c)}</div>`:''}</div></div></div>`;
 }
 function dOpd(){
@@ -309,7 +332,7 @@ function saveOpdracht(){
   if(!naam){toast('Geef de opdracht een naam');return}
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
-  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',doelen:formDoelen()};
+  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',doelen:formDoelen(),kanalen:formKanalen()};
   st.opdrachten.push(o);if(val('f-direct')){st.actief=o.id;sel0();st.draft=newDraft(st.sel)}
   ['f-naam'].forEach(k=>delete st.fv[k]);renderDocent();ververs();toast(val('f-direct')?'Opdracht staat klaar en is actief':'Opdracht opgeslagen')
 }

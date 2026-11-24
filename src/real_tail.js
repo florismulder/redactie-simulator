@@ -13,7 +13,7 @@ async function api(fn,body){
   return j;
 }
 const bIdx=(aid,bid)=>{const a=byId[aid];return bid&&a?a.d.beelden.findIndex(b=>b.id===bid):-1};
-const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld_id),uur:j.uur,plek:j.plek,seed:j.seed,tPub:j.tPub,opdracht:j.opdracht,
+const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld_id),uur:j.uur,plek:j.plek,seed:j.seed,tPub:j.tPub,opdracht:j.opdracht,kanaal:j.kanaal||'website',
   wijzigingen:(j.wijzigingen||[]).map(w=>{const o={uurNa:w.uurNa};if(w.kop!==undefined)o.kop=w.kop;if(w.beeld_id!==undefined)o.beeld=bIdx(j.id,w.beeld_id);if(w.plek!==undefined)o.plek=w.plek;if(w.intrekken)o.intrekken=true;return o})});
 const pubSig=()=>st.pubs.map(p=>p.pid+':'+p.wijzigingen.length).join(',');
 
