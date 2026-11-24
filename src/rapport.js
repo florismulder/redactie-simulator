@@ -238,3 +238,5 @@ dc.addEventListener('click',e=>{
     else{const r=rapVan(st.dsel,actieveOpdracht().id);if(r){r.status='concept';if(r.rid==='jij')st.rapport.status='concept'}renderDocent();toast('Rapport staat weer open voor de student')}
   }
 });
+/* demo: de vier rondes staan meteen klaar, met directe tijd zodat het rapport meteen opengaat */
+if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}
