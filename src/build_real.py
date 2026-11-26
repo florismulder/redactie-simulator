@@ -62,9 +62,17 @@ out = out.replace('<!--ENGINE-->', '<script>\n' + engine + '\n</script>')
 out = out.replace('<!--APP-->', '<script>\n' + app + '\n</script>')
 html = ('<!doctype html><html lang="nl"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-        '<meta name="robots" content="noindex">\n') + out + '\n</html>'
+        '<meta name="robots" content="noindex">\n'
+        '<meta name="theme-color" content="#0e6b5e">\n'
+        '<link rel="icon" type="image/svg+xml" href="favicon.svg">\n'
+        '<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">\n'
+        '<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">\n'
+        '<link rel="apple-touch-icon" href="apple-touch-icon.png">\n'
+        '<link rel="shortcut icon" href="favicon.ico">\n') + out + '\n</html>'
 d = base + 'deploy/'
 os.makedirs(d, exist_ok=True)
 open(d + 'index.html', 'w', encoding='utf8').write(html)
 shutil.copy(base + 'bureau.jpg', d + 'bureau.jpg')
+for f in ['favicon.svg', 'favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png', 'favicon.ico']:
+    shutil.copy(base + 'icons/' + f, d + f)
 print('deploy/index.html', len(html))
