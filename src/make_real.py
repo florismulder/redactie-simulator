@@ -132,7 +132,7 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),scenario:val('f-scn')||'nieuws',doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){
@@ -141,7 +141,7 @@ async function saveArtikel(){
   if(!PICK.D.length){toast('Kies minstens één beeld uit de bibliotheek');return}
   const beelden=PICK.D.map(p=>({type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m}));
   const g=x=>+val(x);
-  const p={titel:t,intro:i,categorie:val('f-c'),nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden};
+  const p={titel:t,intro:i,categorie:val('f-c'),nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden,afdeling:val('f-afd')||'nieuws'};
   const ok=await dAct('rsim_docent_add_article',{p},'Bericht toegevoegd aan de database en aan de actieve opdracht');
   if(ok){['f-t','f-i'].forEach(k=>delete st.fv[k]);PICK.D=[];renderDocent()}
 }

@@ -8,6 +8,16 @@ const PLEK={boven:'Bovenaan',midden:'Midden',onder:'Onderaan'};
 /*BIB*/
 const CATS=['verkeer','politiek','misdaad','human_interest','economie','zorg','onderwijs','cultuur','weer','milieu','veiligheid','sport','shownieuws','tech','mode'];
 const DOELEN={bereik:'Zoveel mogelijk bereik',lezers_houden:'Lezers vasthouden (hoge leestijd)',balans:'Balans tussen bereik en leestijd'};
+const CATS_C=['aanbieding','nieuw_product','evenement','verhaal','dienst','seizoen'];
+const SCN={
+ nieuws:{merk:'Vechtwaard',sub:'Nieuws uit de regio',cms:'Vechtwaard CMS',afd:'Nieuws',nav:['Nieuws','Sport','Shownieuws','Tech','Mode'],orig:'Bericht van de verslaggever',kop:'Kop op de site',lijst:'Berichten voor deze opdracht',
+  eigen:'+ Eigen onderwerp',eigenTitel:'Eigen onderwerp',eigenTxt:'Bedenk een bericht voor Vechtwaard. Je antwoorden bepalen hoe interessant het nieuws is voor het publiek.',titelPh:'Wat is er gebeurd?',introPh:'Wie, wat, waar en wanneer in een paar zinnen',url:'vechtwaard.nl/nieuws/',
+  ig:'@vechtwaard op Instagram',tt:'@vechtwaard op TikTok',prof:'vechtwaard',av:'V',meest:'Meest gelezen',meestLijst:['Gemeente deelt nieuwe plannen voor de Oosterhaven','Voetbalclub wint derby in extremis','Weekmarkt krijgt een extra dag','Fietspad langs de Vecht wordt verbreed'],meer:'Meer uit de regio',verder:'Verder in het nieuws',leeg:'Ruimte voor nieuws',cats:CATS,posts:'berichten',
+  q:{nabij:['Waar speelt het?',[[5,'In onze regio'],[3,'Ergens in Nederland'],[1,'Ver weg']]],impact:['Hoeveel mensen raakt het?',[[2,'Weinig mensen'],[3,'Een groep mensen'],[5,'Heel veel mensen']]],conflict:['Is er ruzie of tegenstelling?',[[1,'Nee'],[3,'Een beetje'],[5,'Ja, duidelijk']]],mens:['Gaat het over een persoon en zijn verhaal?',[[1,'Nee'],[3,'Een beetje'],[5,'Ja, vooral']]],nieuw:['Hoe nieuw is het?',[[5,'Gebeurt vandaag'],[3,'Deze week'],[1,'Al een tijd bekend']]],duur:['Hoe lang blijft het interessant?',[[12,'Een halve dag'],[24,'Een dag'],[48,'Twee dagen'],[168,'Een week']]]}},
+ campagne:{merk:'Fietshuis De Trapper',sub:'Fietsen, e-bikes en onderhoud',cms:'De Trapper Marketing',afd:'Campagne',nav:['Fietsen','E-bikes','Onderhoud','Acties','Over ons'],orig:'Briefing van de klant',kop:'Titel van de campagne',lijst:'Campagnes voor deze opdracht',
+  eigen:'+ Eigen campagne',eigenTitel:'Eigen campagne',eigenTxt:'Bedenk een campagne voor Fietshuis De Trapper. Je antwoorden bepalen hoe aantrekkelijk het aanbod is voor klanten.',titelPh:'Wat bied je aan?',introPh:'Wat is het aanbod, voor wie is het en wat kost het?',url:'detrapper.nl/acties/',
+  ig:'@detrapper op Instagram',tt:'@detrapper op TikTok',prof:'detrapper',av:'T',meest:'Populair deze week',meestLijst:['Stadsfiets Amsterdammer vanaf 649 euro','Accu-service voor e-bikes','Kinderfiets met ruilgarantie','Fietstassen in de uitverkoop'],meer:'Uitgelicht',verder:'Meer acties en aanbod',leeg:'Ruimte voor een actie',cats:CATS_C,posts:'campagnes',
+  q:{nabij:['Hoe lokaal is het aanbod?',[[5,'Alleen in onze winkel'],[3,'Ook online te koop'],[1,'Overal te koop']]],impact:['Hoe aantrekkelijk is het aanbod?',[[2,'Gewoon'],[3,'Goed'],[5,'Heel aantrekkelijk (korting of nieuw)']]],conflict:['Is er tijdsdruk?',[[1,'Nee'],[3,'Een beetje'],[5,'Ja, tijdelijke actie']]],mens:['Is er een persoonlijk verhaal of klantervaring?',[[1,'Nee'],[3,'Een beetje'],[5,'Ja, vooral']]],nieuw:['Past het bij het seizoen?',[[5,'Ja, precies nu'],[3,'Een beetje'],[1,'Niet echt']]],duur:['Hoe lang loopt de actie?',[[12,'Een halve dag'],[24,'Een dag'],[72,'Een paar dagen'],[168,'Een week']]]}}};
 const METRICS=[['bereik','Bereik'],['kliks','Kliks en klikpercentage'],['leestijd','Leestijd'],['verloop','Verloop per uur']];
 const slug=t=>t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,48);
 const $=s=>document.querySelector(s);
@@ -23,7 +33,7 @@ const klas={naam:'MR2A',code:'VW-MR2A',modus:'versneld',vers:60};
 const st={sel:'n02',draft:null,res:0,docOk:false,dtab:'tijd',dsel:'jij',dpub:0,fv:{},
   actief:'o1',
   opdrachten:[
-    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],kanalen:['website','instagram','tiktok'],eigen:true},
+    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.filter(a=>a.d.afdeling!=='campagne').map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],kanalen:['website','instagram','tiktok'],eigen:true},
     {id:'o2',naam:'Kop en beeld: wat doet het?',doel:'bereik',artikelen:['n01','n03','n05','n08','n13'],modus:'versneld',max:2,metrics:['bereik','kliks','verloop']}],
   pubs:[
     {id:'n01',slug:'vechtbrug-twee-weken-dicht-zo-rijd-je-om',kop:'Vechtbrug twee weken dicht: zo rijd je om',beeld:-1,uur:7,plek:'boven',seed:1111,ex:true,tPub:0,wijzigingen:[{uurNa:3,beeld:0}]},
@@ -41,6 +51,7 @@ const studenten=()=>[{id:'jij',naam:'Jij (demo)',pubs:st.pubs}].concat(demo);
 
 /* ---- tijd ---- */
 const actieveOpdracht=()=>st.opdrachten.find(o=>o.id===st.actief)||st.opdrachten[0];
+const scn=()=>SCN[(actieveOpdracht()||{}).scenario||'nieuws']||SCN.nieuws,isCamp=()=>((actieveOpdracht()||{}).scenario)==='campagne';
 const tm=()=>({modus:actieveOpdracht().modus||klas.modus,vers:klas.vers});
 function tmLabel(){const t=tm();return t.modus==='direct'?'direct (24 uur meteen zichtbaar)':t.modus==='echt'?'echte tijd (1 uur is 1 uur)':'versneld ('+(t.vers>=60?'1 minuut = '+dec(t.vers/60,t.vers%60?1:0)+' uur':'1 minuut = '+t.vers+' minuten')+')'}
 function elapsed(p){const t=tm();if(t.modus==='direct')return 24;const min=(Date.now()-p.tPub)/60000;
@@ -97,21 +108,21 @@ function renderSys(){
   let tijd,go,url='';
   if(mode==='edit'){
     const min=laatsteUur(p)+1,uurNa=editUur(p),klok=p.uur+uurNa;
-    url=soc?'':`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
+    url=soc?'':`<div class="url"><span>Adres:</span><b>${scn().url}${esc(p.slug)}</b><span>Dit adres blijft gelijk na een wijziging.</span></div>`;
     if(min>23)tijd='<div><label class="l">Aanpassen om</label><p style="margin:0;color:#6b7885">Binnen de eerste 24 uur is geen aanpassing meer mogelijk.</p></div>';
     else if(tm().modus==='direct')tijd=`<div><label class="l">Aanpassen om<span id="tm2sub">${uurNa} uur na publicatie</span></label><div class="time" id="tm2">${hh(klok)}</div><input type="range" id="uurna" min="${min}" max="23" value="${uurNa}"></div>`;
     else tijd=`<div><label class="l">Aanpassen om<span>de klok loopt mee</span></label><div class="time">${hh(klok)}</div><p style="margin:4px 0 0;color:#6b7885">Een wijziging gaat nu in, ${uurNa} uur na publicatie.</p></div>`;
     go=`<p>${soc?KANALEN[KN]+', gepubliceerd':'Gepubliceerd'} om ${hh(p.uur)} met ${s.beeld<0?'geen beeld':(a.b[s.beeld][0]==='video'?'video':'foto')}. De resultaten laten zien vanaf wanneer je iets veranderde.</p><div class="btns"><button class="btn ghost" data-intrek="1" ${min>23?'disabled':''}>Intrekken</button><button class="btn" data-edit="1" ${min>23?'disabled':''}>Wijziging doorvoeren</button></div>`;
   }else{
     tijd=`<div><label class="l">Tijdstip<span>Wanneer gaat het online</span></label><div class="time" id="tm">${hh(d.uur)}</div><input type="range" id="uur" min="0" max="23" value="${d.uur}"></div>`;
-    if(mode==='ingetrokken'&&!soc)url=`<div class="url"><span>Adres:</span><b>vechtwaard.nl/nieuws/${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
+    if(mode==='ingetrokken'&&!soc)url=`<div class="url"><span>Adres:</span><b>${scn().url}${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
     go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':geenBeeld?'Dit bericht heeft geen '+SC.wil+' voor '+KANALEN[KN]+'.':(soc?KANALEN[KN]:esc(PLEK[d.plek]))+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd||geenBeeld?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
   }
-  $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>Vechtwaard CMS</b><span>Nieuws · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
+  $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>${scn().cms}</b><span>${scn().afd} · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
   ${opKanalen().length>1?`<div class="ktabs"><span>Kanaal</span>${opKanalen().map(k=>`<button data-kanaal="${k}" class="${k===KN?'on':''}">${KANALEN[k]}</button>`).join('')}</div>`:''}
-  <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${op.eigen?`<button class="nieuw ${st.eigenOpen?'on':''}" data-eigen="open">+ Eigen onderwerp</button>`:''}${list}</div>
-  <div class="ed">${url}<div class="orig"><small>Bericht van de verslaggever</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
-  <div><label class="l">${soc?SC.naam+(KN==='tiktok'?' in de eerste seconden':' bij de foto'):'Kop op de site'}<span id="cnt">${d.kop.length}${soc?' van '+SC.max:''} tekens</span></label><input class="kop ${soc?'s':''}" id="kop" maxlength="${soc?SC.max:200}" ${soc?`placeholder="${SC.ph}"`:''} value="${esc(d.kop)}"></div>
+  <div class="body"><div class="list"><h3>${scn().lijst}</h3>${op.eigen?`<button class="nieuw ${st.eigenOpen?'on':''}" data-eigen="open">${scn().eigen}</button>`:''}${list}</div>
+  <div class="ed">${url}<div class="orig"><small>${scn().orig}</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
+  <div><label class="l">${soc?SC.naam+(KN==='tiktok'?' in de eerste seconden':' bij de foto'):scn().kop}<span id="cnt">${d.kop.length}${soc?' van '+SC.max:''} tekens</span></label><input class="kop ${soc?'s':''}" id="kop" maxlength="${soc?SC.max:200}" ${soc?`placeholder="${SC.ph}"`:''} value="${esc(d.kop)}"></div>
   <div><label class="l">${soc?(KN==='instagram'?'Foto':'Video'):'Beeld'}<span>${soc?'Kies wat past bij '+KANALEN[KN]:'Kies wat bij de kop past'}</span></label><div class="imgs">${imgs}</div></div>
   <div class="row2">${tijd}${soc?`<div><label class="l">Waar komt het te staan</label><p style="margin:4px 0 0;color:#6b7885">${KN==='instagram'?'In de tijdlijn van volgers. Kies een foto en schrijf een kort bijschrift.':'In de For You-feed. De haak bepaalt of mensen blijven kijken.'}</p></div>`:`<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div>`}</div>
   <div class="go">${go}</div></div></div></div>`;
@@ -128,27 +139,23 @@ function bibToggle(sc,id){const L=PICK[sc],k=L.findIndex(x=>x.bron===id);if(k>=0
 /* ---- eigen onderwerp (student) ---- */
 const EF0={titel:'',intro:'',cat:'verkeer',nabij:'5',impact:'3',conflict:'1',mens:'1',nieuw:'5',duur:'24',voor:'iedereen'};
 st.ef=Object.assign({},EF0);
-function eigenFormHTML(){const f=st.ef,op=actieveOpdracht(),k=opKanalen();
-  const q=(id,l,o)=>`<label>${l}<select data-ef="${id}">${optH(o,f[id])}</select></label>`;
-  return `<div class="eig"><h2>Eigen onderwerp</h2><p class="muted">Bedenk een bericht voor Vechtwaard. Je antwoorden bepalen hoe interessant het nieuws is voor het publiek.</p>
-  <div class="two"><label>Titel van je bericht<input data-ef="titel" maxlength="120" value="${esc(f.titel)}" placeholder="Wat is er gebeurd?"></label>${q('cat','Categorie',CATS.map(c=>[c,c.replace('_',' ')]))}</div>
-  <label>Eerste alinea<textarea data-ef="intro" rows="3" maxlength="400" placeholder="Wie, wat, waar en wanneer in een paar zinnen">${esc(f.intro)}</textarea></label>
-  <div class="q3">${q('nabij','Waar speelt het?',[['5','In onze regio'],['3','Ergens in Nederland'],['1','Ver weg']])}
-  ${q('impact','Hoeveel mensen raakt het?',[['2','Weinig mensen'],['3','Een groep mensen'],['5','Heel veel mensen']])}
-  ${q('conflict','Is er ruzie of tegenstelling?',[['1','Nee'],['3','Een beetje'],['5','Ja, duidelijk']])}
-  ${q('mens','Gaat het over een persoon en zijn verhaal?',[['1','Nee'],['3','Een beetje'],['5','Ja, vooral']])}
-  ${q('nieuw','Hoe nieuw is het?',[['5','Gebeurt vandaag'],['3','Deze week'],['1','Al een tijd bekend']])}
-  ${q('duur','Hoe lang blijft het interessant?',[['12','Een halve dag'],['24','Een dag'],['48','Twee dagen'],['168','Een week']])}
-  ${q('voor','Voor wie vooral?',[['iedereen','Iedereen'],['jongeren','Jongeren'],['volwassenen','Volwassenen'],['senioren','Senioren']])}</div>
+function eigenFormHTML(){const f=st.ef,C=scn(),k=opKanalen();
+  const q=id=>`<label>${C.q[id][0]}<select data-ef="${id}">${optH(C.q[id][1],f[id])}</select></label>`;
+  if(!C.cats.includes(f.cat))f.cat=C.cats[0];
+  return `<div class="eig"><h2>${C.eigenTitel}</h2><p class="muted">${C.eigenTxt}</p>
+  <div class="two"><label>Titel<input data-ef="titel" maxlength="120" value="${esc(f.titel)}" placeholder="${C.titelPh}"></label><label>Categorie<select data-ef="cat">${optH(C.cats.map(c=>[c,c.replace('_',' ')]),f.cat)}</select></label></div>
+  <label>Eerste alinea<textarea data-ef="intro" rows="3" maxlength="400" placeholder="${C.introPh}">${esc(f.intro)}</textarea></label>
+  <div class="q3">${['nabij','impact','conflict','mens','nieuw','duur'].map(q).join('')}
+  <label>Voor wie vooral?<select data-ef="voor">${optH([['iedereen','Iedereen'],['jongeren','Jongeren'],['volwassenen','Volwassenen'],['senioren','Senioren']],f.voor)}</select></label></div>
   <label>Beelden${k.includes('instagram')||k.includes('tiktok')?'. Instagram heeft een foto nodig en TikTok een video':''}</label>${bibPicker(PICK.E,'E')}
-  <div class="btns"><button class="btn ghost" data-eigen="cancel">Annuleren</button><button class="btn" data-eigen="save">Bericht toevoegen</button></div></div>`}
+  <div class="btns"><button class="btn ghost" data-eigen="cancel">Annuleren</button><button class="btn" data-eigen="save">${isCamp()?'Campagne toevoegen':'Bericht toevoegen'}</button></div></div>`}
 function eigenData(f,pick,id){const n=x=>+x,ij={jongeren:3,volwassenen:3,midden:3,senioren:3};
   if(f.voor!=='iedereen'){Object.keys(ij).forEach(g=>ij[g]=2);ij[f.voor]=5}
   return {id,categorie:f.cat,titel_origineel:f.titel.trim(),intro_origineel:f.intro.trim(),tekst:f.intro.trim(),
     nieuwswaarde:{impact:n(f.impact),nabijheid:n(f.nabij),conflict:n(f.conflict),human_interest:n(f.mens),actualiteit:n(f.nieuw)},emotie:'neutraal',tijdgevoeligheid_uren:n(f.duur),interesse:ij,
     sensatie_potentieel:Math.min(4,Math.max(1,Math.round((n(f.conflict)+n(f.impact))/3))),
     beelden:pick.map((p,k)=>Object.assign({id:id+'-'+(p.type==='video'?'v':'f')+(k+1),type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m},p.type==='video'?{duur_sec:30}:{})),
-    toegevoegd_door:'student'}}
+    toegevoegd_door:'student',afdeling:isCamp()?'campagne':'nieuws'}}
 async function persistEigen(d){const id='e'+(A.filter(a=>a.door==='student').length+1);const x=eigenData(st.ef,PICK.E,id);
   const a={id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving,b.bron,!!b.mensen]),d:x,door:'student'};A.push(a);byId[id]=a;return id}
 async function saveEigen(){const f=st.ef;
@@ -167,7 +174,7 @@ document.addEventListener('input',function(e){const t=e.target.closest('#s0 [dat
 document.addEventListener('change',function(e){const t=e.target.closest('#s0 [data-bibtype]');if(t)PICK.E[+t.dataset.bibtype.split(':')[1]].type=t.value;const u=e.target.closest('#s0 [data-ef]');if(u)st.ef[u.dataset.ef]=u.value});
 /* ---- scherm 2: website ---- */
 function webCard(p,big){
-  if(!p)return `<div class="empty" style="${big?'height:300px':'height:130px'}">Ruimte voor nieuws</div>`;
+  if(!p)return `<div class="empty" style="${big?'height:300px':'height:130px'}">${scn().leeg}</div>`;
   const a=byId[p.id],s=nu(p),b=s.beeld>=0?a.b[s.beeld]:null;
   return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
 }
@@ -175,12 +182,13 @@ function renderSite(bar){
   const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
-  const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
-  return `<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span>${bar}<span class="r">vr 20 november</span></div>
-  <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
-  <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
-  <div><h4 class="sec">Meer uit de regio</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>
-  <div><h4 class="sec">Verder in het nieuws</h4><div class="low">${low}</div></div></div></div>`;
+  const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">${scn().leeg}</div>`).join('');
+  const C=scn();
+  return `<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${C.merk}</b><span>${C.sub}</span>${bar}<span class="r">vr 20 november</span></div>
+  <div class="nav">${C.nav.map((n,i)=>`<a class="${i?'':'on'}">${n}</a>`).join('')}</div>
+  <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>${C.meest}</h4><ul>${C.meestLijst.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
+  <div><h4 class="sec">${C.meer}</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>
+  <div><h4 class="sec">${C.verder}</h4><div class="low">${low}</div></div></div></div>`;
 }
 function socTile(p,k){const a=byId[p.id],s=nu(p),v=viewOf(p),b=s.beeld>=0?a.b[s.beeld]:null;
   const stat=v.e?`<span>♥ ${fmt(v.ia)}</span><span>${k==='tiktok'?'▶ '+fmt(v.b):'bereik '+fmt(v.b)}</span>`:'<span>net geplaatst</span>';
@@ -192,7 +200,7 @@ function renderWeb(){
   if(st.wkan==='website'){$('#s1').innerHTML=renderSite(bar);return}
   const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken),n=k==='instagram'?6:4;
   const tiles=[...Array(n)].map((_,i)=>live[i]?socTile(live[i],k):`<div class="${k==='instagram'?'igt':'ttt'} empty"><div class="${k==='instagram'?'igp':'ttp'}"></div><p>Ruimte voor een post</p></div>`).join('');
-  $('#s1').innerHTML=`<div class="web"><div class="mast"><b>Vechtwaard</b><span>${k==='instagram'?'@vechtwaard op Instagram':'@vechtwaard op TikTok'}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">V</div><div><b>vechtwaard</b><span>Nieuws uit de regio · ${live.length} ${k==='instagram'?'berichten':'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
+  $('#s1').innerHTML=`<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${scn().merk}</b><span>${k==='instagram'?scn().ig:scn().tt}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">${scn().av}</div><div><b>${scn().prof}</b><span>${scn().sub} · ${live.length} ${k==='instagram'?scn().posts:'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
 /* ---- scherm 3: resultaten ---- */
 function renderRes(){
   if(st.rtab==='rap'&&heeftRapport())return renderRap();
@@ -214,7 +222,7 @@ function renderRes(){
   <div class="pan"><h4>${sel?esc(sel.s.kop.slice(0,40))+(sel.s.kop.length>40?'…':''):'Verloop'}</h4>${right}</div></div></div>`;
 }
 function syncPrev(){[0,1,2].forEach(i=>{$('#p'+i).innerHTML=$('#s'+i).innerHTML.replace(/ id="[^"]*"/g,'')})}
-function renderAll(){renderSys();renderWeb();renderRes();syncPrev()}
+function renderAll(){try{const c=isCamp();const t=document.getElementById('brandT'),s=document.getElementById('brandS');if(t){t.textContent=c?'Marketing Fietshuis De Trapper':'Redactie Vechtwaard';s.textContent=c?'Jouw bureau · afdeling Campagnes':'Jouw bureau · afdeling Nieuws'}}catch(e){}renderSys();renderWeb();renderRes();syncPrev()}
 
 /* ---- zoomen op het bureau ---- */
 const BZ=10, mons=[...document.querySelectorAll('.mon')], inners=[0,1,2].map(i=>$('#s'+i));
@@ -328,10 +336,11 @@ function dRes(){
 }
 function dOpd(){
   const lijst=st.opdrachten.map(o=>`<div class="op ${o.id===st.actief?'act':''}"><div><b>${esc(o.naam)}</b><span>${esc(DOELEN[o.doel])} · ${o.artikelen.length} berichten · ${o.modus?o.modus:'tijd van de klas'} · ${o.max?o.max+' pogingen':'onbeperkt'}</span></div><button data-actief="${o.id}" ${o.id===st.actief?'disabled':''}>${o.id===st.actief?'Actief':'Activeer'}</button></div>`).join('');
-  const arts=A.filter(a=>a.door!=='student').map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
+  const scS=st.fv['f-scn']||'nieuws',arts=A.filter(a=>a.door!=='student').map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" ${(a.d.afdeling||'nieuws')===scS?'checked':''}> ${esc(a.t)} <i>${(a.d.afdeling||'nieuws')==='campagne'?'campagne · ':''}${esc(a.c)}</i></label>`).join('');
   return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}${rondesHTML()}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
   <div class="dcol"><h3>Nieuwe opdracht klaarzetten</h3><div class="frm">
    <label>Naam van de opdracht<input id="f-naam" placeholder="Bijvoorbeeld: Kop en beeld"></label>
+   <label>Soort opdracht<select id="f-scn">${optS([['nieuws','Nieuws (Vechtwaard)'],['campagne','Campagne voor een bedrijf (Fietshuis De Trapper)']],'nieuws')}</select></label>
    <label>Doel<select id="f-doel">${optS(Object.entries(DOELEN),'balans')}</select></label>
    <label>Tijdmodus<select id="f-modus">${optS([['','Zoals de klas ('+klas.modus+')'],['versneld','Versneld'],['echt','Echte tijd'],['direct','Direct']],'')}</select></label>
    <label>Pogingen per bericht<select id="f-max">${optS([[0,'Onbeperkt'],[1,'1'],[2,'2'],[3,'3']],0)}</select></label>
@@ -350,7 +359,8 @@ function dBer(){
   <div class="dcol"><h3>Bericht toevoegen</h3><div class="frm">
    <label>Titel van de verslaggever<input id="f-t" placeholder="Titel van het bericht"></label>
    <label>Eerste alinea<textarea id="f-i" rows="3" placeholder="Intro van het bericht"></textarea></label>
-   <div class="two"><label>Categorie<select id="f-c">${optS(CATS.map(c=>[c,c.replace('_',' ')]),'economie')}</select></label>
+   <div class="two"><label>Soort bericht<select id="f-afd">${optS([['nieuws','Nieuwsbericht'],['campagne','Campagne voor een bedrijf']],'nieuws')}</select></label>
+   <label>Categorie<select id="f-c">${optS(CATS.concat(CATS_C).map(c=>[c,c.replace('_',' ')]),'economie')}</select></label>
    <label>Hoe snel veroudert het?<select id="f-tg">${optS([[12,'Binnen een halve dag'],[24,'Binnen een dag'],[48,'Binnen twee dagen'],[96,'Binnen vier dagen'],[168,'Pas na een week']],48)}</select></label></div>
    <fieldset><legend>Nieuwswaarde (1 laag, 5 hoog)</legend><div class="sls">${sl('f-nw-impact','Impact')}${sl('f-nw-nabijheid','Nabijheid')}${sl('f-nw-conflict','Conflict',2)}${sl('f-nw-human','Menselijk verhaal',2)}${sl('f-nw-actualiteit','Actualiteit')}</div></fieldset>
    <fieldset><legend>Interesse per doelgroep</legend><div class="sls">${sl('f-ij-jongeren','Jongeren')}${sl('f-ij-volwassenen','Volwassenen')}${sl('f-ij-midden','Middengroep')}${sl('f-ij-senioren','Senioren')}${sl('f-sp','Sensatiepotentieel',2)}</div></fieldset>
@@ -360,6 +370,7 @@ function dBer(){
 dc.addEventListener('click',function(e){const t=e.target.closest('[data-bib],[data-bibdel]');if(!t)return;saveForm();
   if(t.dataset.bib)bibToggle('D',t.dataset.bib.split(':')[1]);else PICK.D.splice(+t.dataset.bibdel.split(':')[1],1);renderDocent()});
 dc.addEventListener('change',function(e){const t=e.target.closest('[data-bibtype]');if(t)PICK.D[+t.dataset.bibtype.split(':')[1]].type=t.value});
+dc.addEventListener('change',function(e){if(e.target.id==='f-scn'){saveForm();Object.keys(st.fv).filter(k=>k.startsWith('f-a-')).forEach(k=>delete st.fv[k]);renderDocent()}});
 function renderDocent(){
   if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
   const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten']];
@@ -389,7 +400,7 @@ function saveOpdracht(){
   if(!naam){toast('Geef de opdracht een naam');return}
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
-  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),doelen:formDoelen(),kanalen:formKanalen()};
+  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),scenario:val('f-scn')||'nieuws',doelen:formDoelen(),kanalen:formKanalen()};
   st.opdrachten.push(o);if(val('f-direct')){st.actief=o.id;sel0();st.draft=newDraft(st.sel)}
   ['f-naam'].forEach(k=>delete st.fv[k]);renderDocent();ververs();toast(val('f-direct')?'Opdracht staat klaar en is actief':'Opdracht opgeslagen')
 }
@@ -399,7 +410,7 @@ function saveArtikel(){
   if(!PICK.D.length){toast('Kies minstens één beeld uit de bibliotheek');return}
   const n=A.filter(a=>a.door==='docent').length+1,id='d'+String(n).padStart(2,'0');
   const beelden=PICK.D.map((p,k)=>Object.assign({id:id+'-'+(p.type==='video'?'v':'f')+(k+1),type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m},p.type==='video'?{duur_sec:30}:{}));
-  const g=x=>+val(x),d={id,categorie:val('f-c'),titel_origineel:t,intro_origineel:i,tekst:i,nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},emotie:'neutraal',tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden,toegevoegd_door:'docent'};
+  const g=x=>+val(x),d={id,categorie:val('f-c'),titel_origineel:t,intro_origineel:i,tekst:i,nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},emotie:'neutraal',tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden,toegevoegd_door:'docent',afdeling:val('f-afd')||'nieuws'};
   const a={id,c:d.categorie.replace('_',' '),t,i,b:beelden.map(b=>[b.type,b.beschrijving,b.bron,!!b.mensen]),d,door:'docent'};
   A.push(a);byId[id]=a;
   ['f-t','f-i'].forEach(k=>delete st.fv[k]);PICK.D=[];

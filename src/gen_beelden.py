@@ -378,6 +378,111 @@ def _(i):
     b += person(210, 350, 170, 4, 5, 6, 2, long_hair=True, arms='up') + person(450, 350, 200, 0, 2, 0, 0, arms='hold') + c_(330, 330, 20, '#8a8a8a') + poly([(316, 318), (322, 298), (332, 314)], '#8a8a8a')
     return svg(b, sky=('#f4e3cf', '#f8eee0'), uid=i)
 
+
+# ---------------------------------------------------------------- campagne: fietshuis De Trapper
+def bigbike(x, y, s=2.2, col='#c8553d', ebike=False):
+    o = bike(x, y, s, col)
+    if ebike:
+        o += r(x+20*s, y-28*s, 18*s, 10*s, '#37424c', 3*s) + c_(x+29*s, y-23*s, 2.5*s, '#59d0f5')
+    return o
+
+@scene('fiets_product', 'Nieuwe stadsfiets in de showroom', 0, 'aanbieding', 5, sky=('#eef0f2', '#e1e5e9'))
+def _(i):
+    b = r(0, 300, W, 100, '#cfd5da') + bigbike(180, 300, 3.2, '#2f6f9f') + r(470, 150, 110, 70, '#fff', 6, 'stroke="#c0c8cf" stroke-width="3"') + txt(525, 190, '€ 649', 28, '#c8553d') + txt(525, 212, 'stadsfiets', 13, '#6b7885', w=500)
+    return svg(b, sky=('#eef0f2', '#e1e5e9'), uid=i)
+@scene('ebike_product', 'E-bike met bereik van 100 kilometer', 0, 'nieuw_product', 5, sky=('#dbe9f2', '#eef6fb'))
+def _(i):
+    b = r(0, 320, W, 80, '#cfd5da') + bigbike(190, 315, 3.3, '#0e6b5e', True)
+    b += '<path d="M120 120 A200 130 0 0 1 520 120" fill="none" stroke="#f2c230" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 18"/>' + txt(320, 100, '100 km', 36, '#0e6b5e')
+    return svg(b, sky=('#dbe9f2', '#eef6fb'), uid=i)
+@scene('verlichting', 'Fietsverlichting aan', 0, 'aanbieding', 5, sky=('#0e1a2b', '#1c2b42'))
+def _(i):
+    b = r(0, 300, W, 100, '#1b222c')
+    b += poly([(250, 220), (60, 400), (440, 400)], '#f6e7a0', 'opacity=".22"') + c_(250, 220, 26, '#f6e7a0') + c_(250, 220, 14, '#fff') + r(235, 246, 30, 40, '#37424c', 6)
+    b += c_(470, 250, 18, '#e03c31') + c_(470, 250, 8, '#ff8a80') + r(458, 268, 24, 36, '#37424c', 5) + poly([(470, 250), (560, 300), (560, 210)], '#e03c31', 'opacity=".18"')
+    return svg(b, sky=('#0e1a2b', '#1c2b42'), uid=i)
+@scene('showroom', 'Showroom met fietsen op een rij', 0, 'aanbieding', 3, sky=('#e8e3d2', '#f2ede0'))
+def _(i):
+    b = r(0, 300, W, 100, '#b9a07a') + r(0, 0, W, 300, '#f2ede0') + r(40, 40, 560, 6, '#c9b99a')
+    for k, col in enumerate(['#c8553d', '#2f6f9f', '#4b8b5a', '#e3b23c', '#7b5ea7']):
+        b += bike(40+k*118, 330, 1.25, col)
+    return svg(b, sky=('#e8e3d2', '#f2ede0'), uid=i)
+@scene('prijsbord', 'Actiebord met korting', 0, 'aanbieding', 3, sky=('#eef0f2', '#e1e5e9'))
+def _(i):
+    b = r(0, 320, W, 80, '#cfd5da') + poly([(180, 330), (320, 90), (460, 330)], '#c8553d') + r(300, 90, 40, 14, '#a8402c') + poly([(210, 330), (320, 130), (430, 330)], '#e3553d')
+    b += txt(320, 250, '-20%', 64, '#fff') + txt(320, 290, 'alle verlichting', 18, '#fff', w=500)
+    return svg(b, sky=('#eef0f2', '#e1e5e9'), uid=i)
+@scene('tweedehands', 'Tweedehands fietsen met prijskaartjes', 0, 'aanbieding', 4)
+def _(i):
+    b = r(0, 300, W, 100, '#8d99a5') + r(0, 296, W, 8, '#6f7b87')
+    for k, (col, pr) in enumerate([('#2f6f9f', '149'), ('#c8553d', '179'), ('#4b8b5a', '199'), ('#7b5ea7', '229')]):
+        x = 40+k*150
+        b += bike(x, 330, 1.35, col) + r(x+30, 215, 60, 34, '#fff', 4, 'stroke="#c0c8cf" stroke-width="2"') + txt(x+60, 239, '€ '+pr, 17, '#c8553d')
+    return svg(b + cloud(150, 60) + cloud(470, 70), uid=i)
+@scene('donker_fietspad', 'Donker fietspad in de winter', 0, 'seizoen', 3, sky=('#0e1a2b', '#25364f'))
+def _(i):
+    b = poly([(250, 160), (390, 160), (560, 400), (80, 400)], '#2a3441') + line(320, 165, 320, 400, '#3c4a5e', 4)
+    for k, x in enumerate([60, 150, 500, 590]): b += tree(x, 300 + (k % 2)*30, 1.4, '#1b3a2c')
+    b += c_(540, 70, 24, '#e8e4c8') + poly([(320, 330), (230, 400), (410, 400)], '#f6e7a0', 'opacity=".10"')
+    return svg(b, sky=('#0e1a2b', '#25364f'), uid=i)
+@scene('werkplaats_leeg', 'Werkplaats met gereedschap', 0, 'dienst', 3, sky=('#e4ebf0', '#d3dde5'))
+def _(i):
+    b = r(0, 300, W, 100, '#8d99a5') + r(40, 40, 330, 170, '#a67c52', 4)
+    for k in range(8): b += r(60+k*38, 60, 8, 60, '#c0c8cf', 2) + r(56+k*38, 130, 16, 8, '#c8553d', 3)
+    b += r(400, 190, 200, 16, '#6b4a2f') + r(420, 206, 8, 100, '#6b4a2f') + r(570, 206, 8, 100, '#6b4a2f') + bike(420, 190, 1.0, '#2f6f9f') 
+    return svg(b, sky=('#e4ebf0', '#d3dde5'), uid=i)
+@scene('sloten_helmen', 'Fietssloten en helmen', 0, 'aanbieding', 3, sky=('#eef0f2', '#e1e5e9'))
+def _(i):
+    b = r(0, 300, W, 100, '#cfd5da')
+    for k, col in enumerate(['#c8553d', '#2f6f9f', '#e3b23c']):
+        x = 90+k*120
+        b += f'<path d="M{x} 280 q0 -95 70 -95 q70 0 70 95 z" fill="{col}"/>' + r(x+10, 262, 120, 10, '#fff', 4, 'opacity=".5"')
+    b += f'<circle cx="480" cy="250" r="48" fill="none" stroke="#37424c" stroke-width="14"/>' + r(450, 262, 60, 44, '#6b7885', 8) + c_(480, 284, 7, '#222')
+    return svg(b, sky=('#eef0f2', '#e1e5e9'), uid=i)
+@scene('bakfiets_product', 'Bakfiets in de winkel', 0, 'nieuw_product', 4, sky=('#e8e3d2', '#f2ede0'))
+def _(i):
+    b = r(0, 320, W, 80, '#b9a07a') + r(250, 200, 190, 70, '#4b8b5a', 8) + r(245, 190, 200, 14, '#3a7048', 4) + bike(160, 330, 1.6, '#4b8b5a') + c_(420, 330, 30, 'none', 'stroke="#222" stroke-width="4"')
+    b += line(250, 270, 190, 300, '#222', 4) + line(445, 262, 420, 330, '#222', 4)
+    return svg(b, sky=('#e8e3d2', '#f2ede0'), uid=i)
+
+@scene('monteur_band', 'Monteur repareert een lekke band', 1, 'dienst', 5, sky=('#e4ebf0', '#d3dde5'))
+def _(i):
+    b = r(0, 310, W, 90, '#8d99a5') + r(60, 60, 150, 110, '#a67c52', 4) + bike(300, 330, 2.0, '#c8553d') + person(210, 345, 210, 0, 1, 1, 0, arms='hold', hat='#2f6f9f')
+    b += r(250, 300, 60, 8, '#37424c', 3)
+    return svg(b, sky=('#e4ebf0', '#d3dde5'), uid=i)
+@scene('klant_ebike', 'Klant lacht op de nieuwe e-bike', 1, 'verhaal', 5)
+def _(i):
+    b = r(0, 320, W, 80, '#6d7782') + tree(80, 316, 1.4) + tree(570, 316, 1.5) + bigbike(210, 340, 2.4, '#0e6b5e', True) + person(262, 325, 170, 4, 5, 2, 2, long_hair=True, arms='hold')
+    return svg(b + cloud(180, 60) + cloud(470, 50, 1.2), uid=i)
+@scene('fatima_portret', 'Fatima met haar eerste e-bike', 1, 'verhaal', 5, sky=('#f4e3cf', '#f8eee0'))
+def _(i):
+    b = r(0, 330, W, 70, '#c9a07a') + bigbike(380, 335, 3.0, '#0e6b5e', True) + person(220, 380, 300, 3, 4, 3, 1, long_hair=True, arms='hold')
+    return svg(b, sky=('#f4e3cf', '#f8eee0'), uid=i)
+@scene('open_dag', 'Bezoekers bij de open dag', 1, 'evenement', 5, sky=('#e4ebf0', '#d3dde5'))
+def _(i):
+    b = r(0, 310, W, 90, '#8d99a5') + r(0, 0, W, 310, '#eef2f5') + r(40, 50, 560, 70, '#2f6f9f', 6) + txt(320, 96, 'OPEN DAG  ·  GRATIS FIETSCHECK', 28, '#fff')
+    for k in range(5): b += person(80+k*120, 360, 160+(k % 3)*14, k, k+1, k+2, k, arms='up' if k == 2 else 'hold', hat='#c8553d' if k == 0 else None)
+    return svg(b, sky=('#e4ebf0', '#d3dde5'), uid=i)
+@scene('fietscheck', 'Medewerker checkt de remmen', 1, 'evenement', 4, sky=('#e4ebf0', '#d3dde5'))
+def _(i):
+    b = r(0, 310, W, 90, '#8d99a5') + bike(280, 330, 2.1, '#7b5ea7') + person(210, 345, 210, 1, 0, 1, 0, arms='point', hat='#2f6f9f') + person(480, 345, 190, 0, 3, 4, 2, arms='down')
+    return svg(b, sky=('#e4ebf0', '#d3dde5'), uid=i)
+@scene('gezin_bakfiets', 'Gezin met kinderen op de bakfiets', 1, 'nieuw_product', 5)
+def _(i):
+    b = r(0, 330, W, 70, '#6d7782') + tree(60, 326, 1.4) + tree(590, 326, 1.4) + r(250, 220, 190, 80, '#4b8b5a', 8) + bike(180, 345, 1.7, '#4b8b5a') + c_(440, 345, 32, 'none', 'stroke="#222" stroke-width="4"')
+    b += person(235, 300, 120, 4, 5, 3, 2, arms='hold') + person(300, 265, 70, 0, 2, 5, 0) + person(360, 265, 66, 3, 4, 0, 0, long_hair=True)
+    return svg(b + cloud(150, 60) + cloud(450, 70), uid=i)
+@scene('student_fiets', 'Student met fiets bij de campus', 1, 'aanbieding', 5)
+def _(i):
+    b = r(0, 330, W, 70, '#8d99a5') + building(300, 90, 320, 240, '#b86a4f', win='#e8f1f6', rows=3, cols=5) + poly([(280, 90), (460, 30), (640, 90)], '#7a3020') + bike(110, 350, 1.9, '#c8553d') + person(185, 340, 200, 2, 1, 4, 3, arms='hold')
+    b += r(45, 90, 150, 60, '#fff', 8, 'stroke="#c0c8cf" stroke-width="2"') + txt(120, 130, 'STUDENT -15%', 20, '#c8553d')
+    return svg(b + cloud(250, 50), uid=i)
+@scene('team_winkel', 'Team voor het fietshuis', 1, 'verhaal', 3)
+def _(i):
+    b = r(0, 320, W, 80, '#8d99a5') + r(60, 90, 520, 230, '#d9b99b') + r(60, 90, 520, 50, '#0e6b5e') + txt(320, 126, 'FIETSHUIS DE TRAPPER', 26, '#fff') + r(120, 170, 160, 150, '#cfe6f3', 4) + r(360, 170, 160, 150, '#cfe6f3', 4)
+    for k in range(4): b += person(150+k*110, 380, 190-(k % 2)*12, k, k+2, [3, 0, 5, 1][k], k, arms='down' if k % 2 else 'hold', long_hair=(k == 2))
+    return svg(b, uid=i)
+
 def build():
     out = {}
     for k, v in S.items():
@@ -404,18 +509,51 @@ MAP = {
  'n15-f1': 'luchtfoto_terrein', 'n15-f2': 'wethouder_bord', 'n15-v1': 'terrein_impressie',
 }
 
+CAMPAGNE = [
+ dict(id='c01', cat='aanbieding', titel='Winteractie: 20% korting op alle fietsverlichting', intro='Fietshuis De Trapper geeft tot en met zondag 20% korting op alle voor- en achterlichten. Een set kost nu vanaf 12 euro in plaats van 15 euro.',
+      nw=(4,5,4,1,5), ij=(3,4,4,3), sens=2, tg=72, emo='blij', b=[('foto','verlichting',5),('foto','prijsbord',3),('video','donker_fietspad',3)]),
+ dict(id='c02', cat='nieuw_product', titel='Nieuw binnen: e-bike Vecht Cruiser met 100 kilometer bereik', intro='De Vecht Cruiser is de nieuwe e-bike van De Trapper. Met een volle accu rijd je tot 100 kilometer. Prijs: 2.199 euro, proefrit mogelijk in de winkel.',
+      nw=(5,4,2,3,4), ij=(2,4,5,4), sens=2, tg=168, emo='blij', b=[('foto','ebike_product',5),('foto','showroom',3),('video','klant_ebike',5)]),
+ dict(id='c03', cat='evenement', titel='Open dag in de werkplaats: gratis fietscheck op zaterdag', intro='Op zaterdag van 10.00 tot 16.00 uur staat de werkplaats open. Monteurs checken je remmen, banden en verlichting gratis en laten zien hoe je zelf kleine reparaties doet.',
+      nw=(3,5,3,3,3), ij=(3,4,4,4), sens=3, tg=72, emo='blij', b=[('foto','open_dag',5),('foto','werkplaats_leeg',3),('video','fietscheck',4)]),
+ dict(id='c04', cat='verhaal', titel='Fatima fietst na dertig jaar weer: haar eerste e-bike', intro='Fatima (62) uit Vechtwaard stapte dertig jaar niet op een fiets. Nu fietst ze elke dag naar haar werk op een e-bike van De Trapper. Een klantverhaal over durven beginnen.',
+      nw=(2,4,1,5,3), ij=(2,4,5,5), sens=2, tg=168, emo='blij', b=[('foto','fatima_portret',5),('foto','team_winkel',3),('video','klant_ebike',4)]),
+ dict(id='c05', cat='dienst', titel='Winterklaar-pakket: remmen, licht en banden voor 49 euro', intro='Het winterklaar-pakket van De Trapper bevat een remcontrole, nieuwe lampjes en een bandenspanningscheck. Afspraak maken kan online en duurt een kwartier.',
+      nw=(4,4,3,1,5), ij=(3,5,4,3), sens=3, tg=168, emo='neutraal', b=[('foto','monteur_band',5),('foto','werkplaats_leeg',3),('video','monteur_band',4)]),
+ dict(id='c06', cat='aanbieding', titel='Tweedehands fietsen vanaf 149 euro, met een jaar garantie', intro='Alle tweedehands fietsen bij De Trapper zijn nagekeken door de monteurs en krijgen een jaar garantie. De goedkoopste fiets kost 149 euro.',
+      nw=(5,3,2,1,3), ij=(5,4,3,2), sens=2, tg=168, emo='neutraal', b=[('foto','tweedehands',4),('foto','prijsbord',2),('video','team_winkel',3)]),
+ dict(id='c07', cat='seizoen', titel='Donkere dagen: zorg dat je gezien wordt', intro='In de herfst en winter gebeuren de meeste fietsongelukken in het donker. De Trapper helpt je met goede verlichting, reflectoren en een veilige set voor onderweg.',
+      nw=(3,4,3,1,5), ij=(4,4,4,3), sens=3, tg=96, emo='bezorgd', b=[('foto','donker_fietspad',4),('foto','verlichting',4),('video','donker_fietspad',3)]),
+ dict(id='c08', cat='verhaal', titel='Zo maakt monteur Daan een lekke band in drie minuten heel', intro='Monteur Daan laat in een korte video zien hoe je een lekke band plakt. Handig voor wie het zelf wil proberen of eens bij De Trapper wil binnenlopen.',
+      nw=(2,3,1,4,2), ij=(5,3,3,2), sens=2, tg=168, emo='blij', b=[('foto','monteur_band',5),('foto','werkplaats_leeg',3),('video','monteur_band',5)]),
+ dict(id='c09', cat='nieuw_product', titel='Proefrit bakfiets: probeer de nieuwe bakfiets met je gezin', intro='Op zaterdag kun je de nieuwe bakfiets uitproberen bij De Trapper. Er is plek voor twee kinderen en de bakfiets heeft een elektrische motor.',
+      nw=(4,4,2,4,3), ij=(2,5,4,2), sens=2, tg=96, emo='blij', b=[('foto','gezin_bakfiets',5),('foto','bakfiets_product',4),('video','gezin_bakfiets',4)]),
+ dict(id='c10', cat='aanbieding', titel='Studentenkorting: 15% op fietsen en sloten met je studentenpas', intro='Studenten krijgen bij De Trapper 15% korting op fietsen en sloten. Laat je studentenpas zien in de winkel en de korting staat meteen op de bon.',
+      nw=(5,3,3,1,3), ij=(5,2,2,1), sens=1, tg=168, emo='blij', b=[('foto','student_fiets',5),('foto','sloten_helmen',3),('video','student_fiets',3)]),
+]
+
 if __name__ == '__main__':
     here = os.path.dirname(os.path.abspath(__file__))
     lib = build()
     js = 'const BIB=' + json.dumps(lib, ensure_ascii=False, separators=(',', ':')) + ';\n'
     js += "const bibSrc=id=>BIB[id]?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(BIB[id].s):'';\n"
     open(os.path.join(here, 'beelden.js'), 'w', encoding='utf8').write(js)
-    data = json.load(open(os.path.join(here, 'data.json.txt'), encoding='utf8'))
+    data = [a for a in json.load(open(os.path.join(here, 'data.json.txt'), encoding='utf8')) if a['id'].startswith('n')]
     for a in data:
         for b in a['beelden']:
             sid = MAP[b['id']]
             b['bron'] = sid
             b['mensen'] = bool(lib[sid]['m'])
+    for c in CAMPAGNE:
+        bl = []
+        for k, (typ, bron, q) in enumerate(c['b'], 1):
+            e = dict(id=f"{c['id']}-{'v' if typ == 'video' else 'f'}{k}", type=typ, beschrijving=lib[bron]['l'], kwaliteit=q, bron=bron, mensen=bool(lib[bron]['m']))
+            if typ == 'video': e['duur_sec'] = 30
+            bl.append(e)
+        imp, nab, urg, hum, act = c['nw']; j, v, m, se = c['ij']
+        data.append(dict(id=c['id'], afdeling='campagne', categorie=c['cat'], titel_origineel=c['titel'], intro_origineel=c['intro'],
+            nieuwswaarde=dict(impact=imp, nabijheid=nab, conflict=urg, human_interest=hum, actualiteit=act), emotie=c['emo'], tijdgevoeligheid_uren=c['tg'],
+            interesse=dict(jongeren=j, volwassenen=v, midden=m, senioren=se), sensatie_potentieel=c['sens'], beelden=bl))
     json.dump(data, open(os.path.join(here, 'data.json.txt'), 'w', encoding='utf8'), ensure_ascii=False)
     print(len(lib), 'beelden,', sum(1 for v in lib.values() if v['m']), 'met mensen,', len(js), 'bytes')
     # contactvel

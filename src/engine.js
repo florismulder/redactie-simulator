@@ -24,6 +24,7 @@
     ctr_basis: 0.03,
     engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
     conversie: { nieuwsbrief_basis: 0.03 },
+    campagne: { bestel_basis: 0.028, actiewoorden: ['nu', 'bestel', 'bestellen', 'korting', 'gratis', 'actie', 'aanbieding', 'alleen', 'vandaag', 'proef', 'probeer', 'boek', 'reserveer', 'scoor', 'pak', 'ontdek'], per_woord: 0.07, prijs: 0.05, max: 1.3 },
     kanalen: {
       instagram: { dagbereik: 6000, zicht_basis: 0.30, halfwaarde_uur: 7, aandeel: { jongeren: 0.35, volwassenen: 0.35, midden: 0.20, senioren: 0.10 },
         kwaliteit_effect: 0.12, ctr_basis: 0.015, interactie_basis: 0.05, delen_basis: 0.006, max_tekens: 125, ideaal_min: 30, ideaal_max: 110, viraal_ruis: 0.25 },
@@ -96,6 +97,16 @@
     return { aantalWoorden: n, eenvoud, negatief: neg, positief: pos, woorden, sensatie };
   }
 
+  /* ---- campagne: oproep tot actie en prijs ---- */
+  const isCamp = a => !!a && a.afdeling === 'campagne';
+  function actieAnalyse(kop, R) {
+    const C = R.campagne || {}, lijst = C.actiewoorden || [], w = woordenVan(kop);
+    const gevonden = w.filter(x => lijst.some(a => x === a || (a.length > 4 && x.startsWith(a))));
+    const uniek = Array.from(new Set(gevonden)), prijs = /(€|\d\s?%|\d+\s?euro|korting|gratis)/i.test(String(kop));
+    const factor = clamp(1 + (C.per_woord || 0.07) * Math.min(uniek.length, 3) + (prijs ? (C.prijs || 0.05) : 0), 1, C.max || 1.3);
+    return { woorden: uniek, prijs, factor };
+  }
+
   /* ---- beeldfactor ---- */
   function beeldAnalyse(artikel, beeldIdx, R) {
     const b = (beeldIdx !== undefined && beeldIdx !== null && beeldIdx >= 0) ? artikel.beelden[beeldIdx] : null;
@@ -119,8 +130,9 @@
     const betrokken = L.betrokken_basis_sec * (0.85 + 0.06 * nw.human_interest) * (bld.type === 'video' ? 1.15 : 1);
     const ref = L.deel_onder_15_sec * L.onder_15_gem_sec + (1 - L.deel_onder_15_sec) * betrokken;
     const leestijd = Math.max(afhaak * L.onder_15_gem_sec + (1 - afhaak) * betrokken, ref * R.sensatie.leestijd_min);
+    const camp = isCamp(artikel), act = camp ? actieAnalyse(st.kop, R) : null;
     return {
-      kop, bld, afhaak, leestijd, nwF: 0.7 + 0.15 * nwGem,
+      kop, bld, afhaak, leestijd, nwF: 0.7 + 0.15 * nwGem, camp, act, actieF: act ? act.factor : 1,
       sensKliks: 1 + (R.sensatie.kliks_max - 1) * kop.sensatie * potentieel,
       plekNaam: st.plek, plekF: R.plek[st.plek], halfPos: R.plek.halfwaarde_uur[st.plek]
     };
@@ -185,7 +197,7 @@
           const bezoekers = R.publiek.dagbezoekers * R.publiek.aandeel[g] * R.uurcurves[g][klok] / somCurve[g];
           const gezien = bezoekers * R.plek.zicht_basis * S.plekF * dec;
           const interesseF = artikel.interesse[g] / 3;
-          const ctr = R.ctr_basis * interesseF * S.nwF * S.bld.factor * S.kop.eenvoud * S.kop.woorden * S.sensKliks;
+          const ctr = R.ctr_basis * interesseF * S.nwF * S.bld.factor * S.kop.eenvoud * S.kop.woorden * S.sensKliks * S.actieF;
           const bg = gezien * globaal * uurRuis;
           perGroep[g].bereik += bg; perGroep[g].kliks += bg * ctr;
           b += bg; k += bg * ctr;
@@ -196,7 +208,7 @@
       const bet = (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec);
       cDoor += kr * clamp(R.engagement.doorklik_basis * bet, 0, 0.6) * eRuis;
       cDeel += kr * R.engagement.delen_basis * bet * ((0.6 + 0.2 * hi) / 1.2) * eRuis;
-      cInschr += kr * R.conversie.nieuwsbrief_basis * bet * intGem * eRuis;
+      cInschr += kr * (S.camp ? R.campagne.bestel_basis : R.conversie.nieuwsbrief_basis) * bet * intGem * eRuis * S.actieF;
       const door = Math.floor(cDoor), deel = Math.floor(cDeel), inschr = Math.floor(cInschr);
       cDoor -= door; cDeel -= deel; cInschr -= inschr;
       verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door, deel, inschr, lees: Math.round(S.leestijd), gebeurtenis, actief: ingetrokkenOp === null });
@@ -228,7 +240,10 @@
     uitleg.push({ sleutel: 'woorden', label: 'Woorden in de kop', factor: K.woorden, tekst: K.negatief + ' negatief, ' + K.positief + ' positief: ' + pct(K.woorden) + ' kliks' });
     uitleg.push({ sleutel: 'sensatie', label: 'Sensatie in de kop', factor: S.sensKliks, tekst: K.sensatie < 0.05 ? 'Nuchtere kop' : 'Sensationele kop: kliks ' + pct(S.sensKliks) + ', maar meer lezers haken binnen 15 seconden af' });
     uitleg.push({ sleutel: 'betrokkenheid', label: 'Betrokkenheid van lezers', factor: (1 - S.afhaak) / (1 - R.leestijd.deel_onder_15_sec), tekst: Math.round((1 - S.afhaak) * 100) + '% van de lezers blijft langer dan 15 seconden. Dat bepaalt hoeveel lezers doorklikken, delen en zich inschrijven' });
-    uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: S.nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(S.nwF) + ')' });
+    if (S.camp) {
+      uitleg.push({ sleutel: 'nieuwswaarde', label: 'Aantrekkelijkheid van het aanbod', factor: S.nwF, tekst: 'Een sterk, lokaal en actueel aanbod scoort beter (' + pct(S.nwF) + ')' });
+      uitleg.push({ sleutel: 'actie', label: 'Oproep tot actie', factor: S.actieF, tekst: S.act.woorden.length || S.act.prijs ? (S.act.woorden.length ? 'Actiewoord: ' + S.act.woorden.join(', ') : 'Geen actiewoord') + (S.act.prijs ? ', prijs of korting genoemd' : '') + ' (' + pct(S.actieF) + ' kliks en bestellingen)' : 'Geen oproep tot actie en geen prijs of korting genoemd' });
+    } else uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: S.nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(S.nwF) + ')' });
 
     return {
       bereik: totBereik, kliks: totKliks, ctr: totBereik ? totKliks / totBereik : 0,
@@ -276,7 +291,8 @@
       }
       const sens = 1 + 0.12 * ka.sensatie;
       const kijk = kan === 'instagram' ? 2.5 + 2 * (juist && b ? (b.kwaliteit || 3) / 5 : 0.4) : K.duur_sec * clamp(0.25 + 0.3 * (tf - 0.8) + 0.08 * ((b && b.kwaliteit || 3) - 3) - 0.15 * ka.sensatie, 0.12, 0.8);
-      return { ka, b, juist, bf, tf, tl, kwal: Math.max(0.4, bf * tf * ka.woorden * sens * nwF), kijk, sens };
+      const camp = isCamp(artikel), act = camp ? actieAnalyse(st.kop, R) : null;
+      return { ka, b, juist, bf, tf, tl, camp, act, kwal: Math.max(0.4, bf * tf * ka.woorden * sens * nwF * (act ? act.factor : 1)), kijk, sens };
     }
     let st = { kop: keuze.kop, beeld: keuze.beeld === undefined ? -1 : keuze.beeld };
     let S = staat(st), ingetrokkenOp = null;
@@ -313,7 +329,7 @@
       cK += br * K.ctr_basis * kwE * eRuis * intGem; cD += br * K.delen_basis * kwE * eRuis; cI += br * K.interactie_basis * kwE * eRuis; 
       const kr = Math.min(Math.floor(cK), br), deel = Math.floor(cD), ia = Math.floor(cI);
       cK -= kr; cD -= deel; cI -= ia;
-      cA += kr * R.conversie.nieuwsbrief_basis * 1.5 * intGem * eRuis;
+      cA += kr * (S.camp ? R.campagne.bestel_basis : R.conversie.nieuwsbrief_basis) * 1.5 * intGem * eRuis * (S.act ? S.act.factor : 1);
       const inschr = Math.floor(cA); cA -= inschr;
       verloop.push({ uur: klok, uurNa: t, bereik: br, kliks: kr, door: 0, deel, inschr, int: ia, lees: Math.round(S.kijk), gebeurtenis, actief: ingetrokkenOp === null });
       tB += br; tK += kr; tD += deel; tI += inschr; tA += ia; kijkSom += br * S.kijk;
@@ -328,7 +344,10 @@
     uitleg.push({ sleutel: 'beeld', label: kan === 'instagram' ? 'Foto' : 'Video', factor: S.bf, tekst: !S.b ? 'Zonder beeld bereik je veel minder mensen' : (S.juist ? (kan === 'instagram' ? 'Foto' : 'Video') + ' past bij ' + naam + ', kwaliteit ' + (S.b.kwaliteit || 3) + ' van 5' + (S.b.mensen ? ', mensen in beeld doen het hier goed' : ', zonder mensen in beeld') : 'Dit beeldtype past minder bij ' + naam) });
     uitleg.push({ sleutel: 'tekst', label: kan === 'instagram' ? 'Bijschrift' : 'Haak in de eerste seconden', factor: S.tf, tekst: S.tl });
     uitleg.push({ sleutel: 'woorden', label: 'Woorden en sensatie', factor: S.ka.woorden * S.sens, tekst: S.ka.negatief + ' negatief, ' + S.ka.positief + ' positief' + (S.ka.sensatie > 0.05 ? ', sensationeel: meer bereik, minder kijktijd' : '') });
-    uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(nwF) + ')' });
+    if (S.camp) {
+      uitleg.push({ sleutel: 'nieuwswaarde', label: 'Aantrekkelijkheid van het aanbod', factor: nwF, tekst: 'Een sterk, lokaal en actueel aanbod scoort beter (' + pct(nwF) + ')' });
+      uitleg.push({ sleutel: 'actie', label: 'Oproep tot actie', factor: S.act.factor, tekst: S.act.woorden.length || S.act.prijs ? (S.act.woorden.length ? 'Actiewoord: ' + S.act.woorden.join(', ') : 'Geen actiewoord') + (S.act.prijs ? ', prijs of korting genoemd' : '') + ' (' + pct(S.act.factor) + ')' : 'Geen oproep tot actie en geen prijs of korting genoemd' });
+    } else uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(nwF) + ')' });
     if (kan === 'tiktok') uitleg.push({ sleutel: 'viraal', label: 'Het algoritme', factor: viraal, tekst: viraal > 1.4 ? 'Het algoritme duwde deze video veel verder dan gewoon. Dat is deels geluk' : viraal < 0.75 ? 'Het algoritme liet deze video snel los. Dat is deels pech' : 'Het algoritme behandelde deze video gewoon. Let op: bij TikTok verschilt hetzelfde idee soms enorm per keer' });
     return {
       kanaal: kan, bereik: tB, kliks: tK, ctr: tB ? tK / tB : 0,

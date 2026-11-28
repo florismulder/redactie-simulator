@@ -1,3 +1,4 @@
+const CAMP_B=30000,CAMP_K=600,CAMP_I=14;
 /* ================= Rapportage: doelen, begeleiding en advies =================
    Student: tabblad Rapport op de resultatenmonitor. Docent: tab Rapporten.
    Stappen volgen je lessen: welke data nodig, berekenen, doel behaald en waarom, acties, advies. */
@@ -11,7 +12,7 @@ const DATAITEMS=[
   {id:'doorkliks',naam:'Doorkliks naar een ander bericht',uitleg:'Lezers die na het lezen verder klikten.'},
   {id:'gedeeld',naam:'Keer gedeeld',uitleg:'Hoe vaak lezers het bericht deelden.'},
   {id:'engagementrate',naam:'Betrokkenheid',uitleg:'Doorkliks en delen samen, per 100 lezers.'},
-  {id:'inschrijvingen',naam:'Nieuwsbriefinschrijvingen',uitleg:'Lezers die zich inschreven voor de nieuwsbrief.'},
+  {id:'inschrijvingen',get naam(){return isCamp()?'Bestellingen':'Nieuwsbriefinschrijvingen'},get uitleg(){return isCamp()?'Klanten die iets bestelden na een klik.':'Lezers die zich inschreven voor de nieuwsbrief.'}},
   {id:'interacties',naam:'Interacties',uitleg:'Likes, reacties en opgeslagen op Instagram en TikTok.'},
   {id:'kanaal',naam:'Kanaal',uitleg:'Waar het bericht stond: website, Instagram of TikTok.',ruis:true},
   {id:'plek',naam:'Plek op de homepage',uitleg:'Waar het bericht stond.',ruis:true},
@@ -28,7 +29,7 @@ const DOELTYPES={
   interacties:{naam:'Interacties',eenheid:'interacties',data:['interacties'],tekst:t=>`Minimaal ${fmt(t)} interacties (likes, reacties en opgeslagen)`,w:T=>T.ia},
   gedeeld:{naam:'Gedeeld',eenheid:'keer',data:['gedeeld'],tekst:t=>`Minimaal ${fmt(t)} keer gedeeld`,w:T=>T.dl},
   engagement:{naam:'Betrokkenheid',eenheid:'%',data:['engagementrate'],tekst:t=>`Een betrokkenheid van minimaal ${dec(t,1)}%`,w:T=>T.eng*100},
-  inschrijvingen:{naam:'Inschrijvingen',eenheid:'inschrijvingen',data:['inschrijvingen'],tekst:t=>`Minimaal ${fmt(t)} nieuwsbriefinschrijvingen`,w:T=>T.ins}};
+  inschrijvingen:{get naam(){return isCamp()?'Bestellingen':'Inschrijvingen'},get eenheid(){return isCamp()?'bestellingen':'inschrijvingen'},data:['inschrijvingen'],tekst:t=>isCamp()?`Minimaal ${fmt(t)} bestellingen`:`Minimaal ${fmt(t)} nieuwsbriefinschrijvingen`,w:T=>T.ins}};
 const CRITERIA=['Selecteert de relevante data met betrekking tot bereik en effect uit een bredere datacollectie','Analyseert het bereik en effect van de content op een juiste manier','Bepaalt of de vooraf gestelde doelen zijn behaald','Bedenkt acties die het effect en bereik kunnen vergroten of verbeteren','Deelt een duidelijk advies met de opdrachtgever'];
 /* de vier rondes: veel, middel, weinig, geen */
 const RONDES=[
@@ -37,7 +38,8 @@ const RONDES=[
   {naam:'Ronde 3: weinig begeleiding',begeleiding:'weinig',artikelen:['n07','n10','n12','n14','n15'],doelen:[['bereik',3000],['leestijd',35],['doorkliks',40],['inschrijvingen',6]]},
   {naam:'Ronde 4: geen begeleiding (zoals de proeve)',begeleiding:'geen',artikelen:['n01','n02','n04','n08','n10','n12'],doelen:[['bereik',4000],['klikpercentage',5.5],['engagement',21],['inschrijvingen',8]]}];
 const RONDE_SOCIAL={eigen:true,naam:'Bonusronde: website, Instagram en TikTok',begeleiding:'weinig',artikelen:['n02','n05','n09','n12'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',18000],['kliks',350],['interacties',1500],['inschrijvingen',10]]};
-const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website'],eigen:!!r.eigen});
+const RONDE_CAMPAGNE={scenario:'campagne',eigen:true,naam:'Campagneronde: Fietshuis De Trapper',begeleiding:'weinig',artikelen:['c01','c02','c03','c05','c09'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',CAMP_B],['kliks',CAMP_K],['inschrijvingen',CAMP_I]]};
+const rondeObj=(r,i)=>({scenario:r.scenario||'nieuws',naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website'],eigen:!!r.eigen});
 
 /* ---- cijfers uit de publicaties ---- */
 function totalen(pubs){const T={b:0,k:0,l:0,kw:0,dk:0,dl:0,dlw:0,ins:0,ia:0};
@@ -222,7 +224,8 @@ function formKanalen(){const k=Object.keys(KANALEN).filter(x=>val('f-kn-'+x));re
 function formDoelen(){if(!val('f-dl-aan'))return [];
   return [0,1,2,3].filter(i=>val('f-dl-on'+i)).map((i,k)=>({id:'d'+(k+1),type:val('f-dl-t'+i),drempel:num(val('f-dl-v'+i))||0}))}
 function rondesHTML(){return `<div class="card2" style="margin-top:6px"><b>De vier rondes</b><p>Maakt vier opdrachten met doelen: veel, middel, weinig en geen begeleiding. Ronde 4 is zoals de proeve.</p><button class="dbtn" data-drondes="1" style="margin-left:0;justify-self:start">Maak de vier rondes</button></div>
-  <div class="card2" style="margin-top:6px"><b>Bonusronde met alle kanalen</b><p>Vier berichten op de website, Instagram en TikTok. Weinig begeleiding. Studenten leren dat elk kanaal anders werkt.</p><button class="dbtn" data-dbonus="1" style="margin-left:0;justify-self:start">Maak de bonusronde</button></div>`}
+  <div class="card2" style="margin-top:6px"><b>Bonusronde met alle kanalen</b><p>Vier berichten op de website, Instagram en TikTok. Weinig begeleiding. Studenten leren dat elk kanaal anders werkt.</p><button class="dbtn" data-dbonus="1" style="margin-left:0;justify-self:start">Maak de bonusronde</button></div>
+  <div class="card2" style="margin-top:6px"><b>Campagneronde voor een bedrijf</b><p>Vijf campagnes voor het fictieve Fietshuis De Trapper op de website, Instagram en TikTok. Doelen zijn bereik, kliks en bestellingen. Weinig begeleiding.</p><button class="dbtn" data-dcamp="1" style="margin-left:0;justify-self:start">Maak de campagneronde</button></div>`}
 async function maakRondes(lijst,eerste){
   lijst=lijst||RONDES;eerste=eerste||'Ronde 1:';
   if(st.opdrachten.some(o=>o.naam.startsWith(eerste))){toast('Deze ronde bestaat al');return}
@@ -233,10 +236,11 @@ async function maakRondes(lijst,eerste){
   }else{lijst.map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+Math.floor(Math.random()*1e6)},r)));renderDocent();toast('Klaar. Activeer er één.')}
 }
 dc.addEventListener('click',e=>{
-  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes],[data-dbonus]');if(!t)return;const D=t.dataset;
+  const t=e.target.closest('[data-rsel],[data-rev],[data-reopen],[data-drondes],[data-dbonus],[data-dcamp]');if(!t)return;const D=t.dataset;
   if(D.rsel){st.dsel=D.rsel;renderDocent()}
   else if(D.drondes)maakRondes();
   else if(D.dbonus)maakRondes([RONDE_SOCIAL],'Bonusronde:');
+  else if(D.dcamp)maakRondes([RONDE_CAMPAGNE],'Campagneronde:');
   else if(D.rev){
     const crit=CRITERIA.map((c,i)=>{const v=val('f-rv-'+i);return v===''?null:+v}),b={criteria:crit,opmerking:String(val('f-rv-op')||'')};
     if(typeof dAct==='function'&&st.rol==='docent')dAct('rsim_docent_review',{p_report:D.rev,p_beoordeling:b},'Beoordeling opgeslagen');
@@ -248,5 +252,5 @@ dc.addEventListener('click',e=>{
   }
 });
 /* demo: de vier rondes staan meteen klaar, met directe tijd zodat het rapport meteen opengaat */
-if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))
+if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL,RONDE_CAMPAGNE]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))
   const bo=st.opdrachten.find(x=>/^Bonusronde/.test(x.naam));if(bo){st.actief=bo.id;st.kanaal='website';sel0();st.draft=newDraft(st.sel)}}
