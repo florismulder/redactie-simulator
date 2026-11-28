@@ -22,7 +22,7 @@ const klas={naam:'MR2A',code:'VW-MR2A',modus:'versneld',vers:60};
 const st={sel:'n02',draft:null,res:0,docOk:false,dtab:'tijd',dsel:'jij',dpub:0,fv:{},
   actief:'o1',
   opdrachten:[
-    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop']},
+    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],kanalen:['website','instagram','tiktok']},
     {id:'o2',naam:'Kop en beeld: wat doet het?',doel:'bereik',artikelen:['n01','n03','n05','n08','n13'],modus:'versneld',max:2,metrics:['bereik','kliks','verloop']}],
   pubs:[
     {id:'n01',slug:'vechtbrug-twee-weken-dicht-zo-rijd-je-om',kop:'Vechtbrug twee weken dicht: zo rijd je om',beeld:-1,uur:7,plek:'boven',seed:1111,ex:true,tPub:0,wijzigingen:[{uurNa:3,beeld:0}]},
@@ -122,7 +122,7 @@ function renderSite(bar){
   const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
-  const low=[0,1,2,3].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
+  const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
   return `<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span>${bar}<span class="r">vr 20 november</span></div>
   <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
   <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
@@ -167,14 +167,14 @@ function renderAll(){renderSys();renderWeb();renderRes();syncPrev()}
 const BZ=10, mons=[...document.querySelectorAll('.mon')], inners=[0,1,2].map(i=>$('#s'+i));
 const hs=[...document.querySelectorAll('.hs')];
 let zoomed=-1;
-const scaleFor=w=>(w-2*BZ)/1280;
+const scaleFor=w=>(w-2*BZ)/1600;
 const ASP=2576/1438;
 const QUADS=[[[102,580],[926,517],[943,898],[172,1041]],[[949,518],[1658,517],[1644,897],[963,894]],[[1679,539],[2494,605],[2431,1049],[1664,899]]];
 function homog(src,dst){const A=[],b=[];for(let k=0;k<4;k++){const [x,y]=src[k],[u,v]=dst[k];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v)}
   const n=8;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];
     for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
   const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let t=b[i];for(let c=i+1;c<n;c++)t-=A[i][c]*x[c];x[i]=t/A[i][i]}return x}
-function place(k){const src=[[0,0],[1280,0],[1280,800],[0,800]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
+function place(k){const src=[[0,0],[1600,0],[1600,1000],[0,1000]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
   $('#p'+i).style.transform=`matrix3d(${h[0]},${h[3]},0,${h[6]},${h[1]},${h[4]},0,${h[7]},0,0,1,0,${h[2]},${h[5]},0,1)`})}
 function fit(){const sg=$('#stage'),p=$('#photo');const W=sg.clientWidth,H=sg.clientHeight;let w=Math.min(W,H*ASP),h=w/ASP;p.style.width=w+'px';p.style.height=h+'px';place(w/2576)}
 function target(){const W=innerWidth,H=innerHeight-48-16;let w=Math.min(W,H*1.6),h=w/1.6;return {w,h,l:(W-w)/2,t:48+(H-h)/2+8}}

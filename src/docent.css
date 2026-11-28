@@ -131,7 +131,7 @@
 .web .mast .wbar{display:inline-flex;gap:4px;background:rgba(0,0,0,.22);padding:3px;border-radius:99px;margin-left:12px;opacity:1}
 .web .mast .wbar button{border:0;background:transparent;color:#fff;font:600 13px var(--f-ui);padding:5px 14px;border-radius:99px;cursor:pointer}
 .web .mast .wbar button.on{background:#fff;color:var(--brand)}
-.socmain{padding:28px 56px;display:flex;flex-direction:column;gap:22px;height:calc(800px - 68px);box-sizing:border-box;font-family:var(--f-ui)}
+.socmain{padding:28px 56px;display:flex;flex-direction:column;gap:22px;height:calc(1000px - 68px);box-sizing:border-box;font-family:var(--f-ui)}
 .socmain .prof{display:flex;align-items:center;gap:16px}
 .socmain .av{width:64px;height:64px;border-radius:50%;background:var(--brand);color:#fff;font:700 28px var(--f-news);display:flex;align-items:center;justify-content:center}
 .socmain .prof b{display:block;font-size:20px}.socmain .prof span{color:#6b7885;font-size:14px}

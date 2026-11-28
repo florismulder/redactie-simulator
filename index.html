@@ -29,7 +29,7 @@ button{font-family:inherit}
 .stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
 .photo{position:relative;flex:none;border-radius:6px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .photo img{position:absolute;inset:0;width:100%;height:100%;display:block}
-.pv{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;pointer-events:none;overflow:hidden;background:#fff;filter:brightness(.95) contrast(1.03);backface-visibility:hidden}
+.pv{position:absolute;left:0;top:0;width:1600px;height:1000px;transform-origin:0 0;pointer-events:none;overflow:hidden;background:#fff;filter:brightness(.95) contrast(1.03);backface-visibility:hidden}
 .photo svg{position:absolute;inset:0;width:100%;height:100%}
 .hs{fill:rgba(47,183,163,0);stroke:rgba(47,183,163,0);stroke-width:5;cursor:pointer;transition:fill .2s,stroke .2s}
 .hs:hover{fill:rgba(47,183,163,.20);stroke:#2fb7a3}
@@ -38,7 +38,7 @@ button{font-family:inherit}
   transition:left .42s cubic-bezier(.2,.7,.2,1),top .42s cubic-bezier(.2,.7,.2,1),width .42s cubic-bezier(.2,.7,.2,1),height .42s cubic-bezier(.2,.7,.2,1),opacity .35s}
 .mon.zoomed{opacity:1;visibility:visible;z-index:60;pointer-events:auto;box-shadow:0 0 0 2px #232b33,0 30px 80px rgba(0,0,0,.7)}
 .screen{position:relative;width:100%;height:100%;overflow:hidden;border-radius:4px;background:#fff}
-.inner{position:absolute;left:0;top:0;width:1280px;height:800px;transform-origin:0 0;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
+.inner{position:absolute;left:0;top:0;width:1600px;height:1000px;transform-origin:0 0;transition:transform .42s cubic-bezier(.2,.7,.2,1)}
 .bar{position:fixed;left:0;right:0;top:0;height:calc(48px + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));
   display:none;align-items:center;gap:8px;background:rgba(10,13,16,.92);z-index:70;backdrop-filter:blur(6px)}
 .bar.on{display:flex}
@@ -55,7 +55,7 @@ button{font-family:inherit}
 }
 
 /* ---------- Scherm 1: redactiesysteem ---------- */
-.cms{width:1280px;height:800px;background:var(--paper);color:var(--ink);font-size:14px;display:flex;flex-direction:column}
+.cms{width:1600px;height:1000px;background:var(--paper);color:var(--ink);font-size:14px;display:flex;flex-direction:column}
 .cms .hd{height:48px;background:#1f2a33;color:#fff;display:flex;align-items:center;padding:0 20px;gap:14px;flex:none}
 .cms .hd b{font-family:var(--f-head);font-size:17px}
 .cms .hd span{color:#9fb0bc;font-size:13px}
@@ -83,7 +83,8 @@ button{font-family:inherit}
 .img.sel{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,107,94,.18)}
 .ph{position:relative;height:70px;border-radius:5px;background:linear-gradient(135deg,#d3dae0,#bcc6ce);display:flex;align-items:center;justify-content:center;color:#6b7885;font-size:12px;overflow:hidden}
 .ph .play{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
-.img .d{line-height:1.25;min-height:30px}
+.img .ph{height:250px}
+.img .d{line-height:1.25;min-height:30px;font-size:13px}
 .img .k{color:var(--mute)}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .cms input[type=range]{width:100%;accent-color:var(--brand)}
@@ -100,7 +101,7 @@ button{font-family:inherit}
 .btn:hover{background:var(--brand2)}
 
 /* ---------- Scherm 2: website ---------- */
-.web{width:1280px;height:800px;background:#fff;color:#1a1f24;font-family:var(--f-ui);overflow:hidden}
+.web{width:1600px;height:1000px;background:#fff;color:#1a1f24;font-family:var(--f-ui);overflow:hidden}
 .web .mast{background:var(--brand);color:#fff;padding:14px 56px;display:flex;align-items:baseline;gap:18px}
 .web .mast b{font:700 36px var(--f-news);letter-spacing:-.01em}
 .web .mast span{opacity:.8;font-size:13px}
@@ -108,24 +109,24 @@ button{font-family:inherit}
 .web .nav{display:flex;gap:26px;padding:0 56px;border-bottom:1px solid #e1e5e9;font-weight:600;font-size:14px}
 .web .nav a{padding:11px 0;color:#37424c}
 .web .nav a.on{color:var(--brand);box-shadow:inset 0 -3px 0 var(--brand)}
-.web .main{padding:16px 56px;display:grid;gap:14px}
+.web .main{padding:22px 56px;display:grid;gap:22px}
 .web .top2{display:grid;grid-template-columns:2fr 1fr;gap:28px}
-.web .hero .ph{height:166px;border-radius:4px;font-size:14px}
-.web .hero h1{font:700 28px/1.15 var(--f-news);margin:8px 0 4px}
+.web .hero .ph{height:300px;border-radius:4px;font-size:14px}
+.web .hero h1{font:700 32px/1.15 var(--f-news);margin:12px 0 6px}
 .web .hero p{margin:0;color:#56626d;font-size:15px}
-.web .side h4,.web h4.sec{margin:0 0 8px;font:700 12px var(--f-ui);text-transform:uppercase;letter-spacing:.08em;color:var(--brand)}
-.web .side li{list-style:none;padding:8px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
+.web .side h4,.web h4.sec{margin:0 0 10px;font:700 12px var(--f-ui);text-transform:uppercase;letter-spacing:.08em;color:var(--brand)}
+.web .side li{list-style:none;padding:10px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
 .web .side ul{margin:0;padding:0}
 .web .mid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-.web .card .ph{height:76px;border-radius:4px}
-.web .card h3{font:700 17px/1.2 var(--f-news);margin:6px 0 0}
+.web .card .ph{height:130px;border-radius:4px}
+.web .card h3{font:700 19px/1.2 var(--f-news);margin:8px 0 0}
 .web .low{display:grid;grid-template-columns:1fr 1fr;gap:6px 28px}
-.web .low div{padding:7px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
+.web .low div{padding:9px 0;border-bottom:1px solid #eceff2;font:600 16px/1.3 var(--f-news)}
 .web .empty{background:repeating-linear-gradient(135deg,#f3f5f7 0 10px,#eef1f3 10px 20px);border-radius:4px;color:#8793a0;display:flex;align-items:center;justify-content:center;font-size:13px;min-height:44px}
 .cat{font:700 11px var(--f-ui);text-transform:uppercase;letter-spacing:.07em;color:var(--brand)}
 
 /* ---------- Scherm 3: resultaten ---------- */
-.res{width:1280px;height:800px;background:#0f1720;color:#e6edf3;padding:22px 28px;display:flex;flex-direction:column;gap:16px;font-size:14px}
+.res{width:1600px;height:1000px;background:#0f1720;color:#e6edf3;padding:22px 28px;display:flex;flex-direction:column;gap:16px;font-size:14px}
 .res .head{display:flex;align-items:baseline;gap:14px}
 .res .head b{font:700 22px var(--f-head)}
 .res .head span{color:#8aa0b2}
@@ -302,7 +303,7 @@ table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 .web .mast .wbar{display:inline-flex;gap:4px;background:rgba(0,0,0,.22);padding:3px;border-radius:99px;margin-left:12px;opacity:1}
 .web .mast .wbar button{border:0;background:transparent;color:#fff;font:600 13px var(--f-ui);padding:5px 14px;border-radius:99px;cursor:pointer}
 .web .mast .wbar button.on{background:#fff;color:var(--brand)}
-.socmain{padding:28px 56px;display:flex;flex-direction:column;gap:22px;height:calc(800px - 68px);box-sizing:border-box;font-family:var(--f-ui)}
+.socmain{padding:28px 56px;display:flex;flex-direction:column;gap:22px;height:calc(1000px - 68px);box-sizing:border-box;font-family:var(--f-ui)}
 .socmain .prof{display:flex;align-items:center;gap:16px}
 .socmain .av{width:64px;height:64px;border-radius:50%;background:var(--brand);color:#fff;font:700 28px var(--f-news);display:flex;align-items:center;justify-content:center}
 .socmain .prof b{display:block;font-size:20px}.socmain .prof span{color:#6b7885;font-size:14px}
@@ -850,7 +851,7 @@ function renderSite(bar){
   const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
-  const low=[0,1,2,3].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
+  const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">Ruimte voor nieuws</div>`).join('');
   return `<div class="web"><div class="mast"><b>Vechtwaard</b><span>Nieuws uit de regio</span>${bar}<span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div>
   <div class="nav"><a class="on">Nieuws</a><a>Sport</a><a>Shownieuws</a><a>Tech</a><a>Mode</a></div>
   <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>Meest gelezen</h4><ul><li>Gemeente deelt nieuwe plannen voor de Oosterhaven</li><li>Voetbalclub wint derby in extremis</li><li>Weekmarkt krijgt een extra dag</li><li>Fietspad langs de Vecht wordt verbreed</li></ul></div></div>
@@ -895,14 +896,14 @@ function renderAll(){renderSys();renderWeb();renderRes();syncPrev()}
 const BZ=10, mons=[...document.querySelectorAll('.mon')], inners=[0,1,2].map(i=>$('#s'+i));
 const hs=[...document.querySelectorAll('.hs')];
 let zoomed=-1;
-const scaleFor=w=>(w-2*BZ)/1280;
+const scaleFor=w=>(w-2*BZ)/1600;
 const ASP=2576/1438;
 const QUADS=[[[102,580],[926,517],[943,898],[172,1041]],[[949,518],[1658,517],[1644,897],[963,894]],[[1679,539],[2494,605],[2431,1049],[1664,899]]];
 function homog(src,dst){const A=[],b=[];for(let k=0;k<4;k++){const [x,y]=src[k],[u,v]=dst[k];A.push([x,y,1,0,0,0,-u*x,-u*y]);b.push(u);A.push([0,0,0,x,y,1,-v*x,-v*y]);b.push(v)}
   const n=8;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];
     for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
   const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let t=b[i];for(let c=i+1;c<n;c++)t-=A[i][c]*x[c];x[i]=t/A[i][i]}return x}
-function place(k){const src=[[0,0],[1280,0],[1280,800],[0,800]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
+function place(k){const src=[[0,0],[1600,0],[1600,1000],[0,1000]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
   $('#p'+i).style.transform=`matrix3d(${h[0]},${h[3]},0,${h[6]},${h[1]},${h[4]},0,${h[7]},0,0,1,0,${h[2]},${h[5]},0,1)`})}
 function fit(){const sg=$('#stage'),p=$('#photo');const W=sg.clientWidth,H=sg.clientHeight;let w=Math.min(W,H*ASP),h=w/ASP;p.style.width=w+'px';p.style.height=h+'px';place(w/2576)}
 function target(){const W=innerWidth,H=innerHeight-48-16;let w=Math.min(W,H*1.6),h=w/1.6;return {w,h,l:(W-w)/2,t:48+(H-h)/2+8}}
