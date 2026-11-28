@@ -29,7 +29,7 @@ const dec=(n,d=2)=>n.toFixed(d).replace('.',',');
 const NOW0=Date.now();
 
 /* ---- klas, opdrachten, studenten (demo) ---- */
-const klas={naam:'MR2A',code:'VW-MR2A',modus:'versneld',vers:60};
+const klas={naam:'MR324',code:'VW-MR324',modus:'versneld',vers:60};
 const st={sel:'n02',draft:null,res:0,docOk:false,dtab:'tijd',dsel:'jij',dpub:0,fv:{},
   actief:'o1',
   opdrachten:[
