@@ -58,6 +58,7 @@ button{font-family:inherit}
 .cms{width:1600px;height:1000px;background:var(--paper);color:var(--ink);font-size:14px;display:flex;flex-direction:column}
 .cms .hd{height:48px;background:#1f2a33;color:#fff;display:flex;align-items:center;padding:0 20px;gap:14px;flex:none}
 .cms .hd b{font-family:var(--f-head);font-size:17px}
+.cms .hd b.clk{font:700 14px var(--f-ui);color:#fff;background:#2e7d6f;padding:3px 9px;border-radius:6px}
 .cms .hd span{color:#9fb0bc;font-size:13px}
 .cms .hd .r{margin-left:auto}
 .cms .body{flex:1;min-height:0;display:grid;grid-template-columns:400px 1fr}
@@ -844,6 +845,8 @@ const actieveOpdracht=()=>st.opdrachten.find(o=>o.id===st.actief)||st.opdrachten
 const scn=()=>SCN[(actieveOpdracht()||{}).scenario||'nieuws']||SCN.nieuws,isCamp=()=>((actieveOpdracht()||{}).scenario)==='campagne';
 const tm=p=>{const o=(p&&st.opdrachten.find(x=>x.id===p.opdracht))||actieveOpdracht()||{};return {modus:o.modus||klas.modus,vers:klas.vers}};
 function tmLabel(){const t=tm();return t.modus==='direct'?'direct (24 uur meteen zichtbaar)':t.modus==='echt'?'echte tijd (1 uur is 1 uur)':'versneld ('+(t.vers>=60?'1 minuut = '+dec(t.vers/60,t.vers%60?1:0)+' uur':'1 minuut = '+t.vers+' minuten')+')'}
+function simKlok(){const t=tm();if(t.modus==='direct')return'';const L=st.pubs.filter(p=>!p.opdracht||!st.actief||p.opdracht===st.actief);if(!L.length)return'';const p=L.reduce((m,q)=>q.tPub>m.tPub?q:m,L[0]);const h=Math.min(24,(Date.now()-p.tPub)/60000*(t.modus==='echt'?1:t.vers)/60),tot=Math.round((p.uur+h)*60)%1440;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0')}
+const geleden=p=>{if(tm().modus==='direct')return'24 uur data';const e=elapsed(p);return e<1?'zojuist':e+' uur geleden'};
 function elapsed(p){const t=tm(p);if(t.modus==='direct')return 24;const min=(nowMs()-p.tPub)/60000;
   return Math.max(0,Math.min(24,Math.floor(t.modus==='echt'?min/60:min*t.vers/60)))}
 
@@ -887,7 +890,7 @@ function renderSys(){
   const mode=!p?'nieuw':(s.ingetrokken?'ingetrokken':'edit');
   const pog=st.pubs.filter(q=>q.id===st.sel&&kanaalVan(q)===kan()).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
   const list=alleIds(op).map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
-    const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd</span>');
+    const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd '+hh(q.uur)+'</span><span>'+geleden(q)+'</span>');
     return `<div class="it ${x.id===st.sel?'sel':''}" data-pick="${x.id}"><div class="t">${esc(x.t)}</div><div class="m"><span class="pill">${esc(x.c)}</span>${tag}</div></div>`}).join('');
   const imgs=(soc?[]:['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>'])
     .concat(a.b.map((b,i)=>soc&&b[0]!==SC.wil?'':`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}">${phImg(b)}<div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
@@ -907,7 +910,7 @@ function renderSys(){
     if(mode==='ingetrokken'&&!soc)url=`<div class="url"><span>Adres:</span><b>${scn().url}${esc(p.slug)}</b><span>Ingetrokken om ${hh(p.uur+s.intrekUurNa)}, ${s.intrekUurNa} uur na publicatie.</span></div>`;
     go=`<p>${geblokkeerd?'Je hebt alle '+op.max+' pogingen voor dit bericht gebruikt.':geenBeeld?'Dit bericht heeft geen '+SC.wil+' voor '+KANALEN[KN]+'.':(soc?KANALEN[KN]:esc(PLEK[d.plek]))+' om '+hh(d.uur)+' met '+beeldTxt+'.'}</p><button class="btn" data-publish="1" ${geblokkeerd||geenBeeld?'disabled':''}>${mode==='ingetrokken'?'Opnieuw publiceren':'Publiceer'}</button>`;
   }
-  $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>${scn().cms}</b><span>${scn().afd} · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
+  $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>${scn().cms}</b><span>${scn().afd} · ${esc(op.naam)}</span><span class="r">${simKlok()?'<b class="clk">Nu '+simKlok()+'</b> · ':''}Doel: ${esc(DOELEN[op.doel])}</span></div>
   ${opKanalen().length>1?`<div class="ktabs"><span>Kanaal</span>${opKanalen().map(k=>`<button data-kanaal="${k}" class="${k===KN?'on':''}">${KANALEN[k]}</button>`).join('')}</div>`:''}
   <div class="body"><div class="list"><h3>${scn().lijst}</h3>${op.eigen?`<button class="nieuw ${st.eigenOpen?'on':''}" data-eigen="open">${scn().eigen}</button>`:''}${list}</div>
   <div class="ed">${url}<div class="orig"><small>${scn().orig}</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
@@ -972,7 +975,7 @@ function renderSite(bar){
   const bo=by('boven'),mi=by('midden'),on=by('onder');
   const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">${scn().leeg}</div>`).join('');
   const C=scn();
-  return `<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${C.merk}</b><span>${C.sub}</span>${bar}<span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div>
+  return `<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${C.merk}</b><span>${C.sub}</span>${bar}<span class="r">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}${simKlok()?' · '+simKlok():''}</span></div>
   <div class="nav">${C.nav.map((n,i)=>`<a class="${i?'':'on'}">${n}</a>`).join('')}</div>
   <div class="main"><div class="top2">${webCard(bo[0],true)}<div class="side"><h4>${C.meest}</h4><ul>${C.meestLijst.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>
   <div><h4 class="sec">${C.meer}</h4><div class="mid3">${[0,1,2].map(i=>webCard(mi[i],false)).join('')}</div></div>

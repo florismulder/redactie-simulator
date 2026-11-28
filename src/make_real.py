@@ -44,7 +44,7 @@ sub("return tm().modus==='direct'?Math.min(Math.max(st.draft.uurNa||min,min),23)
 sub("sel0();st.draft=newDraft(st.sel);\n", "")
 
 # datum op de website
-sub('<span class="r">vr 20 november</span>', "<span class=\"r\">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span>")
+sub('<span class="r">vr 20 november${simKlok()?\' · \'+simKlok():\'\'}</span>', "<span class=\"r\">${new Date(nowMs()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}${simKlok()?' · '+simKlok():''}</span>")
 
 # --- 3. ververs ----------------------------------------------------------
 sub("function ververs(){renderSys();renderWeb();renderRes();syncPrev()}",
