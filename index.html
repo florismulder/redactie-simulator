@@ -957,7 +957,7 @@ function webCard(p,big){
   return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
 }
 function renderSite(bar){
-  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken);
+  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken&&(!p.opdracht||!st.actief||p.opdracht===st.actief));
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
   const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">${scn().leeg}</div>`).join('');
@@ -976,7 +976,7 @@ function renderWeb(){
   const ks=opKanalen();if(!ks.includes(st.wkan))st.wkan='website';
   const bar=ks.length>1?`<span class="wbar">${ks.map(k=>`<button data-wkan="${k}" class="${k===st.wkan?'on':''}">${KANALEN[k]}</button>`).join('')}</span>`:'';
   if(st.wkan==='website'){$('#s1').innerHTML=renderSite(bar);return}
-  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken),n=k==='instagram'?6:4;
+  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken&&(!p.opdracht||!st.actief||p.opdracht===st.actief)),n=k==='instagram'?6:4;
   const tiles=[...Array(n)].map((_,i)=>live[i]?socTile(live[i],k):`<div class="${k==='instagram'?'igt':'ttt'} empty"><div class="${k==='instagram'?'igp':'ttp'}"></div><p>Ruimte voor een post</p></div>`).join('');
   $('#s1').innerHTML=`<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${scn().merk}</b><span>${k==='instagram'?scn().ig:scn().tt}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">${scn().av}</div><div><b>${scn().prof}</b><span>${scn().sub} · ${live.length} ${k==='instagram'?scn().posts:'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
 /* ---- scherm 3: resultaten ---- */
@@ -1000,7 +1000,7 @@ function renderRes(){
   <div class="pan"><h4>${sel?esc(sel.s.kop.slice(0,40))+(sel.s.kop.length>40?'…':''):'Verloop'}</h4>${right}</div></div></div>`;
 }
 function syncPrev(){[0,1,2].forEach(i=>{$('#p'+i).innerHTML=$('#s'+i).innerHTML.replace(/ id="[^"]*"/g,'')})}
-function renderAll(){try{const c=isCamp();const t=document.getElementById('brandT'),s=document.getElementById('brandS');if(t){t.textContent=c?'Marketing Fietshuis De Trapper':'Redactie Vechtwaard';s.textContent=c?'Jouw bureau · afdeling Campagnes':'Jouw bureau · afdeling Nieuws'}}catch(e){}renderSys();renderWeb();renderRes();syncPrev()}
+function renderAll(){try{if(typeof fit==='function'&&document.getElementById('stage'))setTimeout(fit,0);const c=isCamp();const t=document.getElementById('brandT'),s=document.getElementById('brandS');if(t){t.textContent=c?'Marketing Fietshuis De Trapper':'Redactie Vechtwaard';s.textContent=c?'Jouw bureau · afdeling Campagnes':'Jouw bureau · afdeling Nieuws'}}catch(e){}renderSys();renderWeb();renderRes();syncPrev()}
 
 /* ---- zoomen op het bureau ---- */
 const BZ=10, mons=[...document.querySelectorAll('.mon')], inners=[0,1,2].map(i=>$('#s'+i));
@@ -1013,7 +1013,8 @@ function homog(src,dst){const A=[],b=[];for(let k=0;k<4;k++){const [x,y]=src[k],
   const n=8;for(let i=0;i<n;i++){let m=i;for(let r=i+1;r<n;r++)if(Math.abs(A[r][i])>Math.abs(A[m][i]))m=r;[A[i],A[m]]=[A[m],A[i]];[b[i],b[m]]=[b[m],b[i]];
     for(let r=i+1;r<n;r++){const f=A[r][i]/A[i][i];for(let c=i;c<n;c++)A[r][c]-=f*A[i][c];b[r]-=f*b[i]}}
   const x=Array(n).fill(0);for(let i=n-1;i>=0;i--){let t=b[i];for(let c=i+1;c<n;c++)t-=A[i][c]*x[c];x[i]=t/A[i][i]}return x}
-function place(k){const src=[[0,0],[1600,0],[1600,1000],[0,1000]];QUADS.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
+const QUADS_C=[[[88, 565], [951, 511], [951, 918], [157, 1042]], [[955, 511], [1655, 508], [1655, 899], [957, 895]], [[1671, 511], [2509, 567], [2444, 1075], [1673, 903]]];
+function place(k){const Q=isCamp()?QUADS_C:QUADS;const im=document.querySelector('#photo img'),want=isCamp()?'bureau_trapper.jpg':'bureau.jpg';if(im&&im.getAttribute('src')!==want)im.setAttribute('src',want);document.querySelectorAll('.hs').forEach(h=>{const q=Q[+h.dataset.i];h.setAttribute('points',q.map(p=>p.join(',')).join(' '))});const src=[[0,0],[1600,0],[1600,1000],[0,1000]];Q.forEach((q,i)=>{const h=homog(src,q.map(p=>[p[0]*k,p[1]*k]));
   $('#p'+i).style.transform=`matrix3d(${h[0]},${h[3]},0,${h[6]},${h[1]},${h[4]},0,${h[7]},0,0,1,0,${h[2]},${h[5]},0,1)`})}
 function fit(){const sg=$('#stage'),p=$('#photo');const W=sg.clientWidth,H=sg.clientHeight;let w=Math.min(W,H*ASP),h=w/ASP;p.style.width=w+'px';p.style.height=h+'px';place(w/2576)}
 function target(){const W=innerWidth,H=innerHeight-48-16;let w=Math.min(W,H*1.6),h=w/1.6;return {w,h,l:(W-w)/2,t:48+(H-h)/2+8}}

@@ -73,6 +73,7 @@ d = base + 'deploy/'
 os.makedirs(d, exist_ok=True)
 open(d + 'index.html', 'w', encoding='utf8').write(html)
 shutil.copy(base + 'bureau.jpg', d + 'bureau.jpg')
+shutil.copy(base + 'bureau_trapper.jpg', d + 'bureau_trapper.jpg')
 for f in ['favicon.svg', 'favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png', 'favicon.ico']:
     shutil.copy(base + 'icons/' + f, d + f)
 print('deploy/index.html', len(html))
