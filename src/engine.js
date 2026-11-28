@@ -19,7 +19,7 @@
       kliks_max: 1.25, leestijd_min: 0.6,
       clickbait: ['schokkend', 'je gelooft', 'niet te geloven', 'wat daarna', 'dit moet je', 'verbijsterend', 'ongelooflijk', 'drama', 'bizar', 'dít', 'alles over', 'onthuld']
     },
-    beeld: { met_beeld: 1.19, per_categorie: { politiek: 1.75 }, video_boven_foto_website: 1.10, kwaliteit_effect: 0.05 },
+    beeld: { met_beeld: 1.19, per_categorie: { politiek: 1.75 }, video_boven_foto_website: 1.10, kwaliteit_effect: 0.05, mensen: 1.12, mensen_sociaal: 1.18 },
     plek: { boven: 1.0, midden: 0.2, onder: 0.1, zicht_basis: 0.35, halfwaarde_uur: { boven: 8, midden: 6, onder: 5 } },
     ctr_basis: 0.03,
     engagement: { doorklik_basis: 0.22, delen_basis: 0.03, ruis: 0.2 },
@@ -103,7 +103,8 @@
     const basis = (R.beeld.per_categorie && R.beeld.per_categorie[artikel.categorie]) || R.beeld.met_beeld;
     const video = b.type === 'video' ? R.beeld.video_boven_foto_website : 1;
     const kw = 1 + R.beeld.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3);
-    return { factor: basis * video * kw, type: b.type, kwaliteit: b.kwaliteit, basis, video, kw, categorieEffect: basis !== R.beeld.met_beeld };
+    const mensen = b.mensen ? (R.beeld.mensen || 1.12) : 1;
+    return { factor: basis * video * kw * mensen, type: b.type, kwaliteit: b.kwaliteit, basis, video, kw, mensen, categorieEffect: basis !== R.beeld.met_beeld };
   }
 
   /* ---- de toestand van een publicatie op één moment ---- */
@@ -222,7 +223,7 @@
     const uitleg = [], P = S.plekNaam, K = S.kop, B = S.bld;
     uitleg.push({ sleutel: 'plek', label: 'Plek op de homepage', factor: S.plekF, tekst: ({ boven: 'Bovenaan', midden: 'Midden', onder: 'Onderaan' })[P] + ': ' + (S.plekF >= 1 ? 'iedereen ziet dit bericht het eerst' : 'veel bezoekers scrollen er niet naartoe (' + Math.round(S.plekF * 100) + '% van de zichtbaarheid bovenaan)') });
     uitleg.push({ sleutel: 'tijd', label: 'Tijdstip van plaatsen', factor: tijdIndex, tekst: String(uur).padStart(2, '0') + ':00: jouw publiek is nu ' + (tijdIndex >= 1.3 ? 'zeer actief' : tijdIndex >= 0.8 ? 'redelijk actief' : 'weinig actief') + ' (index ' + tijdIndex.toFixed(2).replace('.', ',') + ')' });
-    uitleg.push({ sleutel: 'beeld', label: 'Beeld', factor: B.factor, tekst: B.type === 'geen' ? 'Geen beeld: de vergelijking is 1,0' : (B.type === 'video' ? 'Video' : 'Foto') + (B.categorieEffect ? ' (bij deze categorie telt beeld extra mee)' : '') + ': ' + pct(B.factor) + ' kliks' });
+    uitleg.push({ sleutel: 'beeld', label: 'Beeld', factor: B.factor, tekst: B.type === 'geen' ? 'Geen beeld: de vergelijking is 1,0' : (B.type === 'video' ? 'Video' : 'Foto') + (B.categorieEffect ? ' (bij deze categorie telt beeld extra mee)' : '') + (B.mensen > 1 ? ', met mensen in beeld (' + pct(B.mensen) + ')' : (B.type !== 'geen' ? ', zonder mensen in beeld' : '')) + ': ' + pct(B.factor) + ' kliks' });
     uitleg.push({ sleutel: 'eenvoud', label: 'Eenvoud van de kop', factor: K.eenvoud, tekst: K.aantalWoorden + ' woorden: ' + (K.eenvoud > 1.02 ? 'kort en duidelijk' : K.eenvoud < 0.98 ? 'lang en vaag' : 'gemiddeld') + ' (' + pct(K.eenvoud) + ')' });
     uitleg.push({ sleutel: 'woorden', label: 'Woorden in de kop', factor: K.woorden, tekst: K.negatief + ' negatief, ' + K.positief + ' positief: ' + pct(K.woorden) + ' kliks' });
     uitleg.push({ sleutel: 'sensatie', label: 'Sensatie in de kop', factor: S.sensKliks, tekst: K.sensatie < 0.05 ? 'Nuchtere kop' : 'Sensationele kop: kliks ' + pct(S.sensKliks) + ', maar meer lezers haken binnen 15 seconden af' });
@@ -262,7 +263,7 @@
       const tekst = String(st.kop || ''), ka = kopAnalyse(tekst, R), n = ka.aantalWoorden, tek = tekst.length;
       const b = (st.beeld !== undefined && st.beeld !== null && st.beeld >= 0) ? artikel.beelden[st.beeld] : null;
       const juist = b && b.type === wil;
-      const bf = !b ? 0.5 : (juist ? 1 : 0.7) * (1 + K.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3)) * 1.1;
+      const bf = !b ? 0.5 : (juist ? 1 : 0.7) * (1 + K.kwaliteit_effect * (clamp(b.kwaliteit || 3, 1, 5) - 3)) * 1.1 * (b.mensen ? (R.beeld.mensen_sociaal || 1.18) : 1);
       let tf, tl;
       if (kan === 'instagram') {
         tf = tek === 0 ? 0.8 : (tek < K.ideaal_min ? 0.92 : (tek <= K.ideaal_max ? 1.1 : 0.97));
@@ -324,7 +325,7 @@
     const naam = kan === 'instagram' ? 'Instagram' : 'TikTok';
     const uitleg = [];
     uitleg.push({ sleutel: 'tijd', label: 'Tijdstip van plaatsen', factor: tijdIndex, tekst: String(uur).padStart(2, '0') + ':00: het publiek van ' + naam + ' is nu ' + (tijdIndex >= 1.3 ? 'zeer actief' : tijdIndex >= 0.8 ? 'redelijk actief' : 'weinig actief') + ' (index ' + tijdIndex.toFixed(2).replace('.', ',') + ')' });
-    uitleg.push({ sleutel: 'beeld', label: kan === 'instagram' ? 'Foto' : 'Video', factor: S.bf, tekst: !S.b ? 'Zonder beeld bereik je veel minder mensen' : (S.juist ? (kan === 'instagram' ? 'Foto' : 'Video') + ' past bij ' + naam + ', kwaliteit ' + (S.b.kwaliteit || 3) + ' van 5' : 'Dit beeldtype past minder bij ' + naam) });
+    uitleg.push({ sleutel: 'beeld', label: kan === 'instagram' ? 'Foto' : 'Video', factor: S.bf, tekst: !S.b ? 'Zonder beeld bereik je veel minder mensen' : (S.juist ? (kan === 'instagram' ? 'Foto' : 'Video') + ' past bij ' + naam + ', kwaliteit ' + (S.b.kwaliteit || 3) + ' van 5' + (S.b.mensen ? ', mensen in beeld doen het hier goed' : ', zonder mensen in beeld') : 'Dit beeldtype past minder bij ' + naam) });
     uitleg.push({ sleutel: 'tekst', label: kan === 'instagram' ? 'Bijschrift' : 'Haak in de eerste seconden', factor: S.tf, tekst: S.tl });
     uitleg.push({ sleutel: 'woorden', label: 'Woorden en sensatie', factor: S.ka.woorden * S.sens, tekst: S.ka.negatief + ' negatief, ' + S.ka.positief + ' positief' + (S.ka.sensatie > 0.05 ? ', sensationeel: meer bereik, minder kijktijd' : '') });
     uitleg.push({ sleutel: 'nieuwswaarde', label: 'Nieuwswaarde van het bericht', factor: nwF, tekst: 'Dichtbij en belangrijk nieuws scoort beter (' + pct(nwF) + ')' });

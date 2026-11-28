@@ -103,5 +103,14 @@ t('determinisme met wijzigingen',x1===x2);
  t('social: TikTok spreidt veel (ruis van het algoritme)',mx/mn>3,'x'+(mx/mn).toFixed(1));
 }
 
+{ /* mensen in beeld */
+ const a=JSON.parse(JSON.stringify(by['n04'])),w=(m)=>{a.beelden[0].mensen=m;return E.simuleer(a,{kop:'Gerrit fietst naar de markt',beeld:0,uur:12,plek:'boven',seed:7,wijzigingen:[]},{})};
+ const met=w(true),zon=w(false);
+ t('mensen in beeld geven meer kliks op de website',met.kliks>zon.kliks,met.kliks+' vs '+zon.kliks);
+ t('uitleg noemt mensen in beeld',met.uitleg.some(u=>u.sleutel==='beeld'&&/met mensen/.test(u.tekst))&&zon.uitleg.some(u=>u.sleutel==='beeld'&&/zonder mensen/.test(u.tekst)));
+ const so=(m)=>{a.beelden[0].mensen=m;return E.simuleerSocial(a,{kanaal:'instagram',kop:'Gerrit (87) fietst nog elke dag',beeld:0,uur:19,seed:7,wijzigingen:[]},{})};
+ t('mensen in beeld geven meer bereik op Instagram',so(true).bereik>so(false).bereik,so(true).bereik+' vs '+so(false).bereik);
+}
+
 console.log(`\n${ok} geslaagd, ${bad} mislukt`);
 process.exit(bad?1:0);

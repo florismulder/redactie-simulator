@@ -8,7 +8,7 @@ subprocess.check_call([sys.executable, base + 'make_real.py'])
 src = open(base + 'bureau.src.html', encoding='utf8').read()
 css = open(base + 'docent.css', encoding='utf8').read()
 engine = open(base + 'engine.js', encoding='utf8').read()
-app = open(base + 'app.real.js', encoding='utf8').read().replace('/*SUPA_URL*/', URL).replace('/*SUPA_KEY*/', KEY)
+app = open(base + 'app.real.js', encoding='utf8').read().replace('/*SUPA_URL*/', URL).replace('/*SUPA_KEY*/', KEY).replace('/*BIB*/', open(base + 'beelden.js', encoding='utf8').read())
 
 extra_css = css + """
 [hidden]{display:none!important}

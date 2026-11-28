@@ -16,7 +16,7 @@ head = """const Engine=window.Engine;
 const API_URL='/*SUPA_URL*/',API_KEY='/*SUPA_KEY*/';
 let RULES={};
 const A=[],byId={};
-const mkA=x=>({id:x.id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving]),d:x,door:x.door||'startset'});
+const mkA=x=>({id:x.id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving,b.bron||'',!!b.mensen]),d:x,door:x.door||'startset'});
 function setA(list){A.length=0;Object.keys(byId).forEach(k=>delete byId[k]);list.forEach(x=>{const a=mkA(x);A.push(a);byId[a.id]=a})}
 """
 app = app[:i0] + head + app[i1:]
@@ -132,18 +132,18 @@ async function saveOpdracht(){
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
   const act=!!val('f-direct');
-  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
+  const ok=await dAct('rsim_docent_save_assignment',{p:{naam,doel:val('f-doel'),modus:val('f-modus'),max:+val('f-max'),metrics,artikelen:arts,activeer:act,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),doelen:formDoelen(),kanalen:formKanalen()}},act?'Opdracht staat klaar en is actief':'Opdracht opgeslagen');
   if(ok){delete st.fv['f-naam'];renderDocent()}
 }
 async function saveArtikel(){
   const t=String(val('f-t')).trim(),i=String(val('f-i')).trim();
-  const beelden=[1,2,3].map(n=>({type:val('f-bt'+n),beschrijving:String(val('f-bd'+n)).trim(),kwaliteit:+val('f-bk'+n)})).filter(b=>b.beschrijving);
   if(!t||!i){toast('Vul een titel en een eerste alinea in');return}
-  if(!beelden.length){toast('Voeg minstens één beeld toe met een omschrijving');return}
+  if(!PICK.D.length){toast('Kies minstens één beeld uit de bibliotheek');return}
+  const beelden=PICK.D.map(p=>({type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m}));
   const g=x=>+val(x);
   const p={titel:t,intro:i,categorie:val('f-c'),nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden};
   const ok=await dAct('rsim_docent_add_article',{p},'Bericht toegevoegd aan de database en aan de actieve opdracht');
-  if(ok){['f-t','f-i','f-bd1','f-bd2','f-bd3'].forEach(k=>delete st.fv[k]);renderDocent()}
+  if(ok){['f-t','f-i'].forEach(k=>delete st.fv[k]);PICK.D=[];renderDocent()}
 }
 
 """
@@ -154,5 +154,8 @@ l0 = app.index("/* klok:")
 tail = open(base + 'real_tail.js', encoding='utf8').read()
 app = app[:l0] + tail
 
+p0 = app.index("async function persistEigen(d){")
+p1 = app.index("async function saveEigen(){")
+app = app[:p0] + "async function persistEigen(){const x=eigenData(st.ef,PICK.E,'x');delete x.id;const r=await api('rsim_student_add_article',{p_token:st.token,p:x});await loadStudent(true);return r.id}\n" + app[p1:]
 open(base + 'app.real.js', 'w', encoding='utf8').write(app)
 print('app.real.js', len(app))

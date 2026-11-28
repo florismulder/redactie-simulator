@@ -36,8 +36,8 @@ const RONDES=[
   {naam:'Ronde 2: middel begeleiding',begeleiding:'middel',artikelen:['n02','n04','n06','n09','n11'],doelen:[['bereik',3500],['engagement',20],['kliks',200]]},
   {naam:'Ronde 3: weinig begeleiding',begeleiding:'weinig',artikelen:['n07','n10','n12','n14','n15'],doelen:[['bereik',3000],['leestijd',35],['doorkliks',40],['inschrijvingen',6]]},
   {naam:'Ronde 4: geen begeleiding (zoals de proeve)',begeleiding:'geen',artikelen:['n01','n02','n04','n08','n10','n12'],doelen:[['bereik',4000],['klikpercentage',5.5],['engagement',21],['inschrijvingen',8]]}];
-const RONDE_SOCIAL={naam:'Bonusronde: website, Instagram en TikTok',begeleiding:'weinig',artikelen:['n02','n05','n09','n12'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',18000],['kliks',350],['interacties',1500],['inschrijvingen',10]]};
-const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website']});
+const RONDE_SOCIAL={eigen:true,naam:'Bonusronde: website, Instagram en TikTok',begeleiding:'weinig',artikelen:['n02','n05','n09','n12'],kanalen:['website','instagram','tiktok'],doelen:[['bereik',18000],['kliks',350],['interacties',1500],['inschrijvingen',10]]};
+const rondeObj=(r,i)=>({naam:r.naam,doel:'balans',modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],artikelen:r.artikelen,begeleiding:r.begeleiding,doelen:r.doelen.map((d,k)=>({id:'d'+(k+1),type:d[0],drempel:d[1]})),activeer:false,kanalen:r.kanalen||['website'],eigen:!!r.eigen});
 
 /* ---- cijfers uit de publicaties ---- */
 function totalen(pubs){const T={b:0,k:0,l:0,kw:0,dk:0,dl:0,dlw:0,ins:0,ia:0};
@@ -248,4 +248,5 @@ dc.addEventListener('click',e=>{
   }
 });
 /* demo: de vier rondes staan meteen klaar, met directe tijd zodat het rapport meteen opengaat */
-if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))}
+if(typeof api==='undefined'&&!st.opdrachten.some(o=>/^Ronde 1:/.test(o.naam))){RONDES.concat([RONDE_SOCIAL]).map(rondeObj).forEach((r,i)=>st.opdrachten.push(Object.assign({id:'r'+(i+1)},r,{modus:'direct'})))
+  const bo=st.opdrachten.find(x=>/^Bonusronde/.test(x.naam));if(bo){st.actief=bo.id;st.kanaal='website';sel0();st.draft=newDraft(st.sel)}}

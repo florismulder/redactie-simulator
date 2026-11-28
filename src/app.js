@@ -2,9 +2,10 @@ const Engine=window.Engine;
 /* Rekenregels: zelfde waarden als tabel rsim_settings, sleutel 'rekenregels'. Leeg = standaardwaarden van de motor. */
 const RULES={};
 const DB=/*DATA*/;
-const A=DB.map(x=>({id:x.id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving]),d:x,door:'startset'}));
+const A=DB.map(x=>({id:x.id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving,b.bron||'',!!b.mensen]),d:x,door:x.toegevoegd_door||x.door||'startset'}));
 const byId=Object.fromEntries(A.map(a=>[a.id,a]));
 const PLEK={boven:'Bovenaan',midden:'Midden',onder:'Onderaan'};
+/*BIB*/
 const CATS=['verkeer','politiek','misdaad','human_interest','economie','zorg','onderwijs','cultuur','weer','milieu','veiligheid','sport','shownieuws','tech','mode'];
 const DOELEN={bereik:'Zoveel mogelijk bereik',lezers_houden:'Lezers vasthouden (hoge leestijd)',balans:'Balans tussen bereik en leestijd'};
 const METRICS=[['bereik','Bereik'],['kliks','Kliks en klikpercentage'],['leestijd','Leestijd'],['verloop','Verloop per uur']];
@@ -22,7 +23,7 @@ const klas={naam:'MR2A',code:'VW-MR2A',modus:'versneld',vers:60};
 const st={sel:'n02',draft:null,res:0,docOk:false,dtab:'tijd',dsel:'jij',dpub:0,fv:{},
   actief:'o1',
   opdrachten:[
-    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],kanalen:['website','instagram','tiktok']},
+    {id:'o1',naam:'Vrije oefening',doel:'balans',artikelen:A.map(a=>a.id),modus:'',max:0,metrics:['bereik','kliks','leestijd','verloop'],kanalen:['website','instagram','tiktok'],eigen:true},
     {id:'o2',naam:'Kop en beeld: wat doet het?',doel:'bereik',artikelen:['n01','n03','n05','n08','n13'],modus:'versneld',max:2,metrics:['bereik','kliks','verloop']}],
   pubs:[
     {id:'n01',slug:'vechtbrug-twee-weken-dicht-zo-rijd-je-om',kop:'Vechtbrug twee weken dicht: zo rijd je om',beeld:-1,uur:7,plek:'boven',seed:1111,ex:true,tPub:0,wijzigingen:[{uurNa:3,beeld:0}]},
@@ -62,7 +63,8 @@ function newDraft(id){const a=byId[id],p=curPub(id);
 const sim=p=>kanaalVan(p)==='website'?Engine.simuleer(byId[p.id].d,{kop:p.kop,beeld:p.beeld,uur:p.uur,plek:p.plek,seed:p.seed,wijzigingen:p.wijzigingen},RULES):Engine.simuleerSocial(byId[p.id].d,{kanaal:kanaalVan(p),kop:p.kop,beeld:p.beeld,uur:p.uur,seed:p.seed,wijzigingen:p.wijzigingen},RULES);
 function viewOf(p){const c=sim(p),e=elapsed(p);let b=0,k=0,l=0,dk=0,dl=0,ins=0,ia=0;const soc=kanaalVan(p)!=='website';c.verloop.slice(0,e).forEach(x=>{b+=x.bereik;k+=x.kliks;l+=soc?x.bereik*x.lees:x.kliks*x.lees;dk+=x.door||0;dl+=x.deel||0;ins+=x.inschr||0;ia+=x.int||0});
   return {c,e,b,k,ctr:b?k/b:0,lees:soc?(b?Math.round(l/b):0):(k?Math.round(l/k):0),dk,dl,ins,ia,soc}}
-function sel0(){const op=actieveOpdracht();if(!op.artikelen.includes(st.sel))st.sel=op.artikelen[0]}
+const alleIds=op=>op.artikelen.concat(A.filter(a=>a.door==='student'&&!op.artikelen.includes(a.id)).map(a=>a.id));
+function sel0(){const op=actieveOpdracht(),ids=alleIds(op);if(!ids.includes(st.sel))st.sel=ids[0]}
 sel0();st.draft=newDraft(st.sel);
 
 /* ---- grafiek en uitleg (student en docent) ---- */
@@ -74,7 +76,9 @@ function chartHTML(v){const c=v.c,V=c.verloop,mx=Math.max(1,...V.slice(0,v.e).ma
 const whyHTML=c=>`<div class="why">${c.uitleg.map(u=>`<div><b>${esc(u.label)}</b><span>${esc(u.tekst)}</span><span class="f">×${dec(u.factor)}</span></div>`).join('')}</div>`;
 
 /* ---- scherm 1: redactiesysteem ---- */
-function phBox(b){return `<div class="ph">${b?(b[0]==='video'?'<div class="play">▶</div>':'Foto'):'Geen beeld'}</div>`}
+function phImg(b,cls){const src=b&&b[2]?bibSrc(b[2]):'';
+  return `<div class="${cls||'ph'}${src?' pic':''}"${src?` style="background-image:url('${src}')"`:''}>${!b?'Geen beeld':(b[0]==='video'?'<div class="play">▶</div>':(src?'':'Foto'))}</div>`}
+const phBox=b=>phImg(b);
 function renderSys(){
   sel0();
   if(!opKanalen().includes(kan())){st.kanaal=opKanalen()[0];st.draft=newDraft(st.sel)}
@@ -82,11 +86,11 @@ function renderSys(){
   const op=actieveOpdracht(),a=byId[st.sel],d=st.draft,p=curPub(st.sel),s=p?nu(p):null;
   const mode=!p?'nieuw':(s.ingetrokken?'ingetrokken':'edit');
   const pog=st.pubs.filter(q=>q.id===st.sel&&kanaalVan(q)===kan()).length,geblokkeerd=op.max>0&&pog>=op.max&&mode!=='edit';
-  const list=op.artikelen.map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
+  const list=alleIds(op).map(id=>byId[id]).map(x=>{const q=curPub(x.id),qs=q&&nu(q);
     const tag=!q?'<span>klaar om te publiceren</span>':(qs.ingetrokken?'<span class="pill">ingetrokken</span>':'<span class="pill ok">gepubliceerd</span>');
     return `<div class="it ${x.id===st.sel?'sel':''}" data-pick="${x.id}"><div class="t">${esc(x.t)}</div><div class="m"><span class="pill">${esc(x.c)}</span>${tag}</div></div>`}).join('');
   const imgs=(soc?[]:['<button class="img '+(d.beeld<0?'sel':'')+'" data-beeld="-1"><div class="ph">Geen beeld</div><div class="d">Zonder beeld</div><div class="k">–</div></button>'])
-    .concat(a.b.map((b,i)=>soc&&b[0]!==SC.wil?'':`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}"><div class="ph">${b[0]==='video'?'<div class="play">▶</div>':'Foto'}</div><div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
+    .concat(a.b.map((b,i)=>soc&&b[0]!==SC.wil?'':`<button class="img ${d.beeld===i?'sel':''}" data-beeld="${i}">${phImg(b)}<div class="d">${esc(b[1])}</div><div class="k">${b[0]==='video'?'Video':'Foto'}</div></button>`)).join('');
   const geenBeeld=soc&&!a.b.some(b=>b[0]===SC.wil);
   const seg=['boven','midden','onder'].map(k=>`<button class="${d.plek===k?'sel':''}" data-plek="${k}"><span class="mini"><i class="${k==='boven'?'hot':''}"></i><i class="${k==='midden'?'hot':''}"></i><i class="${k==='onder'?'hot':''}"></i></span>${PLEK[k]}</button>`).join('');
   const beeldTxt=d.beeld<0?'geen beeld':(a.b[d.beeld][0]==='video'?'video':'foto');
@@ -105,13 +109,62 @@ function renderSys(){
   }
   $('#s0').innerHTML=`<div class="cms"><div class="hd"><b>Vechtwaard CMS</b><span>Nieuws · ${esc(op.naam)}</span><span class="r">Doel: ${esc(DOELEN[op.doel])}</span></div>
   ${opKanalen().length>1?`<div class="ktabs"><span>Kanaal</span>${opKanalen().map(k=>`<button data-kanaal="${k}" class="${k===KN?'on':''}">${KANALEN[k]}</button>`).join('')}</div>`:''}
-  <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${list}</div>
+  <div class="body"><div class="list"><h3>Berichten voor deze opdracht</h3>${op.eigen?`<button class="nieuw ${st.eigenOpen?'on':''}" data-eigen="open">+ Eigen onderwerp</button>`:''}${list}</div>
   <div class="ed">${url}<div class="orig"><small>Bericht van de verslaggever</small><p><b>${esc(a.t)}</b><br>${esc(a.i)}</p></div>
   <div><label class="l">${soc?SC.naam+(KN==='tiktok'?' in de eerste seconden':' bij de foto'):'Kop op de site'}<span id="cnt">${d.kop.length}${soc?' van '+SC.max:''} tekens</span></label><input class="kop ${soc?'s':''}" id="kop" maxlength="${soc?SC.max:200}" ${soc?`placeholder="${SC.ph}"`:''} value="${esc(d.kop)}"></div>
   <div><label class="l">${soc?(KN==='instagram'?'Foto':'Video'):'Beeld'}<span>${soc?'Kies wat past bij '+KANALEN[KN]:'Kies wat bij de kop past'}</span></label><div class="imgs">${imgs}</div></div>
   <div class="row2">${tijd}${soc?`<div><label class="l">Waar komt het te staan</label><p style="margin:4px 0 0;color:#6b7885">${KN==='instagram'?'In de tijdlijn van volgers. Kies een foto en schrijf een kort bijschrift.':'In de For You-feed. De haak bepaalt of mensen blijven kijken.'}</p></div>`:`<div><label class="l">Plek op de homepage</label><div class="seg">${seg}</div></div>`}</div>
   <div class="go">${go}</div></div></div></div>`;
+  if(st.eigenOpen&&op.eigen)$('#s0 .ed').innerHTML=eigenFormHTML();
 }
+/* ---- beeldbibliotheek-kiezer (student en docent) ---- */
+const optH=(o,cur)=>o.map(x=>`<option value="${x[0]}" ${String(x[0])===String(cur)?'selected':''}>${x[1]}</option>`).join('');
+function bibPicker(sel,sc){
+  const ids=Object.keys(BIB);
+  return `<div class="bib">${ids.map(id=>{const n=sel.findIndex(x=>x.bron===id);return `<button type="button" class="bi ${n>=0?'on':''}" data-bib="${sc}:${id}" title="${esc(BIB[id].l)}"><span class="bimg" style="background-image:url('${bibSrc(id)}')"></span><span class="bl">${esc(BIB[id].l)}</span>${n>=0?`<i>${n+1}</i>`:''}</button>`}).join('')}</div>
+  <div class="bsel">${sel.length?sel.map((x,k)=>`<div class="bs"><span class="bimg" style="background-image:url('${bibSrc(x.bron)}')"></span><b>${k+1}. ${esc(BIB[x.bron].l)}</b><select data-bibtype="${sc}:${k}">${optH([['foto','Foto'],['video','Video (foto met play-knop)']],x.type)}</select><button type="button" data-bibdel="${sc}:${k}" title="Verwijderen">×</button></div>`).join(''):'<p class="muted">Klik op een beeld om het toe te voegen. Kies er 1 tot 3.</p>'}</div>`}
+const PICK={E:[],D:[]};
+function bibToggle(sc,id){const L=PICK[sc],k=L.findIndex(x=>x.bron===id);if(k>=0)L.splice(k,1);else if(L.length<3)L.push({bron:id,type:L.length===1||L.length===2?'video':'foto'});else toast('Kies maximaal drie beelden')}
+/* ---- eigen onderwerp (student) ---- */
+const EF0={titel:'',intro:'',cat:'verkeer',nabij:'5',impact:'3',conflict:'1',mens:'1',nieuw:'5',duur:'24',voor:'iedereen'};
+st.ef=Object.assign({},EF0);
+function eigenFormHTML(){const f=st.ef,op=actieveOpdracht(),k=opKanalen();
+  const q=(id,l,o)=>`<label>${l}<select data-ef="${id}">${optH(o,f[id])}</select></label>`;
+  return `<div class="eig"><h2>Eigen onderwerp</h2><p class="muted">Bedenk een bericht voor Vechtwaard. Je antwoorden bepalen hoe interessant het nieuws is voor het publiek.</p>
+  <div class="two"><label>Titel van je bericht<input data-ef="titel" maxlength="120" value="${esc(f.titel)}" placeholder="Wat is er gebeurd?"></label>${q('cat','Categorie',CATS.map(c=>[c,c.replace('_',' ')]))}</div>
+  <label>Eerste alinea<textarea data-ef="intro" rows="3" maxlength="400" placeholder="Wie, wat, waar en wanneer in een paar zinnen">${esc(f.intro)}</textarea></label>
+  <div class="q3">${q('nabij','Waar speelt het?',[['5','In onze regio'],['3','Ergens in Nederland'],['1','Ver weg']])}
+  ${q('impact','Hoeveel mensen raakt het?',[['2','Weinig mensen'],['3','Een groep mensen'],['5','Heel veel mensen']])}
+  ${q('conflict','Is er ruzie of tegenstelling?',[['1','Nee'],['3','Een beetje'],['5','Ja, duidelijk']])}
+  ${q('mens','Gaat het over een persoon en zijn verhaal?',[['1','Nee'],['3','Een beetje'],['5','Ja, vooral']])}
+  ${q('nieuw','Hoe nieuw is het?',[['5','Gebeurt vandaag'],['3','Deze week'],['1','Al een tijd bekend']])}
+  ${q('duur','Hoe lang blijft het interessant?',[['12','Een halve dag'],['24','Een dag'],['48','Twee dagen'],['168','Een week']])}
+  ${q('voor','Voor wie vooral?',[['iedereen','Iedereen'],['jongeren','Jongeren'],['volwassenen','Volwassenen'],['senioren','Senioren']])}</div>
+  <label>Beelden${k.includes('instagram')||k.includes('tiktok')?'. Instagram heeft een foto nodig en TikTok een video':''}</label>${bibPicker(PICK.E,'E')}
+  <div class="btns"><button class="btn ghost" data-eigen="cancel">Annuleren</button><button class="btn" data-eigen="save">Bericht toevoegen</button></div></div>`}
+function eigenData(f,pick,id){const n=x=>+x,ij={jongeren:3,volwassenen:3,midden:3,senioren:3};
+  if(f.voor!=='iedereen'){Object.keys(ij).forEach(g=>ij[g]=2);ij[f.voor]=5}
+  return {id,categorie:f.cat,titel_origineel:f.titel.trim(),intro_origineel:f.intro.trim(),tekst:f.intro.trim(),
+    nieuwswaarde:{impact:n(f.impact),nabijheid:n(f.nabij),conflict:n(f.conflict),human_interest:n(f.mens),actualiteit:n(f.nieuw)},emotie:'neutraal',tijdgevoeligheid_uren:n(f.duur),interesse:ij,
+    sensatie_potentieel:Math.min(4,Math.max(1,Math.round((n(f.conflict)+n(f.impact))/3))),
+    beelden:pick.map((p,k)=>Object.assign({id:id+'-'+(p.type==='video'?'v':'f')+(k+1),type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m},p.type==='video'?{duur_sec:30}:{})),
+    toegevoegd_door:'student'}}
+async function persistEigen(d){const id='e'+(A.filter(a=>a.door==='student').length+1);const x=eigenData(st.ef,PICK.E,id);
+  const a={id,c:x.categorie.replace('_',' '),t:x.titel_origineel,i:x.intro_origineel,b:x.beelden.map(b=>[b.type,b.beschrijving,b.bron,!!b.mensen]),d:x,door:'student'};A.push(a);byId[id]=a;return id}
+async function saveEigen(){const f=st.ef;
+  if(f.titel.trim().length<3){toast('Geef je bericht een titel');return}
+  if(f.intro.trim().length<10){toast('Schrijf een eerste alinea van minstens een paar zinnen');return}
+  if(!PICK.E.length){toast('Kies minstens een beeld');return}
+  try{const id=await persistEigen();st.eigenOpen=false;st.sel=id;st.ef=Object.assign({},EF0);PICK.E=[];st.draft=newDraft(id);ververs();toast('Je bericht staat in de lijst. Je kunt het nu publiceren.')}
+  catch(e){toast(e.message)}}
+document.addEventListener('click',function(e){const t=e.target.closest('#s0 [data-eigen],#s0 [data-bib],#s0 [data-bibdel]');if(!t||zoomed<0)return;
+  if(t.dataset.eigen==='open'){st.eigenOpen=!st.eigenOpen;renderSys()}
+  else if(t.dataset.eigen==='cancel'){st.eigenOpen=false;renderSys()}
+  else if(t.dataset.eigen==='save')saveEigen();
+  else if(t.dataset.bib){bibToggle('E',t.dataset.bib.split(':')[1]);renderSys()}
+  else if(t.dataset.bibdel){PICK.E.splice(+t.dataset.bibdel.split(':')[1],1);renderSys()}});
+document.addEventListener('input',function(e){const t=e.target.closest('#s0 [data-ef]');if(t)st.ef[t.dataset.ef]=t.value});
+document.addEventListener('change',function(e){const t=e.target.closest('#s0 [data-bibtype]');if(t)PICK.E[+t.dataset.bibtype.split(':')[1]].type=t.value;const u=e.target.closest('#s0 [data-ef]');if(u)st.ef[u.dataset.ef]=u.value});
 /* ---- scherm 2: website ---- */
 function webCard(p,big){
   if(!p)return `<div class="empty" style="${big?'height:300px':'height:130px'}">Ruimte voor nieuws</div>`;
@@ -131,8 +184,8 @@ function renderSite(bar){
 }
 function socTile(p,k){const a=byId[p.id],s=nu(p),v=viewOf(p),b=s.beeld>=0?a.b[s.beeld]:null;
   const stat=v.e?`<span>♥ ${fmt(v.ia)}</span><span>${k==='tiktok'?'▶ '+fmt(v.b):'bereik '+fmt(v.b)}</span>`:'<span>net geplaatst</span>';
-  return k==='instagram'?`<div class="igt"><div class="igp">${b?'Foto':''}</div><p>${esc(s.kop)}</p><div class="st">${stat}</div></div>`
-   :`<div class="ttt"><div class="ttp"><div class="play">▶</div><div class="hk">${esc(s.kop)}</div></div><div class="st">${stat}</div></div>`}
+  return k==='instagram'?`<div class="igt">${b?phImg(b,'igp'):'<div class="igp"></div>'}<p>${esc(s.kop)}</p><div class="st">${stat}</div></div>`
+   :`<div class="ttt"><div class="ttp${b&&b[2]?' pic':''}"${b&&b[2]?` style="background-image:url('${bibSrc(b[2])}')"`:''}><div class="play">▶</div><div class="hk">${esc(s.kop)}</div></div><div class="st">${stat}</div></div>`}
 function renderWeb(){
   const ks=opKanalen();if(!ks.includes(st.wkan))st.wkan='website';
   const bar=ks.length>1?`<span class="wbar">${ks.map(k=>`<button data-wkan="${k}" class="${k===st.wkan?'on':''}">${KANALEN[k]}</button>`).join('')}</span>`:'';
@@ -275,7 +328,7 @@ function dRes(){
 }
 function dOpd(){
   const lijst=st.opdrachten.map(o=>`<div class="op ${o.id===st.actief?'act':''}"><div><b>${esc(o.naam)}</b><span>${esc(DOELEN[o.doel])} · ${o.artikelen.length} berichten · ${o.modus?o.modus:'tijd van de klas'} · ${o.max?o.max+' pogingen':'onbeperkt'}</span></div><button data-actief="${o.id}" ${o.id===st.actief?'disabled':''}>${o.id===st.actief?'Actief':'Activeer'}</button></div>`).join('');
-  const arts=A.map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
+  const arts=A.filter(a=>a.door!=='student').map(a=>`<label class="ck"><input type="checkbox" id="f-a-${a.id}" checked> ${esc(a.t)} <i>${esc(a.c)}</i></label>`).join('');
   return `<div class="dcol"><h3>Opdrachten van deze klas</h3>${lijst}${rondesHTML()}<p class="note">Studenten zien alleen de actieve opdracht. Activeren zet de berichten, het doel, de tijd en de zichtbare cijfers meteen klaar op het bureau.</p></div>
   <div class="dcol"><h3>Nieuwe opdracht klaarzetten</h3><div class="frm">
    <label>Naam van de opdracht<input id="f-naam" placeholder="Bijvoorbeeld: Kop en beeld"></label>
@@ -285,11 +338,12 @@ function dOpd(){
    ${doelFormHTML()}
    <fieldset><legend>Wat zien studenten?</legend>${METRICS.map(m=>`<label class="ck"><input type="checkbox" id="f-m-${m[0]}" checked> ${m[1]}</label>`).join('')}</fieldset>
    <fieldset><legend>Berichten in deze opdracht</legend><div class="scr">${arts}</div></fieldset>
+   <label class="ck"><input type="checkbox" id="f-eigen"> Studenten mogen eigen onderwerpen toevoegen</label>
    <label class="ck"><input type="checkbox" id="f-direct" checked> Meteen actief maken</label>
    <button class="btn" data-dsave-opd="1">Opdracht klaarzetten</button></div></div>`;
 }
 function dBer(){
-  const lijst=A.map(a=>`<tr><td class="k">${esc(a.t)}</td><td>${esc(a.c)}</td><td>${a.b.length}</td><td>${esc(a.door)}</td></tr>`).join('');
+  const lijst=A.filter(a=>a.door!=='student').map(a=>`<tr><td class="k">${esc(a.t)}</td><td>${esc(a.c)}</td><td>${a.b.length}</td><td>${esc(a.door)}</td></tr>`).join('');
   const sl=(id,l,v=3)=>`<label class="sl">${l}<input type="range" id="${id}" min="1" max="5" value="${v}"></label>`;
   const rij=n=>`<div class="br"><select id="f-bt${n}">${optS([['foto','Foto'],['video','Video']],n===2?'video':'foto')}</select><input id="f-bd${n}" placeholder="Wat zie je op dit beeld?"><select id="f-bk${n}" title="Kwaliteit">${optS([[1,'Kwaliteit 1'],[2,'2'],[3,'3'],[4,'4'],[5,'5']],4)}</select></div>`;
   return `<div class="dcol"><h3>Berichten in de database (${A.length})</h3><div class="scr2"><table class="t2"><tr><th>Titel</th><th>Categorie</th><th>Beelden</th><th>Door</th></tr>${lijst}</table></div></div>
@@ -300,9 +354,12 @@ function dBer(){
    <label>Hoe snel veroudert het?<select id="f-tg">${optS([[12,'Binnen een halve dag'],[24,'Binnen een dag'],[48,'Binnen twee dagen'],[96,'Binnen vier dagen'],[168,'Pas na een week']],48)}</select></label></div>
    <fieldset><legend>Nieuwswaarde (1 laag, 5 hoog)</legend><div class="sls">${sl('f-nw-impact','Impact')}${sl('f-nw-nabijheid','Nabijheid')}${sl('f-nw-conflict','Conflict',2)}${sl('f-nw-human','Menselijk verhaal',2)}${sl('f-nw-actualiteit','Actualiteit')}</div></fieldset>
    <fieldset><legend>Interesse per doelgroep</legend><div class="sls">${sl('f-ij-jongeren','Jongeren')}${sl('f-ij-volwassenen','Volwassenen')}${sl('f-ij-midden','Middengroep')}${sl('f-ij-senioren','Senioren')}${sl('f-sp','Sensatiepotentieel',2)}</div></fieldset>
-   <fieldset><legend>Beelden (grijs beeld met omschrijving)</legend>${rij(1)}${rij(2)}${rij(3)}</fieldset>
+   <fieldset><legend>Beelden uit de bibliotheek (kies 1 tot 3)</legend>${bibPicker(PICK.D,'D')}</fieldset>
    <button class="btn" data-dsave-art="1">Bericht toevoegen</button></div></div>`;
 }
+dc.addEventListener('click',function(e){const t=e.target.closest('[data-bib],[data-bibdel]');if(!t)return;saveForm();
+  if(t.dataset.bib)bibToggle('D',t.dataset.bib.split(':')[1]);else PICK.D.splice(+t.dataset.bibdel.split(':')[1],1);renderDocent()});
+dc.addEventListener('change',function(e){const t=e.target.closest('[data-bibtype]');if(t)PICK.D[+t.dataset.bibtype.split(':')[1]].type=t.value});
 function renderDocent(){
   if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
   const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten']];
@@ -332,21 +389,20 @@ function saveOpdracht(){
   if(!naam){toast('Geef de opdracht een naam');return}
   if(!arts.length){toast('Kies minstens één bericht');return}
   if(!metrics.length){toast('Kies minstens één cijfer dat studenten zien');return}
-  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',doelen:formDoelen(),kanalen:formKanalen()};
+  const o={id:'o'+(st.opdrachten.length+1+Math.floor(Math.random()*1000)),naam,doel:val('f-doel'),artikelen:arts,modus:val('f-modus'),max:+val('f-max'),metrics,begeleiding:val('f-bg')||'veel',eigen:!!val('f-eigen'),doelen:formDoelen(),kanalen:formKanalen()};
   st.opdrachten.push(o);if(val('f-direct')){st.actief=o.id;sel0();st.draft=newDraft(st.sel)}
   ['f-naam'].forEach(k=>delete st.fv[k]);renderDocent();ververs();toast(val('f-direct')?'Opdracht staat klaar en is actief':'Opdracht opgeslagen')
 }
 function saveArtikel(){
   const t=String(val('f-t')).trim(),i=String(val('f-i')).trim();
-  const beelden=[1,2,3].map(n=>({type:val('f-bt'+n),beschrijving:String(val('f-bd'+n)).trim(),kwaliteit:+val('f-bk'+n)})).filter(b=>b.beschrijving).map((b,k)=>Object.assign({id:'',duur_sec:b.type==='video'?30:undefined},b));
   if(!t||!i){toast('Vul een titel en een eerste alinea in');return}
-  if(!beelden.length){toast('Voeg minstens één beeld toe met een omschrijving');return}
-  const n=A.filter(a=>a.door!=='startset').length+1,id='d'+String(n).padStart(2,'0');
-  beelden.forEach((b,k)=>{b.id=id+'-'+(b.type==='video'?'v':'f')+(k+1)});
+  if(!PICK.D.length){toast('Kies minstens één beeld uit de bibliotheek');return}
+  const n=A.filter(a=>a.door==='docent').length+1,id='d'+String(n).padStart(2,'0');
+  const beelden=PICK.D.map((p,k)=>Object.assign({id:id+'-'+(p.type==='video'?'v':'f')+(k+1),type:p.type,beschrijving:BIB[p.bron].l,kwaliteit:BIB[p.bron].q,bron:p.bron,mensen:!!BIB[p.bron].m},p.type==='video'?{duur_sec:30}:{}));
   const g=x=>+val(x),d={id,categorie:val('f-c'),titel_origineel:t,intro_origineel:i,tekst:i,nieuwswaarde:{impact:g('f-nw-impact'),nabijheid:g('f-nw-nabijheid'),conflict:g('f-nw-conflict'),human_interest:g('f-nw-human'),actualiteit:g('f-nw-actualiteit')},emotie:'neutraal',tijdgevoeligheid_uren:g('f-tg'),interesse:{jongeren:g('f-ij-jongeren'),volwassenen:g('f-ij-volwassenen'),midden:g('f-ij-midden'),senioren:g('f-ij-senioren')},sensatie_potentieel:g('f-sp'),beelden,toegevoegd_door:'docent'};
-  const a={id,c:d.categorie.replace('_',' '),t,i,b:beelden.map(b=>[b.type,b.beschrijving]),d,door:'docent'};
+  const a={id,c:d.categorie.replace('_',' '),t,i,b:beelden.map(b=>[b.type,b.beschrijving,b.bron,!!b.mensen]),d,door:'docent'};
   A.push(a);byId[id]=a;
-  ['f-t','f-i','f-bd1','f-bd2','f-bd3'].forEach(k=>delete st.fv[k]);
+  ['f-t','f-i'].forEach(k=>delete st.fv[k]);PICK.D=[];
   st.opdrachten[0].artikelen.push(id);
   renderDocent();ververs();toast('Bericht toegevoegd aan de database en aan de vrije oefening')
 }
