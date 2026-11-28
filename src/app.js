@@ -372,10 +372,31 @@ dc.addEventListener('click',function(e){const t=e.target.closest('[data-bib],[da
   if(t.dataset.bib)bibToggle('D',t.dataset.bib.split(':')[1]);else PICK.D.splice(+t.dataset.bibdel.split(':')[1],1);renderDocent()});
 dc.addEventListener('change',function(e){const t=e.target.closest('[data-bibtype]');if(t)PICK.D[+t.dataset.bibtype.split(':')[1]].type=t.value});
 dc.addEventListener('change',function(e){if(e.target.id==='f-scn'){saveForm();Object.keys(st.fv).filter(k=>k.startsWith('f-a-')).forEach(k=>delete st.fv[k]);renderDocent()}});
+/* ---- fotobeheer: eigen foto's in plaats van tekeningen ---- */
+async function persistFoto(id,data){}
+async function loadFotos(){}
+function fotoKlein(file){return new Promise((ok,nok)=>{const u=URL.createObjectURL(file),im=new Image();im.onload=()=>{const W=640,H=400,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');const r=Math.max(W/im.width,H/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.72))};im.onerror=()=>{URL.revokeObjectURL(u);nok(new Error('Dit bestand is geen foto'))};im.src=u})}
+async function zetFoto(id,file){const d=await fotoKlein(file);await persistFoto(id,d);FOTO[id]=d}
+async function wisFoto(id){await persistFoto(id,'');delete FOTO[id]}
+function dFoto(){
+  const ids=Object.keys(BIB),n=ids.filter(i=>FOTO[i]).length;
+  const cel=id=>`<div class="fc ${FOTO[id]?'ok':''}"><span class="bimg" style="background-image:url('${bibSrc(id)}')"></span><b>${esc(BIB[id].l)}</b><code>${id}.jpg</code><span class="fa"><label class="fup">${FOTO[id]?'Vervang':'Kies foto'}<input type="file" accept="image/*" data-foto="${id}" hidden></label>${FOTO[id]?`<button type="button" class="fdel" data-fotodel="${id}">Tekening</button>`:''}</span></div>`;
+  const groep=(t,f)=>`<h4 class="fh">${t}</h4><div class="fg">${ids.filter(f).map(cel).join('')}</div>`;
+  return `<div class="dcol wide"><h3>Foto's voor de bibliotheek (${n} van ${ids.length} met een eigen foto)</h3>
+  <p class="fn">Kies per beeld een foto, of kies in een keer veel foto's. Geef dan elk bestand de code als naam, bijvoorbeeld <code>brug_file.jpg</code>. Foto's worden verkleind en zijn voor alle klassen zichtbaar. Beelden zonder foto blijven een tekening.</p>
+  <div class="fbulk"><label class="btn">Meerdere foto's kiezen<input type="file" accept="image/*" multiple data-fotos="1" hidden></label><span id="fmsg" class="fmsg"></span></div>
+  <div class="scr2 fscr">${groep('Nieuws (Vechtwaard)',i=>!CATS_C.includes(BIB[i].c))}${groep('Campagne (Fietshuis De Trapper)',i=>CATS_C.includes(BIB[i].c))}</div></div>`}
+dc.addEventListener('change',async function(e){const t=e.target;if(!t.matches||!t.matches('[data-foto],[data-fotos]'))return;const msg=()=>document.getElementById('fmsg');
+  try{if(t.dataset.foto){await zetFoto(t.dataset.foto,t.files[0])}
+  else{let ok=0,mis=[];for(const f of t.files){const id=f.name.replace(/\.[^.]+$/,'').toLowerCase().replace(/[^a-z0-9_]/g,'');if(BIB[id]){if(msg())msg().textContent='Bezig met '+f.name+'...';await zetFoto(id,f);ok++}else mis.push(f.name)}
+    st.fmsg=ok+' foto'+(ok===1?'':"'s")+' gezet'+(mis.length?'. Geen beeld gevonden voor: '+mis.join(', '):'')}}
+  catch(err){st.fmsg=err.message}
+  renderDocent();renderAll();if(msg()&&st.fmsg){msg().textContent=st.fmsg;st.fmsg=''}});
+dc.addEventListener('click',async function(e){const t=e.target.closest('[data-fotodel]');if(!t)return;try{await wisFoto(t.dataset.fotodel)}catch(err){}renderDocent();renderAll()});
 function renderDocent(){
   if(!st.docOk){dc.innerHTML=`<div class="gate"><div class="gbox"><h2>Docentenmodus</h2><p>Vul de docentcode in om de klas te besturen.</p><input id="dg-code" type="password" placeholder="Docentcode" autofocus><button class="btn" data-dgate="1">Open</button><p class="note">In dit prototype is de code <code>docent</code>. In de echte versie hoort elke klas een eigen code te hebben.</p></div><button class="x" data-dclose="1">Sluiten</button></div>`;return}
-  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten']];
-  const body=({tijd:dTijd,res:dRes,rap:dRap,opd:dOpd,ber:dBer})[st.dtab]();
+  const tabs=[['tijd','Tijd en klas'],['res','Resultaten'],['rap','Rapporten'],['opd','Opdrachten'],['ber','Berichten'],['foto','Foto\'s']];
+  const body=({tijd:dTijd,res:dRes,rap:dRap,opd:dOpd,ber:dBer,foto:dFoto})[st.dtab]();
   dc.innerHTML=`<div class="dc"><div class="dch"><b>Docentenbesturing</b><span>Klas ${klas.naam} · ${esc(tmLabel())}</span><nav>${tabs.map(t=>`<button class="${st.dtab===t[0]?'on':''}" data-dtab="${t[0]}">${t[1]}</button>`).join('')}</nav><button class="x" data-dclose="1">Terug naar bureau</button></div><div class="dcb t-${st.dtab}">${body}</div></div>`;
   restoreForm();
 }

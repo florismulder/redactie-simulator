@@ -17,6 +17,9 @@ const toPub=j=>({pid:j.pid,id:j.id,slug:j.slug,kop:j.kop,beeld:bIdx(j.id,j.beeld
   wijzigingen:(j.wijzigingen||[]).map(w=>{const o={uurNa:w.uurNa};if(w.kop!==undefined)o.kop=w.kop;if(w.beeld_id!==undefined)o.beeld=bIdx(j.id,w.beeld_id);if(w.plek!==undefined)o.plek=w.plek;if(w.intrekken)o.intrekken=true;return o})});
 const pubSig=()=>st.pubs.map(p=>p.pid+':'+p.wijzigingen.length).join(',');
 
+/* ---- foto's ---- */
+async function persistFoto(id,data){await api('rsim_docent_set_beeld',{p_code:st.klascode,p_dcode:st.dcode,p_bron:id,p_data:data})}
+async function loadFotos(){try{const j=await api('rsim_beelden_get',{});Object.keys(FOTO).forEach(k=>delete FOTO[k]);Object.assign(FOTO,j||{});renderAll();if(st.rol==='docent'&&!dc.hidden)renderDocent()}catch(e){}}
 /* ---- student ---- */
 async function loadStudent(stil){
   const s=await api('rsim_state',{p_token:st.token});
@@ -58,13 +61,13 @@ async function startStudent(token,naam){
   const ok=await loadStudent();
   if(!ok){st.wacht=true;toonLogin('Er staat nog geen opdracht klaar. Je docent zet die zo klaar. Deze pagina probeert het zelf opnieuw.');return}
   $('#who').textContent=naam+' · klas '+klas.naam;$('#outbtn').hidden=false;$('#who').hidden=false;
-  toonApp();fit();
+  toonApp();fit();loadFotos();
 }
 async function startDocent(code,dcode){
   st.klascode=code;st.dcode=dcode;st.rol='docent';st.docOk=true;
   await loadDocent();
   document.body.classList.add('is-docent');
-  toonApp();dc.hidden=false;renderDocent();
+  toonApp();dc.hidden=false;renderDocent();loadFotos();
 }
 document.querySelectorAll('[data-lt]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('[data-lt]').forEach(x=>x.classList.toggle('on',x===b));

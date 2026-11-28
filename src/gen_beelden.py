@@ -536,7 +536,7 @@ if __name__ == '__main__':
     here = os.path.dirname(os.path.abspath(__file__))
     lib = build()
     js = 'const BIB=' + json.dumps(lib, ensure_ascii=False, separators=(',', ':')) + ';\n'
-    js += "const bibSrc=id=>BIB[id]?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(BIB[id].s):'';\n"
+    js += "const FOTO={};\nconst bibSrc=id=>FOTO[id]||(BIB[id]?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(BIB[id].s):'');\n"
     open(os.path.join(here, 'beelden.js'), 'w', encoding='utf8').write(js)
     data = [a for a in json.load(open(os.path.join(here, 'data.json.txt'), encoding='utf8')) if a['id'].startswith('n')]
     for a in data:
