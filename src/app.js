@@ -54,7 +54,8 @@ const actieveOpdracht=()=>st.opdrachten.find(o=>o.id===st.actief)||st.opdrachten
 const scn=()=>SCN[(actieveOpdracht()||{}).scenario||'nieuws']||SCN.nieuws,isCamp=()=>((actieveOpdracht()||{}).scenario)==='campagne';
 const tm=()=>({modus:actieveOpdracht().modus||klas.modus,vers:klas.vers});
 function tmLabel(){const t=tm();return t.modus==='direct'?'direct (24 uur meteen zichtbaar)':t.modus==='echt'?'echte tijd (1 uur is 1 uur)':'versneld ('+(t.vers>=60?'1 minuut = '+dec(t.vers/60,t.vers%60?1:0)+' uur':'1 minuut = '+t.vers+' minuten')+')'}
-function simKlok(){const t=tm();if(t.modus==='direct')return'';const L=st.pubs.filter(p=>!p.opdracht||!st.actief||p.opdracht===st.actief);if(!L.length)return'';const p=L.reduce((m,q)=>q.tPub>m.tPub?q:m,L[0]);const h=Math.min(24,(Date.now()-p.tPub)/60000*(t.modus==='echt'?1:t.vers)/60),tot=Math.round((p.uur+h)*60)%1440;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0')}
+const inOp=p=>!st.actief||(p.opdracht?p.opdracht===st.actief:!isCamp());
+function simKlok(){const t=tm();if(t.modus==='direct')return'';const L=st.pubs.filter(inOp);if(!L.length)return'';const p=L.reduce((m,q)=>q.tPub>m.tPub?q:m,L[0]);const h=Math.min(24,(Date.now()-p.tPub)/60000*(t.modus==='echt'?1:t.vers)/60),tot=Math.round((p.uur+h)*60)%1440;return String(Math.floor(tot/60)).padStart(2,'0')+':'+String(tot%60).padStart(2,'0')}
 const geleden=p=>{if(tm().modus==='direct')return'24 uur data';const e=elapsed(p);return e<1?'zojuist':e+' uur geleden'};
 function elapsed(p){const t=tm();if(t.modus==='direct')return 24;const min=(Date.now()-p.tPub)/60000;
   return Math.max(0,Math.min(24,Math.floor(t.modus==='echt'?min/60:min*t.vers/60)))}
@@ -181,7 +182,7 @@ function webCard(p,big){
   return `<div class="${big?'hero':'card'}">${b?phBox(b):''}<div class="cat" style="margin-top:8px">${esc(a.c)}</div>${big?`<h1>${esc(s.kop)}</h1><p>${esc(a.i)}</p>`:`<h3>${esc(s.kop)}</h3>`}</div>`;
 }
 function renderSite(bar){
-  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken&&(!p.opdracht||!st.actief||p.opdracht===st.actief));
+  const live=st.pubs.filter(p=>kanaalVan(p)==='website'&&!nu(p).ingetrokken&&inOp(p));
   const by=k=>live.filter(p=>nu(p).plek===k);
   const bo=by('boven'),mi=by('midden'),on=by('onder');
   const low=[0,1,2,3,4,5].map(i=>on[i]?`<div>${esc(nu(on[i]).kop)}</div>`:`<div class="empty">${scn().leeg}</div>`).join('');
@@ -200,7 +201,7 @@ function renderWeb(){
   const ks=opKanalen();if(!ks.includes(st.wkan))st.wkan='website';
   const bar=ks.length>1?`<span class="wbar">${ks.map(k=>`<button data-wkan="${k}" class="${k===st.wkan?'on':''}">${KANALEN[k]}</button>`).join('')}</span>`:'';
   if(st.wkan==='website'){$('#s1').innerHTML=renderSite(bar);return}
-  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken&&(!p.opdracht||!st.actief||p.opdracht===st.actief)),n=k==='instagram'?6:4;
+  const k=st.wkan,live=st.pubs.filter(p=>kanaalVan(p)===k&&!nu(p).ingetrokken&&inOp(p)),n=k==='instagram'?6:4;
   const tiles=[...Array(n)].map((_,i)=>live[i]?socTile(live[i],k):`<div class="${k==='instagram'?'igt':'ttt'} empty"><div class="${k==='instagram'?'igp':'ttp'}"></div><p>Ruimte voor een post</p></div>`).join('');
   $('#s1').innerHTML=`<div class="web ${isCamp()?'camp':''}"><div class="mast"><b>${scn().merk}</b><span>${k==='instagram'?scn().ig:scn().tt}</span>${bar}<span class="r">${new Date(typeof nowMs==='function'?nowMs():Date.now()).toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'long'})}</span></div><div class="socmain ${k}"><div class="prof"><div class="av">${scn().av}</div><div><b>${scn().prof}</b><span>${scn().sub} · ${live.length} ${k==='instagram'?scn().posts:'video\'s'}</span></div></div><div class="sgrid">${tiles}</div></div></div>`}
 /* ---- scherm 3: resultaten ---- */
